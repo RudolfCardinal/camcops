@@ -28,6 +28,7 @@ Addenbrooke’s Cognitive Examination — III (ACE-III)
 
 (The ACE-R is FROM-LP-specific; the ACE-III replaces the ACE-R.)
 
+
 History and guide
 ~~~~~~~~~~~~~~~~~
 
@@ -42,6 +43,7 @@ By John Hodges and colleagues.
 - Addenbrooke’s Cognitive Examination III (ACE-III): Hsieh et al. 2013,
   https://www.ncbi.nlm.nih.gov/pubmed/23949210.
 
+
 Source
 ~~~~~~
 
@@ -49,7 +51,26 @@ Source
 
 - http://www.neura.edu.au/frontier/research/test-downloads/
 
-- **For iPad, note also the ACEmobile:** http://www.acemobile.org
+- For iPad, note also the **ACEmobile**: http://www.acemobile.org.
+  Update 2020-03-14: the ACEmobile web site has gone. It continues to be
+  described in a reference paper, and there are other web-based citations:
+
+  - Newman CGJ et al. (2017).
+    Improving the quality of cognitive screening assessments: ACEmobile, an
+    iPad-based version of the Addenbrooke's Cognitive Examination-III.
+    *Alzheimer's & Dement* 10: 182-187.
+    https://www.ncbi.nlm.nih.gov/pubmed/29552633
+
+  - https://dementiaroadmap.info/cornwall/resources/acemobile/
+
+  - https://dementiapartnerships.com/project/plymouth-clinicians-develop-acemobile-dementia-assessment-tool/
+
+  - https://www.arc-swp.nihr.ac.uk/research/neurocore
+
+  - https://twitter.com/acemobileorg
+
+  - https://www.plymouth.ac.uk/news/dementia-screening-app-wins-national-award
+
 
 Intellectual property rights
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

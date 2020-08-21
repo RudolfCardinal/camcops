@@ -270,7 +270,7 @@ CCMAP = OrderedDict([
     (SL.BMI_OBSERVABLE, (f"{BMI}", ST.OBS)),
     (SL.BMI_PROCEDURE_MEASUREMENT, (f"{MEASURE} {BMI}", ST.PROC)),
     (SL.BODY_HEIGHT_OBSERVABLE, ("Body height measure", ST.OBS)),
-    (SL.BODY_WEIGHT_OBSERVABLE, (f"Body weight", ST.OBS)),
+    (SL.BODY_WEIGHT_OBSERVABLE, ("Body weight", ST.OBS)),
     (SL.WAIST_CIRCUMFERENCE_PROCEDURE_MEASUREMENT, (f"{MEASURE} circumference of waist", ST.PROC)),  # noqa
     (SL.WAIST_CIRCUMFERENCE_OBSERVABLE, ("Waist circumference", ST.OBS)),
 
@@ -342,7 +342,7 @@ CCMAP = OrderedDict([
     (SL.CORE10_SCORE, (f"{CORE10_2} clinical {SCORE}", ST.OBS)),
     (SL.CORE10_PROCEDURE_ASSESSMENT, (f"{ASSESS} {CORE10_2}", ST.PROC)),
 
-    (SL.DAST_SCALE, (f"Drug abuse screening test", ST.SCALE)),
+    (SL.DAST_SCALE, ("Drug abuse screening test", ST.SCALE)),
 
     (SL.EQ5D5L_SCALE, (f"{EQ5D5L} {SCALE}", ST.SCALE)),
     (SL.EQ5D5L_INDEX_VALUE, (f"{EQ5D5L} index value", ST.OBS)),

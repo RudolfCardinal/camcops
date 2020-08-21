@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -235,6 +235,10 @@ QPointer<QWidget> QuGridContainer::makeWidget(Questionnaire* questionnaire)
     for (const QuGridCell& c : m_cells) {
         QuElementPtr e = c.element;
         QPointer<QWidget> w = e->widget(questionnaire);
+        if (!w) {
+            qWarning() << Q_FUNC_INFO << "Element failed to create a widget!";
+            continue;
+        }
 
 #ifdef DEBUG_GRID_CREATION
         w->setObjectName(CssConst::DEBUG_RED);
@@ -245,6 +249,10 @@ QPointer<QWidget> QuGridContainer::makeWidget(Questionnaire* questionnaire)
             QSizePolicy sp = w->sizePolicy();
             sp.setHorizontalPolicy(QSizePolicy::Expanding);
             w->setSizePolicy(sp);
+#ifdef DEBUG_GRID_CREATION
+            qDebug().noquote()
+                    << "... forcing widget horizontal size policy to Expanding";
+#endif
 
             // Set column minimum width, and column stretch (may be modified
             // below).
@@ -254,7 +262,7 @@ QPointer<QWidget> QuGridContainer::makeWidget(Questionnaire* questionnaire)
 #ifdef DEBUG_GRID_CREATION
         {
             QSizePolicy sp = w->sizePolicy();
-            qDebug().noquote() << "... ... widget sizePolicy():"
+            qDebug().noquote() << "... widget sizePolicy():"
                                << LayoutDumper::toString(sp);
         }
 #endif

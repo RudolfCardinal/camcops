@@ -307,7 +307,7 @@ class KhandakerMojoMedicationTherapy(TaskHasPatientMixin, Task):
         for item in self.therapy_items:
             html += item.get_html_table_row(req)
 
-        html += f"""
+        html += """
             </table>
         """
 

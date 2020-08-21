@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -33,6 +33,9 @@
     - Best algorithmic introduction to GLMs
 [11] https://en.wikipedia.org/wiki/Generalized_linear_model#Model_components
 [12] http://web.as.uky.edu/statistics/users/pbreheny/760/S13/notes/2-19.pdf
+
+Subsequently:
+[13] http://madrury.github.io/jekyll/update/statistics/2016/07/20/lm-in-R.html
 
 -------------------------------------------------------------------------------
 First, a general linear model
@@ -80,6 +83,8 @@ For logistic regression, then:
 
 */
 
+// #define DEBUG_DESIGN_MATRIX
+
 #include "glm.h"
 #include <algorithm>
 #include <QDebug>
@@ -109,7 +114,7 @@ const double INF = std::numeric_limits<double>::infinity();
 
 
 // ============================================================================
-// Constructor
+// Constructors
 // ============================================================================
 
 Glm::Glm(const LinkFunctionFamily& link_fn_family,
@@ -125,6 +130,31 @@ Glm::Glm(const LinkFunctionFamily& link_fn_family,
     m_verbose(false)
 {
     reset();
+}
+
+
+Glm::Glm(const Eigen::MatrixXd& predictors,
+         const Eigen::VectorXd& dependent_variable,
+         const LinkFunctionFamily& link_fn_family,
+         bool add_intercept,
+         SolveMethod solve_method,
+         int max_iterations,
+         double tolerance,
+         RankDeficiencyMethod rank_deficiency_method) :
+    // Delegating constructor:
+    Glm(
+        link_fn_family,
+        solve_method,
+        max_iterations,
+        tolerance,
+        rank_deficiency_method
+    )
+{
+    if (add_intercept) {
+        fitAddingIntercept(predictors, dependent_variable);
+    } else {
+        fit(predictors, dependent_variable);
+    }
 }
 
 
@@ -187,11 +217,9 @@ void Glm::fit(const MatrixXd& predictors,
         case SolveMethod::IRLS_SVDNewton_KaneLewis:
             fitIRLSSVDNewtonKaneLewis();
             break;
-#ifdef GLM_OFFER_R_GLM_FIT
         case SolveMethod::IRLS_R_glmfit:
             fitIRLSRglmfit();
             break;
-#endif
 #ifdef COMPILER_WANTS_DEFAULT_IN_EXHAUSTIVE_SWITCH
         default:
             addError("Unknown solve method!");
@@ -226,6 +254,16 @@ void Glm::fit(const MatrixXd& predictors,
 }
 
 
+void Glm::fitAddingIntercept(
+        const Eigen::MatrixXd& predictors_excluding_intercept,
+        const Eigen::VectorXd& dependent_variable)
+{
+    const MatrixXd predictors = eigenfunc::addOnesAsFirstColumn(
+                predictors_excluding_intercept);
+    fit(predictors, dependent_variable);
+}
+
+
 // ============================================================================
 // Re-retrieve config
 // ============================================================================
@@ -257,6 +295,21 @@ double Glm::getTolerance() const
 Glm::RankDeficiencyMethod Glm::getRankDeficiencyMethod() const
 {
     return m_rank_deficiency_method;
+}
+
+
+// ============================================================================
+// Design matrix
+// ============================================================================
+
+MatrixXd Glm::addInterceptToPredictors(const MatrixXd& x) const
+{
+    const MatrixXd x_design = eigenfunc::addOnesAsFirstColumn(x);
+#ifdef DEBUG_DESIGN_MATRIX
+    addInfo("Design matrix: " +
+            eigenfunc::qStringFromEigenMatrixOrArray(x_design));
+#endif
+    return x_design;
 }
 
 
@@ -487,6 +540,11 @@ void Glm::fitIRLSKaneLewis()
     const LinkFunctionFamily& family = m_link_fn_family;
     const Eigen::Index n_predictors = nPredictors();
     using statsfunc::svdSolve;
+
+    if (m_p_weights) {
+        addError("Warning: weights specified but not supported by "
+                 "fitIRLSKaneLewis(); will be IGNORED");
+    }
 
     VectorXd x = VectorXd::Zero(n_predictors);  // k,1
     VectorXd xold = VectorXd::Zero(n_predictors);  // k,1
@@ -798,7 +856,6 @@ eigenfunc::IndexArray Glm::svdsubsel(const MatrixXd& A, Eigen::Index k)
 }
 
 
-#ifdef GLM_OFFER_R_GLM_FIT
 void Glm::fitIRLSRglmfit()
 {
     addInfo("Fitting GLM using IRLS as implemented by R's glm.fit");
@@ -812,54 +869,157 @@ void Glm::fitIRLSRglmfit()
 
     using namespace eigenfunc;
 
-    // Input parameters and naming
+    // ------------------------------------------------------------------------
+    // Input parameters
+    // ------------------------------------------------------------------------
+
+    // Number of observations (values of the dependent variable)
     const Eigen::Index nobs = nObservations();
+
+    // Number of predictor variables (for each observation)
     const Eigen::Index nvars = nPredictors();
+
+    // Predictor values for each y value
     const MatrixXd& x = m_predictors;  // nobs,nvars
+
+    // Dependent variable (observations)
     ArrayXd y = m_dependent_variable.array();  // nobs,1
+
+    // Weights to apply to the dependent variable
     ArrayXd weights(nobs);  // nobs,1
     if (m_p_weights) {
         weights = m_p_weights->array();
     } else {
+        // Default weighting: all observations have equal weights
         weights = ArrayXd::Ones(nobs);
     }
-    ArrayXd start;  // not implemented as a parameter
-    ArrayXd etastart;  // not implemented as a parameter
-    ArrayXd mustart;  // not implemented as a parameter
-    ArrayXd offset = ArrayXd::Zero(nobs);  // specifying it not yet supported
+
+    // A priori known component to incorporate in the linear predictor
+    ArrayXd offset = ArrayXd::Zero(nobs);  // specifying it is not yet supported
+
+    // Include an intercept term?
+    // const bool intercept = true;  // specifying it is not yet supported
+
+    // Link function family (incorporating link function, variance function,
+    // etc.)
     const LinkFunctionFamily& family = m_link_fn_family;
-    // const bool intercept = true;  // specifying it not yet supported
-    bool& conv = m_converged;
-    const bool empty = nvars == 0;
+
+        // Shorthands for the various parts of the family:
+
+    // Link function, eta = linkfun(mu)
     const LinkFunctionFamily::LinkFnType linkfun = family.link_fn;
+
+    // Variance function, variance = variance_fn(mu)
     const LinkFunctionFamily::VarianceFnType& variance = family.variance_fn;
+
+    // Inverse link function, mu = linkinv(eta)
     const LinkFunctionFamily::InvLinkFnType& linkinv = family.inv_link_fn;
+
+    // Function to validate eta
     const LinkFunctionFamily::ValidEtaFnType valideta = family.valid_eta_fn;
+
+    // Function to validate mu
     const LinkFunctionFamily::ValidMuFnType validmu = family.valid_mu_fn;
+
+    // Derivative of the inverse link function, d(mu)/d(eta); "mu.eta" in R
     const LinkFunctionFamily::DerivativeInvLinkFnType mu_eta = family.derivative_inv_link_fn;
+
+    // GLM initialization function
     const LinkFunctionFamily::InitializeFnType initialize = family.initialize_fn;
+
+    // Function to calculate the deviance for each observation as a function
+    // of (y, mu, wt).
     const LinkFunctionFamily::DevResidsFnType dev_resids = family.dev_resids_fn;
-    const double& epsilon = m_tolerance;
+
 #ifdef LINK_FUNCTION_FAMILY_USE_AIC
+    // AIC calculation function
     const LinkFunctionFamily::AICFnType& aic = family.aic_fn;
 #endif
-    int& iter = m_n_iterations;
-    VectorXd& coef = m_coefficients;
+
+    // ------------------------------------------------------------------------
+    // Control parameters
+    // ------------------------------------------------------------------------
+
+    // Starting values for the parameters in the linear predictor
+    ArrayXd start;  // not implemented as a parameter
+
+    // Starting values for the linear predictor
+    ArrayXd etastart;  // not implemented as a parameter
+
+    // Starting values for the vector of means
+    ArrayXd mustart;  // not implemented as a parameter
+
+    // Maximum number of iterations permitted
     const int& maxit = m_max_iterations;
+
+    // Be verbose?
     const bool& trace = m_verbose;
 
+    // Tolerance (used to determine GLM convergence)
+    const double& epsilon = m_tolerance;
+
+    // Tolerance (threshold) for the QR decomposition
     const double qr_tol = std::min(1e-07, epsilon / 1000);
 
+    // ------------------------------------------------------------------------
+    // Derived information variables
+    // ------------------------------------------------------------------------
+
+    // Does the model have no predictors?
+    const bool empty = nvars == 0;
+
+    // ------------------------------------------------------------------------
+    // Working variables
+    // ------------------------------------------------------------------------
+
+    // Residuals, closely related to (y - mu)
     ArrayXd residuals;  // nobs,1
+
+    // The linear predictor values (in "x space")
     ArrayXd eta;  // nobs,1
+
+    // The means (in "y space")
     ArrayXd mu;  // nobs,1
+
+    // The sum of all deviances
     double dev = 0.0;
-    ArrayXd w;  // nobs,1
-    ArrayXd z;  // nobs,1
+
+    // Array of flags indicating whether each observation is "good" for
+    // prediction (e.g. has a weight that is not zero; sometimes other
+    // validity checks too).
     ArrayXb good;  // nobs,1
+
+    // w = sqrt( weights * mu'^2 / V(mu) )
+    ArrayXd w;  // nobs,1
+
+    // z = (eta - offset) + [(y - mu) / mu']
+    ArrayXd z;  // nobs,1
+
+    // ?
     ArrayXd n;  // nobs,1
+
+    // ?
     ArrayXd m;  // nobs,1
+
+    // Did the algorithm stop at a boundary value?
     bool boundary = false;
+
+    // ------------------------------------------------------------------------
+    // Output variables
+    // ------------------------------------------------------------------------
+
+    // Has the model converged?
+    bool& conv = m_converged;
+
+    // Number of iterations used
+    int& iter = m_n_iterations;
+
+    // Coefficients for the predictors -- what we are trying to fit
+    VectorXd& coef = m_coefficients;
+
+    // ------------------------------------------------------------------------
+    // Initialize
+    // ------------------------------------------------------------------------
 
     // Initialize as the link family dictates
     if (mustart.size() == 0) {
@@ -874,43 +1034,78 @@ void Glm::fitIRLSRglmfit()
         mustart = mukeep;
     }
 
+    // ------------------------------------------------------------------------
     // Main bit
+    // ------------------------------------------------------------------------
+
     if (empty) {
+        // No predictors.
+
+        // Set linear predictors.
         eta = offset;
         if (!valideta(eta)) {
             addError("invalid linear predictor values in empty model");
             return;
         }
+
+        // Calculate means from linear predictors
         mu = linkinv(eta);
         if (!validmu(mu)) {
             addError("invalid fitted means in empty model");
             return;
         }
+
+        // Calculate total deviance.
         dev = dev_resids(y, mu, weights).sum();
+
+        // ?
         ArrayXd mu_eta_of_eta = mu_eta(eta);
         w = (
-                    (weights * mu_eta_of_eta.square()) /
-                    variance(mu)
-            ).sqrt();
+            (weights * mu_eta_of_eta.square()) /
+            variance(mu)
+        ).sqrt();
+
+        // Calculate residuals.
         residuals = (y - mu) / mu_eta_of_eta;
+
+        // All values are good.
         good = ArrayXb(residuals.size());
         good.setConstant(true);
+
+        // Finished at a boundary value.
         boundary = true;
+
+        // Converged (trivially).
         conv = true;
+
+        // No coefficients.
         coef = VectorXd();
+
+        // No iterations required.
         iter = 0;
+
     } else {
+        // Predictors are present. The normal situation!
 
         ArrayXd coefold;
+
+        // Deviance on previous iteration.
         double devold;
+
+        // Used to store the results of a least-squares fit operation.
         dqrls::DqrlsResult fit;
 
         // No prizes for code clarity in R...
-        // Set eta.
+
+        // Set starting values for eta, the linear predictors.
         if (etastart.size() > 0) {
+            // The user has given us the starting values.
             eta = etastart;
         } else {
+            // Work out some starting values for eta, the linear predictors.
             if (start.size() > 0) {
+                // User has given initial coefficients.
+                // Use eta = offset + X * initial_coeffs.
                 if (start.size() != nvars) {
                     addError(QString(
                                  "length of 'start' should equal %1 and "
@@ -920,28 +1115,51 @@ void Glm::fitIRLSRglmfit()
                 coefold = start;
                 eta = offset + (x * start.matrix()).array();
             } else {
+                // Our initialization function will have set mustart.
+                // Use eta = link(mustart) as the starting value for eta.
                 eta = linkfun(mustart);
             }
         }
 
+        // Set initial values for mu.
         mu = linkinv(eta);
+
+        // Check starting values are OK.
         if (!validmu(mu) && valideta(eta)) {
             addError("cannot find valid starting values: please specify some");
             return;
         }
 
+        // "Initial" deviance is the deviance based on the starting values of
+        // mu.
         devold = dev_resids(y, mu, weights).sum();
+
+        // We've not reached a boundary value (yet).
         boundary = false;
+
+        // We haven't converged yet.
         conv = false;
 
-        // --------------------------------------------------------------------
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // MAIN CALCULATION LOOP
-        // --------------------------------------------------------------------
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // Iterate as many times as we're allowed (we'll break if we converge).
         for (iter = 1; iter <= maxit; ++iter) {
 
-            // Checks
+            // Checks.
+            // For now, "good" means "observation has non-zero weight".
             good = weights > 0;
+
+            // Calculate V(mu).
             ArrayXd varmu = subsetByElementBoolean(variance(mu), good);
+
+            // Check that the variance function, when applied to our current
+            // values of mu, hasn't produced silly values. In the R code,
+            // varmu, being variance(mu), isn't used for anything else -- but
+            // that is because it contains an inefficiency and it recalculates
+            // variance(mu) later. Search "glm.fit" code for
+            // "variance(mu)[good]" to see this. Note that mu is not
+            // recalculated between the two uses.
             if (varmu.isNaN().any()) {
                 addError("NAs in V(mu)");
                 return;
@@ -950,6 +1168,8 @@ void Glm::fitIRLSRglmfit()
                 addError("0s in V(mu)");
                 return;
             }
+
+            // Calculate d(mu)/d(eta), which we'll refer to as mu'.
             ArrayXd mu_eta_val = mu_eta(eta);
             if (subsetByElementBoolean(mu_eta_val.isNaN(), good).any()) {
                 addError("NAs in d(mu)/d(eta)");
@@ -959,6 +1179,8 @@ void Glm::fitIRLSRglmfit()
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // "good" is reset here; don't rely on cached info
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            // Now, we say "good" means "observation has a non-zero weight and
+            // a non-zero value of d(mu)/d(eta)".
             good = (weights > 0) && (mu_eta_val != 0);
             if (!good.any()) {
                 conv = false;
@@ -967,28 +1189,46 @@ void Glm::fitIRLSRglmfit()
                 break;
             }
 
+            // For good values, calculate
+            //      z = (eta - offset) + [(y - mu) / mu']
             ArrayXd mu_eta_val_good = subsetByElementBoolean(mu_eta_val, good);
             z = subsetByElementBoolean(eta - offset, good) +
                     subsetByElementBoolean(y - mu, good) /
                     mu_eta_val_good;  // n_good,1
+
+            // For good values, calculate
+            //      w = sqrt( weights * mu'^2 / V(mu) )
             w = (
-                    (subsetByElementBoolean(weights, good) *
-                        mu_eta_val_good.square()) /
-                    subsetByElementBoolean(variance(mu), good)
-                ).sqrt();  // n_good,1
+                (subsetByElementBoolean(weights, good) *
+                    mu_eta_val_good.square()) /
+                varmu
+                // R doesn't re-use varmu but recalculates variance(mu)[good],
+                // which is less efficient.
+                // So we'll use varmu instead of repeating:
+                //      subsetByElementBoolean(variance(mu), good)
+            ).sqrt();  // n_good,1
 
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // Main moment of fitting
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+            // x, predictors
             ArrayXXd x_good = subsetByRowBoolean(x, good).array();
+
+            // x * w
             ArrayXXd x_good_times_w = multiply(x_good, w);
             // ... in R, multiplication of a matrix(n_good, nvar) by a vector
             // of length (n_good)
-            fit = dqrls::Cdqrls(x_good_times_w.matrix(),  // x
-                                (z * w).matrix(),  // y
+
+            // Solve an equation of the form XB = Y, for B.
+            // Here, we solve (x * w)B = (z * w)
+            // The result, B, is returned in fit.coeffiecients.
+            fit = dqrls::Cdqrls(x_good_times_w.matrix(),  // "X"
+                                (z * w).matrix(),  // "Y"
                                 qr_tol,
                                 false);  // check
 
+            // Checks
             if (!fit.coefficients.array().isFinite().all()) {
                 conv = false;
                 addError(QString("non-finite coefficients at iteration "
@@ -1001,33 +1241,48 @@ void Glm::fitIRLSRglmfit()
                 return;
             }
 
+            // Store our working coefficients in "start".
+            //
             // start[fit$pivot] <- fit$coefficients
             // ... fit$pivot contained indices of pivoted columns
             // ... but we're using Eigen::FullPivHouseholderQR to do full
             //     pivoting, i.e. all
             start = fit.coefficients.array();
 
+            // Calculate linear predictors,
+            //      eta = X[predictors] * b[coefficients]
+            //
             // eta <- drop(x %*% start)
             // ... the drop() bit takes a one-dimensional matrix and makes a vector
             eta = (x * start.matrix()).array();
 
+            // Apply offset to eta.
+            //
             // mu <- linkinv(eta <- eta + offset)
             // http://blog.revolutionanalytics.com/2008/12/use-equals-or-arrow-for-assignment.html
             eta = eta + offset;
+
+            // Calculate means from linear predictors.
             mu = linkinv(eta);
 
+            // Calculate deviance, based on the discrepancies between y
+            // and mu (potentially weighted).
             dev = dev_resids(y, mu, weights).sum();
             if (trace) {
                 addInfo(QString("Deviance = %1 Iterations - %2")
                         .arg(dev).arg(iter));
             }
+
+            // Check validity.
             boundary = false;
             if (!std::isfinite(dev)) {
+                // Infinite deviance.
                 if (coefold.size() == 0) {
                     addError("no valid set of coefficients has been found: "
                              "please supply starting values");
                     return;
                 }
+                // Try reducing step size.
                 addInfo("step size truncated due to divergence");
                 int ii = 1;
                 while (!std::isfinite(dev)) {
@@ -1048,6 +1303,7 @@ void Glm::fitIRLSRglmfit()
                 }
             }
             if (!(valideta(eta) && validmu(mu))) {
+                // Either the linear predictors or the means are invalid.
                 if (coefold.size() == 0) {
                     addError("no valid set of coefficients has been found: "
                              "please supply starting values");
@@ -1077,21 +1333,35 @@ void Glm::fitIRLSRglmfit()
             // Converged?
             // ----------------------------------------------------------------
             if (std::abs(dev - devold) / (0.1 + std::abs(dev)) < epsilon) {
+                // Deviance (dev) is very close to previous deviance (devold).
+                // We have converged.
                 conv = true;
+
+                // Store the coefficients in our output variable.
                 coef = start;
+
+                // DONE; EXIT LOOP.
                 break;
             }
+
+            // Store current deviance as old deviance, for next iteration.
             devold = dev;
+
+            // Copy current coefficients to "coef" and "coefold".
             coef = start;
             coefold = start;
         }
 
+        // Report any problems
         if (!conv) {
             addError("algorithm did not converge");
         }
         if (boundary) {
             addError("algorithm stopped at boundary value");
         }
+
+        // Special checks for mu (predicted y) values for particular
+        // distributions.
         const double eps = 10 * std::numeric_limits<double>::epsilon();
         if (family.family_name == LINK_FAMILY_NAME_BINOMIAL) {
             if ((mu > 1 - eps).any() || (mu < eps).any()) {
@@ -1104,6 +1374,7 @@ void Glm::fitIRLSRglmfit()
             }
         }
 
+        // ?
         if (fit.rank < nvars) {
             // coef[fit$pivot][seq.int(fit$rank + 1, nvars)] <- NA
             addError("Not sure how to wipe out duff coefficients with full "
@@ -1145,4 +1416,3 @@ void Glm::fitIRLSRglmfit()
 
     m_fitted = true;
 }
-#endif

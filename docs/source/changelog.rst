@@ -2676,7 +2676,7 @@ Current C++/SQLite client, Python/SQLAlchemy server
 
 - Bugfix: Automatically create EXPORT_LOCKDIR on server startup
 
-**Client and server v2.3.7, IN PROGRESS**
+**Client and server v2.3.7, released 3 Mar 2020**
 
 - ``pyexcel-ods3`` and ``pyexcel-xlsx`` for spreadsheet export; faster and much
   smaller for ODS files. See ``cc_tsv.py``.
@@ -2733,7 +2733,7 @@ Current C++/SQLite client, Python/SQLAlchemy server
 
   - We are using Python 3.6; changes afoot for 3.7?
 
-- ``cardinal_pythonlib==1.0.81`` for memory efficiency, then for the
+- ``cardinal_pythonlib==1.0.83`` for memory efficiency, then for the
   :func:`nice_call` function that sorts this out a bit, etc.
 
 - R script file export for basic data dumps.
@@ -2761,3 +2761,99 @@ Current C++/SQLite client, Python/SQLAlchemy server
 
 - Documentation link from app fixed for FFT, CGI-I, IRAC, RSS
   (patient-specific), RSS (survey), PSS.
+
+- Bugfix to demo supervisord config file: indented comments are not OK on at
+  least some versions of supervisor (2020-02-20; on Ubuntu 18.04).
+
+- :ref:`DAS28 <das28>` CRP and ESR changed from integer to floating point
+  (Database revision 0045).
+
+- Bugfix to QuLineEditDouble, where the default minimum value was positive,
+  preventing zero or negative numbers from being entered.
+
+- Restrict alcohol units for :ref:`Khandaker GM — MOJO — Medical questionnaire
+  <khandaker_mojo_medical>`.
+
+- Bugfix to ``Thermometer`` widget (e.g. for EQ-5D-5L). Height suffered from
+  an integer rounding problem (lots of little images stacked).
+  Significant rewrite of widget code.
+  Also removed ``QUTHERMOMETER_USE_THERMOMETER_WIDGET`` option (now always
+  defined, effectively).
+
+**Client and server v2.3.8, IN PROGRESS**
+
+- Fixed openpyxl conflict when installing from Debian package
+
+- Fixed blank labels on form to delete user and translation of "Danger" on
+  other deletion forms.
+
+- Bugfix to
+  :meth:`camcops_server.cc_modules.cc_patient.gen_patient_idnums_even_noncurrent`.
+  This created a set of PatientIdNum instances, comparing them in the usual way
+  of "do they represent the same ID number?" (implemented via the ``__hash__``
+  and ``__eq_`` functions of PatientIdNum). However, here, we are after
+  distinct database records; we therefore want the additional condition that
+  two things are "unequal" if their primary keys are different. We do this by
+  checking PK instead.
+
+  Similar changes to
+  :meth:`camcops_server.cc_modules.cc_db.GenericTabletRecordMixin.gen_ancillary_instances_even_noncurrent`
+  and
+  :meth:`camcops_server.cc_modules.cc_db.GenericTabletRecordMixin.gen_blobs_even_noncurrent`,
+  which now operate by PK.
+
+  Achieved via the generic function
+  :meth:`camcops_server.cc_modules.cc_db.GenericTabletRecordMixin._gen_unique_lineage_objects`.
+
+- Bugfix to :ref:`Khandaker GM — MOJO — Medical questionnaire
+  <khandaker_mojo_medical>` where the diagnosis date / years since diagnosis fields were not
+  marked as mandatory.
+
+- :ref:`Export of tasks to REDCap <redcap>`.
+  (Database revision 0046).
+
+- Docker support for the server.
+
+- Better clarity of error messages for administrators in
+  :class:`camcops_server.cc_modules.cc_forms.DeliveryModeNode`.
+
+- Cosmetic fix: if ID numbers are always present, the tracker consistency view
+  shouldn't say "all blank or X" (makes users think it might be blank when it's
+  not). Changed in
+  :func:`camcops_server.cc_modules.cc_tracker.consistency_idnums`.
+
+- Cosmetic fix: an ``axis_min`` of zero was being ignored (the test was
+  inappropriately an implicit cast to boolean rather than ``is not None`` in
+  :meth:`camcops_server.cc_modules.cc_tracker.Tracker.get_single_plot_html`.
+  Observed in QoLSG task. Also would have been true of ``axis_max``.
+
+- Cosmetic fix: in PDF tracker generation, the PNG (rather than the SVG) was
+  being used. May relate to ``wkhtmltopdf`` version? PNG fallback removed via
+  the ``provide_png_fallback_for_svg`` option in
+  :class:`camcops_server.cc_modules.cc_request.CamcopsRequest`.
+
+- In the process of fixing a "pixellated font" problem via wkhtmltopdf, which
+  seems to have problems with the "opacity" style in SVG (in wkhtmltopdf
+  version 0.12.5), sorted out z-order to make plotting more efficient (and
+  avoided opacity).
+
+- There appears to be a bug in Deform (currently ``deform==2.0.8``) that
+  emerges when Chameleon is upgraded (e.g. from ``Chameleon==3.4`` to
+  ``Chameleon==3.8.0``, probably as Chameleon fixes some bugs in its
+  implementation of the TAL language). Specifically, a bunch of HTML attributes
+  like ``<select multiple>`` and ``<input type="checkbox" checked>`` are
+  mis-rendered as ``multiple="False"`` or ``checked="False"``, which reverses
+  their meaning. This manifests as, for example, single-select dropdowns
+  allowing multiple selections (fixed temporarily via
+  :class:`camcops_server.cc_modules.cc_forms.BugfixSelectWidget`) and things
+  being ticked when they shouldn't be (e.g. ``CheckboxChoiceWidget`` -- not so
+  obviously fixable), and the wrong defaults (e.g. ``RadioChoiceWidget``).
+
+  Temporary fix: pin Chameleon to 3.4.
+
+  Consider: Deform seems to be out of regular maintenance and is rated
+  "L2" (low) at e.g. https://python.libhunt.com/wtforms-alternatives. Should we
+  use WTForms (https://wtforms.readthedocs.io/)? That's rated L5.
+
+  2020-07-24: No, Deform has caught up. See https://pypi.org/project/deform/.
+  Move to ``deform==2.0.10`` and ``Chameleon==3.8.1``.

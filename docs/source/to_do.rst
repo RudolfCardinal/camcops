@@ -230,6 +230,15 @@ Server
 
 - Improve installation ease and docs.
 
+**Medium**
+
+- Self-test: possible to avoid recreating database structure each time? Makes
+  it very slow.
+  (MB 2020-08-19: Certainly possible with pytest / pytest-django. I haven't
+  checked if there's an equivalent for pyramid. No doubt this would require a
+  lot of work up front and would be good not to have to maintain our own test
+  runner.)
+
 **Not a priority**
 
 - Consider: see ``DEBUG_TEMPLATE_SOURCE`` -- would it improve performance to

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -64,6 +64,8 @@
 // #define DISABLE_CACHING
 // #define Q_OS_MAC  // for testing only, just to be sure it compiles OK...
 
+#define USE_WIDGETITEMHFW
+
 #include "gridlayouthfw.h"
 #include <QApplication>
 #include <QDebug>
@@ -91,6 +93,17 @@ using qtlayouthelpers::qSmartSpacing;
 
 
 // ============================================================================
+// Constants
+// ============================================================================
+
+#if defined GRIDLAYOUTHFW_ALTER_FROM_QGRIDLAYOUT && defined USE_WIDGETITEMHFW
+    const bool USE_HFW_CAPABLE_ITEM = true;
+#else
+    const bool USE_HFW_CAPABLE_ITEM = false;
+#endif
+
+
+// ============================================================================
 // QQGridLayoutSizeTriple
 // ============================================================================
 
@@ -115,38 +128,98 @@ struct QQGridLayoutSizeTriple
 
 class QQGridBox
 {
+    // A wrapper around a QLayoutItem (which owns widgets for the layout)
+    // that adds (row, column) information.
 public:
-    QQGridBox(QLayoutItem* lit) { item_ = lit; }
+    QQGridBox(QLayoutItem* lit) {
+        item_ = lit;
+    }
 
-    QQGridBox(const QLayout* l, QWidget* wid) { item_ = createWidgetItem(l, wid); }
-    ~QQGridBox() { delete item_; }
+    QQGridBox(const QLayout* l, QWidget* wid) {
+        // Coded added 2020-03-12
+        item_ = createWidgetItem(l, wid, USE_HFW_CAPABLE_ITEM);
+    }
 
-    QSize sizeHint() const { return item_->sizeHint(); }
-    QSize minimumSize() const { return item_->minimumSize(); }
-    QSize maximumSize() const { return item_->maximumSize(); }
-    Qt::Orientations expandingDirections() const { return item_->expandingDirections(); }
-    bool isEmpty() const { return item_->isEmpty(); }
+    ~QQGridBox() {
+        delete item_;
+    }
 
-    bool hasHeightForWidth() const { return item_->hasHeightForWidth(); }
-    int heightForWidth(int w) const { return item_->heightForWidth(w); }
+    QSize sizeHint() const {
+        return item_->sizeHint();
+    }
 
-    void setAlignment(Qt::Alignment a) { item_->setAlignment(a); }
-    void setGeometry(const QRect& r) { item_->setGeometry(r); }
-    Qt::Alignment alignment() const { return item_->alignment(); }
-    QLayoutItem* item() { return item_; }
-    void setItem(QLayoutItem* newitem) { item_ = newitem; }
-    QLayoutItem* takeItem() { QLayoutItem* i = item_; item_ = nullptr; return i; }
+    QSize minimumSize() const {
+        return item_->minimumSize();
+    }
 
-    int hStretch() { return item_->widget() ?
-                         item_->widget()->sizePolicy().horizontalStretch() : 0; }
-    int vStretch() { return item_->widget() ?
-                         item_->widget()->sizePolicy().verticalStretch() : 0; }
+    QSize maximumSize() const {
+        return item_->maximumSize();
+    }
+
+    Qt::Orientations expandingDirections() const {
+        return item_->expandingDirections();
+    }
+
+    bool isEmpty() const {
+        return item_->isEmpty();
+    }
+
+    bool hasHeightForWidth() const {
+        return item_->hasHeightForWidth();
+    }
+
+    int heightForWidth(int w) const {
+        return item_->heightForWidth(w);
+    }
+
+    void setAlignment(Qt::Alignment a) {
+        item_->setAlignment(a);
+    }
+
+    void setGeometry(const QRect& r) {
+        item_->setGeometry(r);
+    }
+
+    Qt::Alignment alignment() const {
+        return item_->alignment();
+    }
+
+    QLayoutItem* item() {
+        return item_;
+    }
+
+    void setItem(QLayoutItem* newitem) {
+        item_ = newitem;
+    }
+
+    QLayoutItem* takeItem() {
+        QLayoutItem* i = item_;
+        item_ = nullptr;
+        return i;
+    }
+
+    int hStretch() {
+        return item_->widget()
+                ? item_->widget()->sizePolicy().horizontalStretch()
+                : 0;
+    }
+
+    int vStretch() {
+        return item_->widget()
+                ? item_->widget()->sizePolicy().verticalStretch()
+                : 0;
+    }
 
 private:
     friend class GridLayoutHfw;
 
-    inline int toRow(int rr) const { return torow >= 0 ? torow : rr - 1; }
-    inline int toCol(int cc) const { return tocol >= 0 ? tocol : cc - 1; }
+    inline int toRow(int rr) const {
+        return torow >= 0 ? torow : rr - 1;
+    }
+
+    inline int toCol(int cc) const {
+        return tocol >= 0 ? tocol : cc - 1;
+    }
 
     QLayoutItem* item_;
     int row, col;
@@ -305,7 +378,7 @@ QSize GridLayoutHfw::findSize(const GeomInfo& gi,
 void GridLayoutHfw::setSize(const int r, const int c)
 {
     if (static_cast<int>(m_r_stretches.size()) < r) {
-        int new_r = qMax(r, m_nrow * 2);
+        const int new_r = qMax(r, m_nrow * 2);
         m_r_stretches.resize(new_r);
         m_r_min_heights.resize(new_r);
         for (int i = m_nrow; i < new_r; i++) {
@@ -314,7 +387,7 @@ void GridLayoutHfw::setSize(const int r, const int c)
         }
     }
     if (static_cast<int>(m_c_stretches.size()) < c) {
-        int new_c = qMax(c, m_ncol * 2);
+        const int new_c = qMax(c, m_ncol * 2);
         m_c_stretches.resize(new_c);
         m_c_min_widths.resize(new_c);
         for (int i = m_ncol; i < new_c; i++) {
@@ -481,7 +554,7 @@ static void distributeMultiBox(QVector<QQLayoutStruct>& chain,
         }
 
         if (i != end) {
-            int spacing = data->spacing;
+            const int spacing = data->spacing;
             w += spacing;
             wh += spacing;
             max += spacing;
@@ -500,7 +573,7 @@ static void distributeMultiBox(QVector<QQLayoutStruct>& chain,
         int pos = 0;
         for (i = start; i <= end; i++) {
             QQLayoutStruct* data = &chain[i];
-            int next_pos = (i == end) ? min_size : chain.at(i + 1).pos;
+            const int next_pos = (i == end) ? min_size : chain.at(i + 1).pos;
             int real_size = next_pos - pos;
             if (i != end) {
                 real_size -= data->spacing;
@@ -638,8 +711,20 @@ void GridLayoutHfw::addHfwData(GeomInfo& gi, QQGridBox* box, int width) const
 
     if (box->hasHeightForWidth()) {
 
-        int hfw = box->heightForWidth(width);
+        const int hfw = box->heightForWidth(width);
+#if 0
+        // DON'T do this; it breaks things quite badly!
+        // 2020-03-12
+        QLayoutItem* item = box->item();
+        QWidget* widget = item->widget();
+        const bool can_shrink_vertically =
+                sizehelpers::canHFWPolicyShrinkVertically(widget->sizePolicy());
+        const int min_h = can_shrink_vertically ? item->minimumSize().height()
+                                                : hfw;
+        ls.minimum_size = qMax(min_h, ls.minimum_size);
+#else
         ls.minimum_size = qMax(hfw, ls.minimum_size);
+#endif
         ls.size_hint = qMax(hfw, ls.size_hint);
 #ifdef GRIDLAYOUTHFW_ALTER_FROM_QGRIDLAYOUT
         if (ls.maximum_size >= QLAYOUTSIZE_MAX) {
@@ -654,8 +739,8 @@ void GridLayoutHfw::addHfwData(GeomInfo& gi, QQGridBox* box, int width) const
 
     } else {
 
-        int hint_h = box->sizeHint().height();
-        int min_h = box->minimumSize().height();
+        const int hint_h = box->sizeHint().height();
+        const int min_h = box->minimumSize().height();
         // Note:
         //  QQGridBox::minimumSize()
         //  -> QLayoutItem::minimumSize() [pure virtual]
@@ -740,26 +825,26 @@ void GridLayoutHfw::distribute(const QRect& layout_rect)
     // Therefore I think we can recover the information with:
     QRect rect = geometry();  // RNC
 
-    bool reverse = (
+    const bool reverse = (
                 (r.bottom() > rect.bottom()) ||
                 (r.bottom() == rect.bottom() &&
                     ((r.right() > rect.right()) != visual_h_reversed)));
-    int n = m_things.size();
+    const int n = m_things.size();
     const QVector<QLayoutStruct>& rowdata = gi.m_has_hfw ? gi.m_hfw_data
                                                          : gi.m_row_data;
     for (int i = 0; i < n; ++i) {
         QQGridBox* box = m_things.at(reverse ? n-i-1 : i);
-        int r1 = box->row;
-        int c1 = box->col;
-        int r2 = box->toRow(m_nrow);
-        int c2 = box->toCol(m_ncol);
+        const int r1 = box->row;
+        const int c1 = box->col;
+        const int r2 = box->toRow(m_nrow);
+        const int c2 = box->toCol(m_ncol);
 
         int x = gi.m_col_data.at(c1).pos;
         int y = rowdata.at(r1).pos;
-        int x2p = gi.m_col_data.at(c2).pos + gi.m_col_data.at(c2).size; // x2+1
-        int y2p = rowdata.at(r2).pos + rowdata.at(r2).size;    // y2+1
-        int w = x2p - x;
-        int h = y2p - y;
+        const int x2p = gi.m_col_data.at(c2).pos + gi.m_col_data.at(c2).size; // x2+1
+        const int y2p = rowdata.at(r2).pos + rowdata.at(r2).size;    // y2+1
+        const int w = x2p - x;
+        const int h = y2p - y;
 
         if (visual_h_reversed) {
             x = r.left() + r.right() - x - w + 1;
@@ -902,7 +987,7 @@ void GridLayoutHfw::setSpacing(int spacing)
 
 int GridLayoutHfw::spacing() const
 {
-    int h_spacing = horizontalSpacing();
+    const int h_spacing = horizontalSpacing();
     if (h_spacing == verticalSpacing()) {
         return h_spacing;
     }
@@ -925,7 +1010,7 @@ int GridLayoutHfw::columnCount() const
 QSize GridLayoutHfw::sizeHint() const
 {
 #ifdef GRIDLAYOUTHFW_ALTER_FROM_QGRIDLAYOUT
-    GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
+    const GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
     m_width_last_size_constraints_based_on = m_rect_for_next_size_constraints.width();
 #else
     GeomInfo gi = getGeomInfo();
@@ -945,7 +1030,7 @@ QSize GridLayoutHfw::sizeHint() const
 QSize GridLayoutHfw::minimumSize() const
 {
 #ifdef GRIDLAYOUTHFW_ALTER_FROM_QGRIDLAYOUT
-    GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
+    const GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
     m_width_last_size_constraints_based_on = m_rect_for_next_size_constraints.width();
 #else
     GeomInfo gi = getGeomInfo();
@@ -965,7 +1050,7 @@ QSize GridLayoutHfw::minimumSize() const
 QSize GridLayoutHfw::maximumSize() const
 {
 #ifdef GRIDLAYOUTHFW_ALTER_FROM_QGRIDLAYOUT
-    GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
+    const GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
     m_width_last_size_constraints_based_on = m_rect_for_next_size_constraints.width();
 #else
     GeomInfo gi = getGeomInfo();
@@ -992,7 +1077,7 @@ QSize GridLayoutHfw::maximumSize() const
 bool GridLayoutHfw::hasHeightForWidth() const
 {
 #ifdef GRIDLAYOUTHFW_ALTER_FROM_QGRIDLAYOUT
-    GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
+    const GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
 #else
     GeomInfo gi = getGeomInfo();
 #endif
@@ -1005,7 +1090,7 @@ int GridLayoutHfw::heightForWidth(int w) const
     if (!hasHeightForWidth()) {
         return -1;
     }
-    GeomInfo gi = getGeomInfoForHfw(w);
+    const GeomInfo gi = getGeomInfoForHfw(w);
     return gi.m_hfw_height;
 }
 
@@ -1015,7 +1100,7 @@ int GridLayoutHfw::minimumHeightForWidth(int w) const
     if (!hasHeightForWidth()) {
         return -1;
     }
-    GeomInfo gi = getGeomInfoForHfw(w);
+    const GeomInfo gi = getGeomInfoForHfw(w);
     return gi.m_hfw_min_height;
 }
 
@@ -1037,7 +1122,7 @@ QLayoutItem* GridLayoutHfw::itemAt(int index) const
 
 QLayoutItem* GridLayoutHfw::itemAtPosition(int row, int column) const
 {
-    int n = m_things.count();
+    const int n = m_things.count();
     for (int i = 0; i < n; ++i) {
         QQGridBox* box = m_things.at(i);
         if (row >= box->row && row <= box->toRow(m_nrow)
@@ -1073,8 +1158,8 @@ void GridLayoutHfw::getItemPosition(int index, int* row, int* column,
 {
     if (index < m_things.count()) {
         const QQGridBox* b =  m_things.at(index);
-        int toRow = b->toRow(m_nrow);
-        int toCol = b->toCol(m_ncol);
+        const int toRow = b->toRow(m_nrow);
+        const int toCol = b->toCol(m_ncol);
         *row = b->row;
         *column = b->col;
         *row_span = toRow - *row + 1;
@@ -1083,7 +1168,7 @@ void GridLayoutHfw::getItemPosition(int index, int* row, int* column,
 }
 
 
-void GridLayoutHfw::setGeometry(const QRect &rect)
+void GridLayoutHfw::setGeometry(const QRect& rect)
 {
     // ------------------------------------------------------------------------
     // Prevent infinite recursion
@@ -1116,7 +1201,7 @@ void GridLayoutHfw::setGeometry(const QRect &rect)
     // ------------------------------------------------------------------------
 #ifndef DISABLE_CACHING
 #ifdef GRIDLAYOUTHFW_ALTER_FROM_QGRIDLAYOUT
-    bool geometry_previously_calculated = m_geom_cache.contains(r);
+    const bool geometry_previously_calculated = m_geom_cache.contains(r);
     if (geometry_previously_calculated && r == geometry()) {
 #else
     if (!m_dirty && r == geometry()) {
@@ -1133,7 +1218,7 @@ void GridLayoutHfw::setGeometry(const QRect &rect)
     // Recalculate geometry
     // ------------------------------------------------------------------------
 #ifdef GRIDLAYOUTHFW_ALTER_FROM_QGRIDLAYOUT
-    GeomInfo gi = getGeomInfo(r);
+    const GeomInfo gi = getGeomInfo(r);
 #else
     GeomInfo gi = getGeomInfo();
 #endif
@@ -1152,11 +1237,11 @@ void GridLayoutHfw::setGeometry(const QRect &rect)
         }
     }
     QWidget* parent = parentWidget();
-    Margins parent_margins = Margins::getContentsMargins(parent);
+    const Margins parent_margins = Margins::getContentsMargins(parent);
     if (!parent) {
         qWarning() << Q_FUNC_INFO << "Layout has no parent widget";
     }
-    int parent_new_height = getParentTargetHeight(parent, parent_margins, gi);
+    const int parent_new_height = getParentTargetHeight(parent, parent_margins, gi);
     if (parent_new_height != -1) {
         r.setHeight(parent_new_height - parent_margins.totalHeight());  // change
     }
@@ -1174,10 +1259,20 @@ void GridLayoutHfw::setGeometry(const QRect &rect)
     // ------------------------------------------------------------------------
 #ifdef GRIDLAYOUTHFW_ALTER_FROM_QGRIDLAYOUT
     if (parent_new_height != -1) {
-        bool change = !sizehelpers::fixedHeightEquals(parent,
-                                                      parent_new_height);
+        const bool change = !sizehelpers::fixedHeightEquals(parent,
+                                                            parent_new_height);
+        // Don't resize if the parent is already trying its best.
         if (change) {
+#ifdef DEBUG_LAYOUT_COMMS
+            qDebug()
+                    << Q_FUNC_INFO
+                    << "Asking parent to change height from"
+                    << parent->geometry().height()
+                    << "to"
+                    << parent_new_height;
+#endif
             parent->setFixedHeight(parent_new_height);  // RISK OF INFINITE RECURSION
+            // ... hence the ReentryDepthGuard
             parent->updateGeometry();
         }
     }
@@ -1272,6 +1367,15 @@ void GridLayoutHfw::addItem(QLayoutItem* item, int row, int column,
 }
 
 
+void GridLayoutHfw::addWidget(QWidget* w)
+{
+    // The original, as per qgridlayout.h, is:
+    //      QLayout::addWidget(w);
+    QWidgetItem* b = createWidgetItem(this, w, USE_HFW_CAPABLE_ITEM);
+    addItem(b);
+}
+
+
 void GridLayoutHfw::addWidget(QWidget* widget, int row, int column,
                               Qt::Alignment alignment)
 {
@@ -1287,7 +1391,7 @@ void GridLayoutHfw::addWidget(QWidget* widget, int row, int column,
         return;
     }
     addChildWidget(widget);
-    QWidgetItem* b = createWidgetItem(this, widget);
+    QWidgetItem* b = createWidgetItem(this, widget, USE_HFW_CAPABLE_ITEM);
     addItem(b, row, column, 1, 1, alignment);
 }
 
@@ -1299,8 +1403,8 @@ void GridLayoutHfw::addWidget(QWidget* widget, int from_row, int from_column,
     if (!checkWidget(widget, this)) {
         return;
     }
-    int toRow = (row_span < 0) ? -1 : from_row + row_span - 1;
-    int toColumn = (column_span < 0) ? -1 : from_column + column_span - 1;
+    const int toRow = (row_span < 0) ? -1 : from_row + row_span - 1;
+    const int toColumn = (column_span < 0) ? -1 : from_column + column_span - 1;
     addChildWidget(widget);
     auto b = new QQGridBox(this, widget);
     b->setAlignment(alignment);
@@ -1407,7 +1511,7 @@ int GridLayoutHfw::columnMinimumWidth(int column) const
 Qt::Orientations GridLayoutHfw::expandingDirections() const
 {
 #ifdef GRIDLAYOUTHFW_ALTER_FROM_QGRIDLAYOUT
-    GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
+    const GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
 #else
     GeomInfo gi = getGeomInfo();
 #endif
@@ -1539,7 +1643,7 @@ GridLayoutHfw::GeomInfo GridLayoutHfw::getGeomInfo() const
                 : m_c_min_widths.at(i);
     }
 
-    int n = m_things.size();
+    const int n = m_things.size();
     QVarLengthArray<QQGridLayoutSizeTriple> sizes(n);
     bool has_multi = false;
 
@@ -1584,8 +1688,8 @@ GridLayoutHfw::GeomInfo GridLayoutHfw::getGeomInfo() const
         }
     }
 
-    int h_spacing = horizontalSpacing();
-    int v_spacing = verticalSpacing();
+    const int h_spacing = horizontalSpacing();
+    const int v_spacing = verticalSpacing();
     setupSpacings(gi.m_col_data, grid.data(), h_spacing, Qt::Horizontal);
     setupSpacings(gi.m_row_data, grid.data(), v_spacing, Qt::Vertical);
 
@@ -1644,10 +1748,12 @@ GridLayoutHfw::GeomInfo GridLayoutHfw::getGeomInfo() const
 
     if (gi.m_has_hfw) {
         for (int i = 0; i < m_nrow; i++) {
-            gi.m_hfw_data[i] = gi.m_row_data.at(i);  // copy m_row_data to m_hfw_data
+            // Copy m_row_data to m_hfw_data:
+            gi.m_hfw_data[i] = gi.m_row_data.at(i);
+            // Modify starting minimum/hint heights:
             gi.m_hfw_data[i].minimum_size = gi.m_hfw_data[i].size_hint =
                     m_r_min_heights.at(i);
-            // ... and modify starting minimum/hint heights
+            // ... start with prespecified grid row minimum heights
 #ifdef GRIDLAYOUTHFW_ALTER_FROM_QGRIDLAYOUT
             gi.m_hfw_data[i].maximum_size = qMax(gi.m_hfw_data[i].maximum_size,
                                                  gi.m_hfw_data[i].minimum_size);
@@ -1657,12 +1763,14 @@ GridLayoutHfw::GeomInfo GridLayoutHfw::getGeomInfo() const
         for (int pass = 0; pass < 2; ++pass) {
             // Two passes used to calculate for items that cover >1 box.
             for (QQGridBox* box : m_things) {
-                int r1 = box->row;
-                int c1 = box->col;
-                int r2 = box->toRow(m_nrow);
-                int c2 = box->toCol(m_ncol);
-                int w = (gi.m_col_data.at(c2).pos + gi.m_col_data.at(c2).size -
-                         gi.m_col_data.at(c1).pos);
+                const int r1 = box->row;
+                const int c1 = box->col;
+                const int r2 = box->toRow(m_nrow);
+                const int c2 = box->toCol(m_ncol);
+                const int w = (
+                        gi.m_col_data.at(c2).pos + gi.m_col_data.at(c2).size -
+                        gi.m_col_data.at(c1).pos
+                );
     
                 if (r1 == r2) {
                     if (pass == 0) {
@@ -1722,12 +1830,14 @@ GridLayoutHfw::GeomInfo GridLayoutHfw::getGeomInfo() const
 
     // Size hints
 
-    Margins effmarg = effectiveMargins();  // RNC: stores in cache
-    QSize extra = effmarg.totalSize();
+    const Margins effmarg = effectiveMargins();  // RNC: stores in cache
+    const QSize extra = effmarg.totalSize();
     // Note that findSize checks hasHeightForWidth() and acts accordingly:
     gi.m_min_size = findSize(gi, &QLayoutStruct::minimum_size);
     gi.m_max_size = findSize(gi, &QLayoutStruct::maximum_size);
-    gi.m_size_hint = findSize(gi, &QLayoutStruct::size_hint).expandedTo(gi.m_min_size).boundedTo(gi.m_max_size);
+    gi.m_size_hint = findSize(gi, &QLayoutStruct::size_hint)
+            .expandedTo(gi.m_min_size)
+            .boundedTo(gi.m_max_size);
 
     // From calcHfw (but then altered):
     if (gi.m_has_hfw) {
@@ -1778,10 +1888,10 @@ GridLayoutHfw::GeomInfo GridLayoutHfw::getGeomInfo() const
 #ifdef DEBUG_LAYOUT_BASIC
     qDebug().nospace()
             << "[getGeomInfo()] ..."
-    #ifdef GRIDLAYOUTHFW_ALTER_FROM_QGRIDLAYOUT
+#ifdef GRIDLAYOUTHFW_ALTER_FROM_QGRIDLAYOUT
              << " for rect " << layout_rect
              << " (contents rect " << r << ")"
-    #endif
+#endif
              << " n " << n
              << " m_expanding " << gi.m_expanding
              << " m_min_size " << gi.m_min_size
@@ -1790,19 +1900,19 @@ GridLayoutHfw::GeomInfo GridLayoutHfw::getGeomInfo() const
              << " m_has_hfw " << gi.m_has_hfw
              << " (margins " << effmarg
              << ")";
-    #ifdef DEBUG_LAYOUT_DETAILED
+#ifdef DEBUG_LAYOUT_DETAILED
     for (int i = 0; i < m_things.size(); ++i) {
         QQGridBox* box = m_things.at(i);
-        int r1 = box->row;
-        int c1 = box->col;
-        int r2 = box->toRow(m_nrow);
-        int c2 = box->toCol(m_ncol);
-        int w = (gi.m_col_data.at(c2).pos + gi.m_col_data.at(c2).size -
-                 gi.m_col_data.at(c1).pos);
-        QString rowdesc = (r1 == r2)
+        const int r1 = box->row;
+        const int c1 = box->col;
+        const int r2 = box->toRow(m_nrow);
+        const int c2 = box->toCol(m_ncol);
+        const int w = (gi.m_col_data.at(c2).pos + gi.m_col_data.at(c2).size -
+                       gi.m_col_data.at(c1).pos);
+        const QString rowdesc = (r1 == r2)
                 ? QString("row=%1").arg(r1)
                 : QString("rows=%1-%2").arg(r1).arg(r2);
-        QString coldesc = (c1 == c2)
+        const QString coldesc = (c1 == c2)
                 ? QString("col=%1").arg(c1)
                 : QString("cols=%1-%2").arg(c1).arg(c2);
         qDebug().nospace().noquote()
@@ -1834,7 +1944,7 @@ GridLayoutHfw::GeomInfo GridLayoutHfw::getGeomInfo() const
                                << i << ": " << ls;
         }
     }
-    #endif
+#endif
 #endif
 
 #ifdef GRIDLAYOUTHFW_ALTER_FROM_QGRIDLAYOUT
@@ -1888,7 +1998,7 @@ GridLayoutHfw::GeomInfo GridLayoutHfw::getGeomInfoForHfw(int w) const
 QRect GridLayoutHfw::getContentsRect(const QRect& layout_rect) const
 {
     const QRect& r = layout_rect;  // so variable names match QBoxLayout
-    QRect cr = alignment() ? alignmentRect(r) : r;
+    const QRect cr = alignment() ? alignmentRect(r) : r;
     return effectiveMargins().removeMarginsFrom(cr);
 }
 

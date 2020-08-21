@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -47,7 +47,7 @@ protected:
     virtual void extraLineEditCreation(QLineEdit* editor) override;
 
 protected:
-    double m_minimum;  // minimum; may be std::numeric_limits<double>::min()
+    double m_minimum;  // minimum; may be std::numeric_limits<double>::lowest()
     double m_maximum;  // maximum; may be std::numeric_limits<double>::max()
     int m_decimals;  // maximum number of decimal places, for StrictDoubleValidator
     bool m_allow_empty;  // allow an empty field?

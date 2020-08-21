@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -21,19 +21,41 @@
 // #define DEBUG_WIDGET_MARGINS
 
 #include "sizehelpers.h"
+#include <QAbstractItemDelegate>
+#include <QAction>
+#include <QCheckBox>
+#include <QComboBox>
 #include <QDebug>
+#include <QGroupBox>
+#include <QHeaderView>
 #include <QLayout>
 #include <QLabel>
+#include <QLineEdit>
+#include <QMdiSubWindow>
+#include <QMenu>
+#include <QMenuBar>
+#include <QProgressBar>
 #include <QPushButton>
+#include <QRadioButton>
+#include <QScrollBar>
+#include <QSizeGrip>
 #include <QSizePolicy>
+#include <QSlider>
+#include <QSpinBox>
+#include <QSplitter>
 #include <QStyle>
 #include <QStyleOptionButton>
 #include <QStyleOptionFrame>
+#include <QTabBar>
+#include <QTabWidget>
+#include <QToolButton>
 #include <QWidget>
 
 #ifdef DEBUG_WIDGET_MARGINS
 #include "lib/layoutdumper.h"
 #endif
+
+#define QT_FREQUENT_STARTING_WIDTH 640
 
 
 namespace sizehelpers {
@@ -136,7 +158,7 @@ void resizeEventForHFWParentWidget(QWidget* widget)
 #ifdef DEBUG_HFW_RESIZE_EVENT
     qDebug() << Q_FUNC_INFO << "w" << w << "-> h" << h;
 #endif
-    bool change = !fixedHeightEquals(widget, h);
+    const bool change = !fixedHeightEquals(widget, h);
     if (change) {
         widget->setFixedHeight(h);
         widget->updateGeometry();
@@ -184,8 +206,8 @@ QSize widgetExtraSizeForCssOrLayout(const QWidget* widget,
     if (add_style_element) {
         QStyle* style = widget->style();
         if (style) {
-            QSize temp = style->sizeFromContents(contents_type, opt,
-                                                 child_size, widget);
+            const QSize temp = style->sizeFromContents(contents_type, opt,
+                                                       child_size, widget);
             stylesheet_extra_size = temp - child_size;
         }
     }
@@ -209,7 +231,7 @@ QSize widgetExtraSizeForCssOrLayout(const QWidget* widget,
     // size_hint += stylesheet_extra_size + extra_for_layout_margins;
 
     // Take the maximum?
-    QSize total_extra = stylesheet_extra_size
+    const QSize total_extra = stylesheet_extra_size
             .expandedTo(extra_for_layout_margins)
             .expandedTo(QSize(0, 0));  // just to ensure it's never negative
 
@@ -222,6 +244,85 @@ QSize widgetExtraSizeForCssOrLayout(const QWidget* widget,
              << " => total_extra " << total_extra;
 #endif
     return total_extra;
+}
+
+
+QStyle::ContentsType guessStyleContentsType(const QWidget* widget)
+{
+    if (dynamic_cast<const QCheckBox*>(widget)) {
+        return QStyle::CT_CheckBox;
+    }
+    if (dynamic_cast<const QComboBox*>(widget)) {
+        return QStyle::CT_ComboBox;
+    }
+    if (dynamic_cast<const QHeaderView*>(widget)) {
+        return QStyle::CT_HeaderSection;
+    }
+    if (dynamic_cast<const QLineEdit*>(widget)) {
+        return QStyle::CT_LineEdit;
+    }
+    if (dynamic_cast<const QMenu*>(widget)) {
+        return QStyle::CT_Menu;
+    }
+    if (dynamic_cast<const QMenuBar*>(widget)) {
+        return QStyle::CT_MenuBar;
+    }
+    // No direct widget corresponding to QStyle::CT_MenuBarItem?
+    if (dynamic_cast<const QProgressBar*>(widget)) {
+        return QStyle::CT_ProgressBar;
+    }
+    if (dynamic_cast<const QPushButton*>(widget)) {
+        return QStyle::CT_PushButton;
+    }
+    if (dynamic_cast<const QRadioButton*>(widget)) {
+        return QStyle::CT_RadioButton;
+    }
+    if (dynamic_cast<const QSizeGrip*>(widget)) {
+        return QStyle::CT_SizeGrip;
+    }
+    if (dynamic_cast<const QSlider*>(widget)) {
+        return QStyle::CT_Slider;
+    }
+    if (dynamic_cast<const QScrollBar*>(widget)) {
+        return QStyle::CT_ScrollBar;
+    }
+    if (dynamic_cast<const QSpinBox*>(widget)) {
+        return QStyle::CT_SpinBox;
+    }
+    if (dynamic_cast<const QSplitter*>(widget)) {
+        return QStyle::CT_Splitter;
+    }
+    if (dynamic_cast<const QTabBar*>(widget)) {
+        return QStyle::CT_TabBarTab;
+    }
+    if (dynamic_cast<const QTabWidget*>(widget)) {
+        return QStyle::CT_TabWidget;
+    }
+    if (dynamic_cast<const QToolButton*>(widget)) {
+        return QStyle::CT_ToolButton;
+    }
+    if (dynamic_cast<const QGroupBox*>(widget)) {
+        return QStyle::CT_GroupBox;
+    }
+    if (dynamic_cast<const QMdiSubWindow*>(widget)) {
+        return QStyle::CT_MdiControls;
+    }
+    // No direct widget corresponding to QStyle::CT_ItemViewItem?
+
+    // Default??
+    return QStyle::CT_CustomBase;
+}
+
+
+QSize widgetExtraSizeForCssOrLayout(const QWidget* widget)
+{
+    QStyleOption opt;
+    opt.initFrom(widget);
+    const QSize child_size = widget->sizeHint();
+    const bool add_style_element = true;
+    const QStyle::ContentsType contents_type = guessStyleContentsType(widget);
+    return widgetExtraSizeForCssOrLayout(widget, &opt, child_size,
+                                         add_style_element, contents_type);
 }
 
 
@@ -307,6 +408,39 @@ bool fixedHeightEquals(QWidget* widget, const int height)
 {
     return height == widget->minimumHeight() &&
             height == widget->maximumHeight();
+}
+
+
+bool canHFWPolicyShrinkVertically(const QSizePolicy& sp)
+{
+    if (!sp.hasHeightForWidth()) {
+        return false;
+    }
+    const QSizePolicy::Policy vp = sp.verticalPolicy();
+    const bool can_shrink_vertically = vp & QSizePolicy::ShrinkFlag;
+    return can_shrink_vertically;
+}
+
+
+bool isWidgetHFWTradingDimensions(const QWidget* widget)
+{
+    if (!widget->hasHeightForWidth()) {
+        return false;
+    }
+    const int h_for_small_w = widget->heightForWidth(QT_FREQUENT_STARTING_WIDTH);
+    const int h_for_big_w = widget->heightForWidth(QT_FREQUENT_STARTING_WIDTH * 2);
+    return h_for_small_w > h_for_big_w;
+}
+
+
+bool isWidgetHFWMaintainingAspectRatio(const QWidget* widget)
+{
+    if (!widget->hasHeightForWidth()) {
+        return false;
+    }
+    const int h_for_small_w = widget->heightForWidth(QT_FREQUENT_STARTING_WIDTH);
+    const int h_for_big_w = widget->heightForWidth(QT_FREQUENT_STARTING_WIDTH * 2);
+    return h_for_small_w < h_for_big_w;
 }
 
 

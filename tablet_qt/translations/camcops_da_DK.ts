@@ -389,142 +389,142 @@
         <translation>Konfiguration af intern database</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="547"/>
+        <location filename="../core/camcopsapp.cpp" line="561"/>
         <source>Enter a new password for the CamCOPS application</source>
         <translation>Indtast en ny adgangskode til CamCOPS-applikationen</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="548"/>
+        <location filename="../core/camcopsapp.cpp" line="562"/>
         <source>Set CamCOPS password</source>
         <translation>Indstil CamCOPS adgangskode</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="549"/>
+        <location filename="../core/camcopsapp.cpp" line="563"/>
         <source>Enter the password to unlock CamCOPS</source>
         <translation>Indtast adgangskoden for at låse CamCOPS op</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="550"/>
+        <location filename="../core/camcopsapp.cpp" line="564"/>
         <source>Enter CamCOPS password</source>
         <translation>Indtast CamCOPS adgangskode</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="558"/>
+        <location filename="../core/camcopsapp.cpp" line="572"/>
         <source>CamCOPS uses a system and a data database; one has a password and one doesn&apos;t (no_password_sys = %1, no_password_data = %2); this is an incongruent state that has probably arisen from user error, and CamCOPS will not continue until this is fixed.</source>
         <translation>CamCOPS bruger et system og en databas. Man har et kodeord, og man gør det ikke (no_password_sys = %1, no_password_data = %2). Dette er en inkongruent tilstand, der sandsynligvis er opstået som følge af brugerfejl, og CamCOPS fortsætter ikke, før dette er løst.</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="566"/>
+        <location filename="../core/camcopsapp.cpp" line="580"/>
         <source>Inconsistent database state</source>
         <translation>Inkonsekvent database tilstand</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="622"/>
+        <location filename="../core/camcopsapp.cpp" line="636"/>
         <source>Decrypting databases...</source>
         <translation>Dekryptering af databaser...</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="642"/>
+        <location filename="../core/camcopsapp.cpp" line="656"/>
         <source>Can&apos;t read system database; corrupted? encrypted? (This version of CamCOPS has had its encryption facilities disabled.)</source>
         <translation>Kan ikke læse systemdatabasen; ødelagt? krypteret? (Denne version af CamCOPS har haft sine krypteringsfaciliteter deaktiveret.)</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="647"/>
+        <location filename="../core/camcopsapp.cpp" line="661"/>
         <source>Can&apos;t read data database; corrupted? encrypted? (This version of CamCOPS has had its encryption facilities disabled.)</source>
         <translation>Kan ikke læse databasen; ødelagt? krypteret? (Denne version af CamCOPS har haft sine krypteringsfaciliteter deaktiveret.)</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="1237"/>
+        <location filename="../core/camcopsapp.cpp" line="1251"/>
         <source>Upload?</source>
         <translation>Upload?</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="1238"/>
+        <location filename="../core/camcopsapp.cpp" line="1252"/>
         <source>Task finished. Upload data to server now?</source>
         <translation>Opgave færdig. Upload data til server nu?</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="1240"/>
+        <location filename="../core/camcopsapp.cpp" line="1254"/>
         <source>Yes, upload</source>
         <translation>Ja, upload</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="1242"/>
+        <location filename="../core/camcopsapp.cpp" line="1256"/>
         <source>No, cancel</source>
         <translation>Nej, annuller</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="1407"/>
+        <location filename="../core/camcopsapp.cpp" line="1423"/>
         <source>Enter app password</source>
         <translation>Indtast programadgangskode</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="1408"/>
+        <location filename="../core/camcopsapp.cpp" line="1424"/>
         <source>Unlock</source>
         <translation>Lås</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="1423"/>
+        <location filename="../core/camcopsapp.cpp" line="1439"/>
         <source>Enter privileged-mode password</source>
         <translation>Indtast adgangskode med privilegeret tilstand</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="1424"/>
+        <location filename="../core/camcopsapp.cpp" line="1440"/>
         <source>Set privileged mode</source>
         <translation>Indstil privilegeret tilstand</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="1445"/>
+        <location filename="../core/camcopsapp.cpp" line="1461"/>
         <source>Wrong password</source>
         <translation>Forkert kodeord</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="1453"/>
+        <location filename="../core/camcopsapp.cpp" line="1469"/>
         <source>Change app password</source>
         <translation>Skift programadgangskode</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="1461"/>
+        <location filename="../core/camcopsapp.cpp" line="1477"/>
         <source>Re-encrypting databases...</source>
         <translation>Genkrypterende databaser...</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="1477"/>
+        <location filename="../core/camcopsapp.cpp" line="1493"/>
         <source>Change privileged-mode password</source>
         <translation>Skift adgangskode til privilegeret tilstand</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="1500"/>
+        <location filename="../core/camcopsapp.cpp" line="1516"/>
         <source>Incorrect old password</source>
         <translation>Forkert gammel adgangskode</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="2236"/>
+        <location filename="../core/camcopsapp.cpp" line="2252"/>
         <source>Terms and conditions of use</source>
         <translation>Vilkår og betingelser for brug</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="2240"/>
+        <location filename="../core/camcopsapp.cpp" line="2256"/>
         <source>I AGREE</source>
         <translation>JEG ER ENIG</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="2241"/>
+        <location filename="../core/camcopsapp.cpp" line="2257"/>
         <source>I DO NOT AGREE</source>
         <translation>JEG ER IKKE ENIG</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="2252"/>
+        <location filename="../core/camcopsapp.cpp" line="2268"/>
         <source>OK. Goodbye.</source>
         <translation>Okay. Farvel.</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="2252"/>
+        <location filename="../core/camcopsapp.cpp" line="2268"/>
         <source>You refused the conditions.</source>
         <translation>Du nægtede betingelserne.</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="2267"/>
+        <location filename="../core/camcopsapp.cpp" line="2283"/>
         <source>Copy data to server, or move it to server?
 
 COPY: copies unfinished patients, moves finished patients.
@@ -541,17 +541,17 @@ HOLD PATIENTER OG FLYG: Flytter alle opgaver, holder kun grundlæggende patiento
 Flyt venligst, når det er muligt; dette reducerer mængden af patientidentificerbare oplysninger, der er gemt på denne enhed.</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="2278"/>
+        <location filename="../core/camcopsapp.cpp" line="2294"/>
         <source>Upload to server</source>
         <translation>Upload til server</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="2282"/>
+        <location filename="../core/camcopsapp.cpp" line="2298"/>
         <source>Keep patients and move</source>
         <translation>Hold patienter og flyt data</translation>
     </message>
     <message>
-        <location filename="../core/camcopsapp.cpp" line="2283"/>
+        <location filename="../core/camcopsapp.cpp" line="2299"/>
         <source>Move</source>
         <translation>Flyt</translation>
     </message>
@@ -1176,12 +1176,12 @@ Flyt venligst, når det er muligt; dette reducerer mængden af patientidentifice
 <context>
     <name>Das28</name>
     <message>
-        <location filename="../tasks/das28.cpp" line="93"/>
+        <location filename="../tasks/das28.cpp" line="95"/>
         <source>Disease Activity Score-28</source>
         <translation>Disease Activity Score-28 [sygdomsaktivitetsscore-28]</translation>
     </message>
     <message>
-        <location filename="../tasks/das28.cpp" line="99"/>
+        <location filename="../tasks/das28.cpp" line="101"/>
         <source>A measure of disease activity in rheumatoid arthritis (joint examination, inflammatory marker, visual analogue scale)</source>
         <translation>Et mål for sygdomsaktivitet ved reumatoid arthritis (fællesundersøgelse, inflammatorisk markør, visuel analog skala)</translation>
     </message>
@@ -2188,12 +2188,12 @@ enig</translation>
 <context>
     <name>ElixhauserCI</name>
     <message>
-        <location filename="../tasks/elixhauserci.cpp" line="106"/>
+        <location filename="../tasks/elixhauserci.cpp" line="108"/>
         <source>Elixhauser Comorbidity Index</source>
         <translation>Elixhauser Comorbidity Index [Elixhauser comorbiditetsindeks]</translation>
     </message>
     <message>
-        <location filename="../tasks/elixhauserci.cpp" line="112"/>
+        <location filename="../tasks/elixhauserci.cpp" line="114"/>
         <source>31-item clinician-rated comorbidity catalogue.</source>
         <translation>31-punkts kliniker-bedømt comorbiditet katalog.</translation>
     </message>
@@ -2234,7 +2234,7 @@ enig</translation>
         <translation>Visuel analog sundhed: %1</translation>
     </message>
     <message>
-        <location filename="../tasks/eq5d5l.cpp" line="244"/>
+        <location filename="../tasks/eq5d5l.cpp" line="243"/>
         <source>YOUR HEALTH TODAY =</source>
         <translation>DIN SUNDHED FORDAG =</translation>
     </message>
@@ -2860,12 +2860,12 @@ enig</translation>
 <context>
     <name>KhandakerMojoMedical</name>
     <message>
-        <location filename="../tasks/khandakermojomedical.cpp" line="198"/>
+        <location filename="../tasks/khandakermojomedical.cpp" line="207"/>
         <source>Khandaker GM — MOJO — Medical questionnaire</source>
         <translation>Khandaker GM — MOJO — Medicinsk spørgeskema</translation>
     </message>
     <message>
-        <location filename="../tasks/khandakermojomedical.cpp" line="204"/>
+        <location filename="../tasks/khandakermojomedical.cpp" line="213"/>
         <source>Medical questionnaire for MOJO study.</source>
         <translation>Medicinsk spørgeskema til MOJO-undersøgelse.</translation>
     </message>
@@ -2883,8 +2883,8 @@ enig</translation>
         <translation>Registrering af medicin og taleterapier til MOJO-undersøgelse.</translation>
     </message>
     <message>
-        <location filename="../tasks/khandakermojomedicationtherapy.cpp" line="322"/>
-        <location filename="../tasks/khandakermojomedicationtherapy.cpp" line="344"/>
+        <location filename="../tasks/khandakermojomedicationtherapy.cpp" line="332"/>
+        <location filename="../tasks/khandakermojomedicationtherapy.cpp" line="354"/>
         <source>A row is blank; won’t add another</source>
         <translation>En række er tom; tilføjer ikke en anden</translation>
     </message>
@@ -3798,109 +3798,109 @@ enig</translation>
 <context>
     <name>Patient</name>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="399"/>
+        <location filename="../dbobjects/patient.cpp" line="423"/>
         <source>[No ID numbers]</source>
         <translation>[Ingen ID-numre]</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="666"/>
+        <location filename="../dbobjects/patient.cpp" line="690"/>
         <source>View patient</source>
         <translation>Se patienten</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="666"/>
+        <location filename="../dbobjects/patient.cpp" line="690"/>
         <source>Edit patient</source>
         <translation>Rediger patienten</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="681"/>
+        <location filename="../dbobjects/patient.cpp" line="705"/>
         <source>Surname</source>
         <translation>Efternavn</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="685"/>
+        <location filename="../dbobjects/patient.cpp" line="709"/>
         <source>Forename</source>
         <translation>Fornavn</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="689"/>
+        <location filename="../dbobjects/patient.cpp" line="713"/>
         <source>Sex</source>
         <translation>Køn</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="695"/>
+        <location filename="../dbobjects/patient.cpp" line="719"/>
         <source>Date of birth</source>
         <translation>Fødselsdato</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="700"/>
+        <location filename="../dbobjects/patient.cpp" line="726"/>
         <source>Address</source>
         <translation>Adresse</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="704"/>
+        <location filename="../dbobjects/patient.cpp" line="730"/>
         <source>General practitioner (GP)</source>
         <translation>Praktiserende læge</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="708"/>
+        <location filename="../dbobjects/patient.cpp" line="734"/>
         <source>Other details</source>
         <translation>Andre detaljer</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="727"/>
-        <location filename="../dbobjects/patient.cpp" line="925"/>
+        <location filename="../dbobjects/patient.cpp" line="753"/>
+        <location filename="../dbobjects/patient.cpp" line="951"/>
         <source>Delete ID#</source>
         <translation>Slet ID#</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="751"/>
-        <location filename="../dbobjects/patient.cpp" line="907"/>
+        <location filename="../dbobjects/patient.cpp" line="777"/>
+        <location filename="../dbobjects/patient.cpp" line="933"/>
         <source>Add ID number</source>
         <translation>Tilføj id-nummer</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="760"/>
+        <location filename="../dbobjects/patient.cpp" line="786"/>
         <source>Minimum ID required for app:</source>
         <translation>Mindste id er påkrævet for programmet:</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="765"/>
+        <location filename="../dbobjects/patient.cpp" line="791"/>
         <source>Minimum ID required for upload to server:</source>
         <translation>Mindste id kræves for upload til server:</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="770"/>
+        <location filename="../dbobjects/patient.cpp" line="796"/>
         <source>Minimum ID required to finalize on server:</source>
         <translation>Mindste id, der kræves for at færdiggøre på serveren:</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="775"/>
+        <location filename="../dbobjects/patient.cpp" line="801"/>
         <source>ID numbers must not clash with another patient:</source>
         <translation>ID-numre må ikke kollidere med en anden patient:</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="889"/>
+        <location filename="../dbobjects/patient.cpp" line="915"/>
         <source>All ID numbers offered by the server are already here!</source>
         <translation>Alle ID-numre tilbydes af serveren er allerede her!</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="891"/>
+        <location filename="../dbobjects/patient.cpp" line="917"/>
         <source> (There are no ID numbers at all – have you registered with a server?)</source>
         <translation>(Der er slet ingen ID-numre – har du registreret dig hos en server?)</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="923"/>
+        <location filename="../dbobjects/patient.cpp" line="949"/>
         <source>Really delete ID number</source>
         <translation>Virkelig slet ID-nummer</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="927"/>
+        <location filename="../dbobjects/patient.cpp" line="953"/>
         <source>Yes, delete it</source>
         <translation>Ja, slet det</translation>
     </message>
     <message>
-        <location filename="../dbobjects/patient.cpp" line="927"/>
+        <location filename="../dbobjects/patient.cpp" line="953"/>
         <source>No, cancel</source>
         <translation>Nej, annuller</translation>
     </message>
@@ -4279,7 +4279,7 @@ enig</translation>
         <translation>Lås først op</translation>
     </message>
     <message>
-        <location filename="../lib/uifunc.cpp" line="617"/>
+        <location filename="../lib/uifunc.cpp" line="618"/>
         <source>Failed to open browser</source>
         <translation>Kunne ikke åbne browseren</translation>
     </message>
@@ -4369,12 +4369,12 @@ enig</translation>
 <context>
     <name>QuLineEditDouble</name>
     <message>
-        <location filename="../questionnairelib/qulineeditdouble.cpp" line="37"/>
+        <location filename="../questionnairelib/qulineeditdouble.cpp" line="46"/>
         <source>real number, %1 dp</source>
         <translation>reelt tal, %1 decimaler</translation>
     </message>
     <message>
-        <location filename="../questionnairelib/qulineeditdouble.cpp" line="53"/>
+        <location filename="../questionnairelib/qulineeditdouble.cpp" line="62"/>
         <source>real number, %1 to %2, %3 dp</source>
         <translation>reelt tal, %1 til %2, %3 decimaler</translation>
     </message>
@@ -5206,21 +5206,9 @@ enig</translation>
         <translation>Tilbud om at uploade hver gang en opgave er redigeret?</translation>
     </message>
     <message>
-        <source>Default clinician’s details (to save you typing)</source>
-        <translation>Standard klinikerens detaljer (for at gemme dig at skrive)</translation>
-    </message>
-    <message>
-        <source>Default clinician’s specialty</source>
-        <translation>Standard klinikerens specialitet</translation>
-    </message>
-    <message>
         <location filename="../menu/settingsmenu.cpp" line="578"/>
         <source>e.g. “Liaison Psychiatry”</source>
         <translation>f.eks. “Forbindelsespsykiatri”</translation>
-    </message>
-    <message>
-        <source>Default clinician’s name</source>
-        <translation>Standard klinikerens navn</translation>
     </message>
     <message>
         <location filename="../menu/settingsmenu.cpp" line="582"/>
@@ -5228,17 +5216,9 @@ enig</translation>
         <translation>f.eks. “Dr Viktor Jensen”</translation>
     </message>
     <message>
-        <source>Default clinician’s professional registration</source>
-        <translation>Standard klinikerens faglige registrering</translation>
-    </message>
-    <message>
         <location filename="../menu/settingsmenu.cpp" line="586"/>
         <source>e.g. “GMC# 12345”</source>
         <translation>e.g. “STPS# 12345”</translation>
-    </message>
-    <message>
-        <source>Default clinician’s post</source>
-        <translation>Standard klinikerens arbejde</translation>
     </message>
     <message>
         <location filename="../menu/settingsmenu.cpp" line="590"/>
@@ -5246,17 +5226,9 @@ enig</translation>
         <translation>f.eks. “Konsulent psykiater”</translation>
     </message>
     <message>
-        <source>Default clinician’s service</source>
-        <translation>Standard klinikerens service</translation>
-    </message>
-    <message>
         <location filename="../menu/settingsmenu.cpp" line="594"/>
         <source>e.g. “Liaison Psychiatry Service”</source>
         <translation>f.eks. “Forbindelsespsykiatri Service”</translation>
-    </message>
-    <message>
-        <source>Default clinician’s contact details</source>
-        <translation>Standard klinikerens kontaktoplysninger</translation>
     </message>
     <message>
         <location filename="../menu/settingsmenu.cpp" line="574"/>
@@ -5962,17 +5934,17 @@ Anonym</translation>
 <context>
     <name>TaskChain</name>
     <message>
-        <location filename="../tasklib/taskchain.cpp" line="47"/>
+        <location filename="../tasklib/taskchain.cpp" line="49"/>
         <source>Task chain</source>
         <translation>Opgavekæde</translation>
     </message>
     <message>
-        <location filename="../tasklib/taskchain.cpp" line="161"/>
+        <location filename="../tasklib/taskchain.cpp" line="167"/>
         <source>No patient selected</source>
         <translation>Ingen patient valgt</translation>
     </message>
     <message>
-        <location filename="../tasklib/taskchain.cpp" line="167"/>
+        <location filename="../tasklib/taskchain.cpp" line="173"/>
         <source>Task(s) not permissible:</source>
         <translation>Opgave(er) ikke tilladt:</translation>
     </message>
@@ -6106,106 +6078,118 @@ Anonym</translation>
     </message>
     <message>
         <location filename="../menu/testmenu.cpp" line="190"/>
-        <source>Test logistic regression, and the underlying generalized linear model (GLM)</source>
-        <translation>Test logistisk regression, og den underliggende generaliserede lineære model (GLM)</translation>
+        <source>Test logistic regression, and the underlying generalized linear model (GLM) (binomial)</source>
+        <translation>Test logistisk regression og den underliggende generaliserede lineære model (GLM) (binomial)</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="237"/>
+        <location filename="../menu/testmenu.cpp" line="195"/>
+        <location filename="../menu/testmenu.cpp" line="729"/>
+        <source>Test GLM: Gaussian</source>
+        <translation>Test GLM: Gaussian</translation>
+    </message>
+    <message>
+        <location filename="../menu/testmenu.cpp" line="200"/>
+        <location filename="../menu/testmenu.cpp" line="773"/>
+        <source>Test GLM: Poisson</source>
+        <translation>Test GLM: Poisson</translation>
+    </message>
+    <message>
+        <location filename="../menu/testmenu.cpp" line="677"/>
+        <source>Test logistic regression and binomial GLM</source>
+        <translation>Test logistisk regression og binomial GLM</translation>
+    </message>
+    <message>
+        <location filename="../menu/testmenu.cpp" line="247"/>
         <source>Test HTTPS</source>
         <translation>Test HTTPS</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="246"/>
+        <location filename="../menu/testmenu.cpp" line="256"/>
         <source>Test HTTP</source>
         <translation>Test HTTP</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="290"/>
+        <location filename="../menu/testmenu.cpp" line="300"/>
         <source>Done; see USB debugging output</source>
         <translation>Færdig; se USB debugging tekst</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="292"/>
+        <location filename="../menu/testmenu.cpp" line="302"/>
         <source>Done; see console</source>
         <translation>Færdig; se konsol</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="304"/>
+        <location filename="../menu/testmenu.cpp" line="314"/>
         <source>Testing progress (but not doing anything; safe to abort)...</source>
         <translation>Test fremskridt (men ikke gør noget, sikkert at afbryde)...</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="305"/>
+        <location filename="../menu/testmenu.cpp" line="315"/>
         <source>Abort test</source>
         <translation>Afbryd test</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="306"/>
+        <location filename="../menu/testmenu.cpp" line="316"/>
         <source>Progress dialog</source>
         <translation>Fremskridt dialog</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="329"/>
+        <location filename="../menu/testmenu.cpp" line="339"/>
         <source>Running uninterruptible expensive function in worker thread (for %1 ms)</source>
         <translation>Kører uafbrudt dyre funktion i arbejdstråd (for %1 ms)</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="346"/>
+        <location filename="../menu/testmenu.cpp" line="356"/>
         <source>ScrollMessageBox, with some lengthy text</source>
         <translation>ScrollMessageBox, med lidt lang tekst</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="349"/>
+        <location filename="../menu/testmenu.cpp" line="359"/>
         <source>One (Yes)</source>
         <translation>En (Ja)</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="351"/>
+        <location filename="../menu/testmenu.cpp" line="361"/>
         <source>Two (No)</source>
         <translation>To (Nej)</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="353"/>
+        <location filename="../menu/testmenu.cpp" line="363"/>
         <source>Three (Reject)</source>
         <translation>Tre (Afvis)</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="376"/>
+        <location filename="../menu/testmenu.cpp" line="386"/>
         <source>bytes</source>
         <translation>bytes</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="391"/>
+        <location filename="../menu/testmenu.cpp" line="401"/>
         <source>Size formatting</source>
         <translation>Størrelsesformatering</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="398"/>
+        <location filename="../menu/testmenu.cpp" line="408"/>
         <source>Conversion test: OK</source>
         <translation>Konverteringstest: OK</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="406"/>
+        <location filename="../menu/testmenu.cpp" line="416"/>
         <source>Eigen functions successfully tested</source>
         <translation>Funktioner af Eigen med succes testet</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="416"/>
+        <location filename="../menu/testmenu.cpp" line="426"/>
         <source>Random-number functions (and supporting floating-point-delta functions): OK</source>
         <translation>Tilfældige talfunktioner (og understøtter real tal funktioner): OK</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="427"/>
+        <location filename="../menu/testmenu.cpp" line="437"/>
         <source>Miscellaneous maths functions</source>
         <translation>Diverse matematiske funktioner</translation>
     </message>
     <message>
-        <location filename="../menu/testmenu.cpp" line="670"/>
-        <source>Test logistic regression</source>
-        <translation>Test logistisk regression</translation>
-    </message>
-    <message>
-        <location filename="../menu/testmenu.cpp" line="677"/>
+        <location filename="../menu/testmenu.cpp" line="780"/>
         <source>Hello, world!</source>
         <translation>Hej, verden!</translation>
     </message>
@@ -6241,46 +6225,6 @@ Anonym</translation>
         <location filename="../common/textconst.cpp" line="34"/>
         <source>Category</source>
         <translation>Kategori</translation>
-    </message>
-    <message>
-        <source>Clinician</source>
-        <translation>Kliniker</translation>
-    </message>
-    <message>
-        <source>Clinician’s and respondent’s details</source>
-        <translation>Klinikers og respondentens detaljer</translation>
-    </message>
-    <message>
-        <source>Clinician’s comments</source>
-        <translation>Klinikernes kommentarer</translation>
-    </message>
-    <message>
-        <source>Clinician’s contact details</source>
-        <translation>Klinikerens kontaktoplysninger</translation>
-    </message>
-    <message>
-        <source>Clinician’s details</source>
-        <translation>Klinikerens detaljer</translation>
-    </message>
-    <message>
-        <source>Clinician’s name</source>
-        <translation>Klinikerens navn</translation>
-    </message>
-    <message>
-        <source>Clinician’s post</source>
-        <translation>Klinikernes stilling</translation>
-    </message>
-    <message>
-        <source>Clinician’s professional registration</source>
-        <translation>Klinikerens faglige registrering</translation>
-    </message>
-    <message>
-        <source>Clinician’s service</source>
-        <translation>Klinikers service</translation>
-    </message>
-    <message>
-        <source>Clinician’s specialty</source>
-        <translation>Klinikers speciale</translation>
     </message>
     <message>
         <location filename="../common/textconst.cpp" line="46"/>

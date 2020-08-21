@@ -17,7 +17,11 @@
     You should have received a copy of the GNU General Public License
     along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
 
+.. _Pendulum: https://pendulum.eustace.io/
 .. _RewriteRule: https://httpd.apache.org/docs/current/mod/mod_rewrite.html#rewriterule
+.. _tzfile: http://man7.org/linux/man-pages/man5/tzfile.5.html
+.. _VirtualBox: https://www.virtualbox.org/
+.. _WSL: https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux
 
 
 Troubleshooting server problems
@@ -26,6 +30,12 @@ Troubleshooting server problems
 ..  contents::
     :local:
     :depth: 3
+
+
+Problems under Docker
+---------------------
+
+See :ref:`troubleshooting under Docker <troubleshooting_docker>`.
 
 
 Installation problems
@@ -55,6 +65,40 @@ Unsuccessful method:
 Successful method:
 
 - Upgrade ``matplotlib`` from 2.2.0 to 3.0.2 (as of CamCOPS v2.3.1).
+
+
+Problems starting CamCOPS
+-------------------------
+
+"Posix spec does not match last transition"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This error has been reported (on 2020-02-14) when running CamCOPS 2.3.6
+(version number likely not very important) under Ubuntu 18.04 LTS hosted via
+the Windows Subsystem for Linux (WSL_) version 1 running under Windows 10,
+in Singapore (but using a GMT timezone).
+
+The problem appears to be that the WSL does not properly implement the POSIX
+standard for time "transitions" (we think this refers to e.g. daylight savings
+time adjustments in a given timezone; see tzfile_). The problem arises via
+the Pendulum_ Python module.
+
+This may reflect known WSL bugs:
+
+- https://github.com/microsoft/WSL/issues/869
+- https://github.com/microsoft/WSL/issues/3747
+
+Our suggestion would be to run Ubuntu in a proper virtual machine (e.g.
+VirtualBox_) or on physical hardware.
+
+
+Memory problems
+---------------
+
+Celery worker process size grows until the process dies
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+See :ref:`Celery-related memory leak <celery_memory_leak>`.
 
 
 Web server errors from Apache

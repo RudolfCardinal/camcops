@@ -97,7 +97,7 @@ class DummyDataFactory(object):
         self.group.name = f"dummygroup {next_id}"
         self.group.description = "Dummy group"
         self.group.upload_policy = "sex AND anyidnum"
-        self.group.finalize_policy = "sex AND idnum1"
+        self.group.finalize_policy = "sex AND idnum1001"
         self.dbsession.add(self.group)
         self.dbsession.commit()  # sets PK fields
 

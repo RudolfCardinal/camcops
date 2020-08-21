@@ -1,4 +1,4 @@
-# requirements_readthedocs.txt
+# server/requirements_readthedocs.txt
 #
 # Point readthedocs towards setup.py.
 # As per https://docs.readthedocs.io/en/latest/faq.html
@@ -16,4 +16,3 @@ server/
 # (3) Turn off "Install your project inside a virtualenv using setup.py
 #     install"; the requirements-based method supersedes that (by redirecting
 #     to setup.py directly).
-

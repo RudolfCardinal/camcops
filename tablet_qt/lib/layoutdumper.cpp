@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -29,6 +29,7 @@
 #include <QtWidgets/QLayout>
 #include <QtWidgets/QWidget>
 #include "lib/convert.h"
+#include "lib/sizehelpers.h"
 #include "lib/uifunc.h"
 
 namespace layoutdumper {
@@ -226,14 +227,20 @@ QString getWidgetInfo(const QWidget* w, const DumperConfig& config)
     }
     if (w->hasHeightForWidth() &&
             geom.height() < w->heightForWidth(geom.width())) {
-        elements.append("[WARNING: geometry().height() < "
-                        "heightForWidth(geometry().width())]");
+        const bool can_shrink_vertically =
+                sizehelpers::canHFWPolicyShrinkVertically(w->sizePolicy());
+        if (!can_shrink_vertically) {
+            elements.append(
+                "[WARNING: geometry().height() < "
+                "heightForWidth(geometry().width()) and policy doesn't allow "
+                "vertical shrinkage]");
+        }
     }
 
     // Bounds themselves consistent?
     if (w->sizeHint().width() != -1 && w->sizeHint().height() != -1) {
         if (w->sizeHint().width() < w->minimumSizeHint().width()) {
-            elements.append("[BUG? sizeHint().width() < "
+            elements.append("[WIDGET BUG? sizeHint().width() < "
                             "minimumSizeHint().width()]");
         }
         /*
@@ -249,7 +256,7 @@ QString getWidgetInfo(const QWidget* w, const DumperConfig& config)
         }
         */
         if (w->sizeHint().height() < w->minimumSizeHint().height()) {
-            elements.append("[BUG? (Not sure!) sizeHint().height() < "
+            elements.append("[WIDGET BUG? sizeHint().height() < "
                             "minimumSizeHint().height()]");
         }
         if (!w->hasHeightForWidth()) {

@@ -93,6 +93,10 @@ from camcops_server.cc_modules.cc_hl7 import (
     msg_is_successful_ack,
     SEGMENT_SEPARATOR,
 )
+from camcops_server.cc_modules.cc_redcap import (
+    RedcapExportException,
+    RedcapTaskExporter,
+)
 from camcops_server.cc_modules.cc_sqla_coltypes import (
     LongText,
     TableNameColType,
@@ -221,8 +225,7 @@ class ExportedTask(Base):
     recipient_id = Column(
         "recipient_id", BigInteger, ForeignKey(ExportRecipient.id),
         nullable=False,
-        comment="FK to {}.{}".format(ExportRecipient.__tablename__,
-                                     ExportRecipient.id.name)
+        comment=f"FK to {ExportRecipient.__tablename__}.{ExportRecipient.id.name}"  # noqa
     )
     basetable = Column(
         "basetable", TableNameColType, nullable=False, index=True,
@@ -407,6 +410,10 @@ class ExportedTask(Base):
             else:
                 self.abort("Task not valid for HL7 export")
 
+        elif transmission_method == ExportTransmissionMethod.REDCAP:
+            eredcap = ExportedTaskRedcap(self)
+            dbsession.add(eredcap)
+            eredcap.export_task(req)
         else:
             raise AssertionError("Bug: bad transmission_method")
 
@@ -487,7 +494,7 @@ class ExportedTask(Base):
 
 
 # =============================================================================
-# HL7Message class
+# HL7 export
 # =============================================================================
 
 class ExportedTaskHL7Message(Base):
@@ -503,8 +510,7 @@ class ExportedTaskHL7Message(Base):
     exported_task_id = Column(
         "exported_task_id", BigInteger, ForeignKey(ExportedTask.id),
         nullable=False,
-        comment="FK to {}.{}".format(ExportedTask.__tablename__,
-                                     ExportedTask.id.name)
+        comment=f"FK to {ExportedTask.__tablename__}.{ExportedTask.id.name}"
     )
     sent_at_utc = Column(
         "sent_at_utc", DateTime,
@@ -781,7 +787,7 @@ class ExportedTaskHL7Message(Base):
 
 
 # =============================================================================
-# FileExport class
+# File export
 # =============================================================================
 
 class ExportedTaskFileGroup(Base):
@@ -797,8 +803,7 @@ class ExportedTaskFileGroup(Base):
     exported_task_id = Column(
         "exported_task_id", BigInteger, ForeignKey(ExportedTask.id),
         nullable=False,
-        comment="FK to {}.{}".format(ExportedTask.__tablename__,
-                                     ExportedTask.id.name)
+        comment=f"FK to {ExportedTask.__tablename__}.{ExportedTask.id.name}"
     )
     filenames = Column(
         "filenames", StringListType,
@@ -1026,7 +1031,7 @@ class ExportedTaskFileGroup(Base):
 
 
 # =============================================================================
-# EmailExport class
+# E-mail export
 # =============================================================================
 
 class ExportedTaskEmail(Base):
@@ -1042,13 +1047,11 @@ class ExportedTaskEmail(Base):
     exported_task_id = Column(
         "exported_task_id", BigInteger, ForeignKey(ExportedTask.id),
         nullable=False,
-        comment="FK to {}.{}".format(ExportedTask.__tablename__,
-                                     ExportedTask.id.name)
+        comment=f"FK to {ExportedTask.__tablename__}.{ExportedTask.id.name}"
     )
     email_id = Column(
         "email_id", BigInteger, ForeignKey(Email.id),
-        comment="FK to {}.{}".format(Email.__tablename__,
-                                     Email.id.name)
+        comment=f"FK to {Email.__tablename__}.{Email.id.name}"
     )
 
     exported_task = relationship(ExportedTask)
@@ -1117,3 +1120,68 @@ class ExportedTaskEmail(Base):
             exported_task.succeed()
         else:
             exported_task.abort("Failed to send e-mail")
+
+
+# =============================================================================
+# REDCap export
+# =============================================================================
+
+class ExportedTaskRedcap(Base):
+    """
+    Represents an individual REDCap export.
+    """
+    __tablename__ = "_exported_task_redcap"
+
+    id = Column(
+        "id", Integer, primary_key=True, autoincrement=True,
+        comment="Arbitrary primary key"
+    )
+    exported_task_id = Column(
+        "exported_task_id", BigInteger, ForeignKey(ExportedTask.id),
+        nullable=False,
+        comment=f"FK to {ExportedTask.__tablename__}.{ExportedTask.id.name}"
+    )
+
+    exported_task = relationship(ExportedTask)
+
+    # We store these just as an audit trail
+    redcap_record_id = Column(
+        "redcap_record_id", UnicodeText,
+        comment=("ID of the (patient) record on the REDCap instance where "
+                 "this task has been exported")
+    )
+
+    redcap_instrument_name = Column(
+        "redcap_instrument_name", UnicodeText,
+        comment=("The name of the REDCap instrument name (form) where this "
+                 "task has been exported")
+    )
+
+    redcap_instance_id = Column(
+        "redcap_instance_id", Integer,
+        comment=("1-based index of this particular task within the patient "
+                 "record. Increments on every repeat attempt.")
+    )
+
+    def __init__(self, exported_task: ExportedTask = None) -> None:
+        """
+        Args:
+            exported_task: :class:`ExportedTask` object
+        """
+        self.exported_task = exported_task
+
+    def export_task(self, req: "CamcopsRequest") -> None:
+        """
+        Exports the task to REDCap.
+
+        Args:
+            req: a :class:`camcops_server.cc_modules.cc_request.CamcopsRequest`
+        """
+        exported_task = self.exported_task
+        exporter = RedcapTaskExporter()
+
+        try:
+            exporter.export_task(req, self)
+            exported_task.succeed()
+        except RedcapExportException as e:
+            exported_task.abort(str(e))

@@ -776,8 +776,6 @@ def change_other_password(req: "CamcopsRequest") -> Response:
             # Change the password
             # -----------------------------------------------------------------
             user_id = appstruct.get(ViewParam.USER_ID)
-            if user_id == req.user_id:
-                return change_own_password(req)
             must_change_pw = appstruct.get(ViewParam.MUST_CHANGE_PASSWORD)
             new_password = appstruct.get(ViewParam.NEW_PASSWORD)
             user = User.get_user_by_id(req.dbsession, user_id)
@@ -795,7 +793,7 @@ def change_other_password(req: "CamcopsRequest") -> Response:
         if user_id is None:
             raise HTTPBadRequest(f"{_('Improper user_id of')} {user_id!r}")
         if user_id == req.user_id:
-            return change_own_password(req)
+            raise HTTPFound(req.route_url(Routes.CHANGE_OWN_PASSWORD))
         user = User.get_user_by_id(req.dbsession, user_id)
         if user is None:
             raise HTTPBadRequest(f"{_('Missing user for id')} {user_id}")
@@ -3627,3 +3625,78 @@ class WebviewTests(DemoDatabaseTestCase):
         self.dbsession.flush()
 
         self.assertFalse(any_records_use_group(self.req, group))
+
+
+def debug_form_rendering() -> None:
+    r"""
+    Test code for form rendering.
+
+    From the command line:
+
+    .. code-block:: bash
+
+        # Start in the CamCOPS source root directory.
+        # - Needs the "-f" option to follow forks.
+        # - "open" doesn't show all files opened. To see what you need, try
+        #   strace cat /proc/version
+        # - ... which shows that "openat" is most useful.
+
+        strace -f --trace=openat \
+            python -c 'from camcops_server.cc_modules.webview import debug_form_rendering; debug_form_rendering()' \
+            | grep site-packages \
+            | grep -v "\.pyc"
+
+    This tells us that the templates are files like:
+    
+    .. code-block:: none
+    
+        site-packages/deform/templates/form.pt
+        site-packages/deform/templates/select.pt
+        site-packages/deform/templates/textinput.pt
+
+    On 2020-06-29 we are interested in why a newer (Docker) installation
+    renders buggy HTML like:
+    
+    .. code-block:: none
+
+        <select name="which_idnum" id="deformField2" class=" form-control " multiple="False">
+            <option value="1">CPFT RiO number</option>
+            <option value="2">NHS number</option>
+            <option value="1000">MyHospital number</option>
+        </select>
+
+    ... the bug being that ``multiple="False"`` is wrong; an HTML boolean
+    attribute is false when *absent*, not when set to a certain value (see
+    https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes#Boolean_Attributes).
+    The ``multiple`` attribute of ``<select>`` is a boolean attribute
+    (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select).
+
+    The ``select.pt`` file indicates that this is controlled by
+    ``tal:attributes`` syntax. TAL is Template Attribution Language
+    (https://sharptal.readthedocs.io/en/latest/tal.html).
+     
+    TAL is either provided by Zope (given ZPT files) or Chameleon or both. The
+    tracing suggests Chameleon. So the TAL language reference is
+    https://chameleon.readthedocs.io/en/latest/reference.html.
+    
+    Chameleon changelog is
+    https://github.com/malthe/chameleon/blob/master/CHANGES.rst.
+    
+    Multiple sources for ``tal:attributes`` syntax say that a null value
+    (presumably: ``None``) is required to omit the attribute, not a false
+    value.
+
+    """  # noqa
+
+    import sys
+
+    from camcops_server.cc_modules.cc_debug import makefunc_trace_unique_calls
+    from camcops_server.cc_modules.cc_forms import ChooseTrackerForm
+    from camcops_server.cc_modules.cc_request import get_core_debugging_request
+
+    req = get_core_debugging_request()
+    form = ChooseTrackerForm(req, as_ctv=False)
+
+    sys.settrace(makefunc_trace_unique_calls(file_only=True))
+    _ = form.render()
+    sys.settrace(None)

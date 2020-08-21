@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -27,6 +27,7 @@
 #include <QResizeEvent>
 #include "common/colourdefs.h"
 #include "common/gui_defines.h"
+#include "graphics/graphicsfunc.h"
 #include "lib/sizehelpers.h"
 
 
@@ -148,26 +149,5 @@ void AspectRatioPixmap::paintEvent(QPaintEvent* event)
 
     QPainter painter(this);
     const QRect cr = contentsRect();
-    if (cr.size() != m_pixmap.size()) {
-        // Scale
-        QSize displaysize = m_pixmap.size();
-        displaysize.scale(cr.size(), Qt::KeepAspectRatio);
-        const QRect dest_active_rect = QRect(cr.topLeft(), displaysize);
-        const QRect source_all_image(QPoint(0, 0), m_pixmap.size());
-#ifdef DEBUG_LAYOUT
-        qDebug().nospace()
-                << Q_FUNC_INFO
-                << " - Asked to draw to contentsRect() of size " << cr.size()
-                << "; drawing to size " << displaysize;
-#endif
-        painter.drawPixmap(dest_active_rect, m_pixmap, source_all_image);
-
-        // Optimizations are possible: we don't have to draw all of it...
-        // http://blog.qt.io/blog/2006/05/13/fast-transformed-pixmapimage-drawing/
-        // ... but I haven't implemented those optimizations.
-        // See also CanvasWidget.
-    } else {
-        // No need to scale
-        painter.drawPixmap(cr.left(), cr.top(), m_pixmap);
-    }
+    graphicsfunc::paintPixmapKeepingAspectRatio(painter, m_pixmap, cr, event);
 }

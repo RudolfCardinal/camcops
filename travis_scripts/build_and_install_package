@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -e
+
+echo installing pip packages
+pip install -e server/.
+
+echo building packages
+server/tools/MAKE_LINUX_PACKAGES.py
+
+echo installing debian package
+server/tools/REINSTALL_DEBIAN_PACKAGE.sh
+
+echo checking packages for conflicts
+/usr/share/camcops/venv/bin/pip check

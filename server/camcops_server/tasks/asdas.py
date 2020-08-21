@@ -112,19 +112,19 @@ class Asdas(TaskHasPatientMixin,
             SummaryElement(
                 name="asdas_crp", coltype=Float(),
                 value=self.asdas_crp(),
-                comment=f"ASDAS-CRP"),
+                comment="ASDAS-CRP"),
             SummaryElement(
                 name="activity_state_crp", coltype=SummaryCategoryColType,
                 value=self.activity_state(req, self.asdas_crp()),
-                comment=f"Activity state (CRP)"),
+                comment="Activity state (CRP)"),
             SummaryElement(
                 name="asdas_esr", coltype=Float(),
                 value=self.asdas_esr(),
-                comment=f"ASDAS-ESR"),
+                comment="ASDAS-ESR"),
             SummaryElement(
                 name="activity_state_esr", coltype=SummaryCategoryColType,
                 value=self.activity_state(req, self.asdas_esr()),
-                comment=f"Activity state (ESR)"),
+                comment="Activity state (ESR)"),
         ]
 
     def is_complete(self) -> bool:

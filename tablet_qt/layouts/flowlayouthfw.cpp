@@ -49,6 +49,9 @@
 ===========================================================================*/
 
 // #define DEBUG_LAYOUT
+// #define DEBUG_LAYOUT_VERBOSE
+
+#define USE_WIDGETITEMHFW
 
 #include "flowlayouthfw.h"
 #include <QDebug>
@@ -63,9 +66,15 @@
     #pragma GCC diagnostic pop
 #endif
 
+#include "layouts/qtlayouthelpers.h"
+#include "layouts/widgetitemhfw.h"
 #include "lib/layoutdumper.h"
 #include "lib/margins.h"
 
+
+// ============================================================================
+// FlowLayoutHfw
+// ============================================================================
 
 FlowLayoutHfw::FlowLayoutHfw(QWidget* parent, const int margin,
                              const int h_spacing, const int v_spacing) :
@@ -103,12 +112,12 @@ FlowLayoutHfw::~FlowLayoutHfw()
     //   parent widget owns the child widgets.
     QLayoutItem* item;
     while ((item = takeAt(0))) {
-#ifdef DEBUG_LAYOUT
+#ifdef DEBUG_LAYOUT_VERBOSE
         qDebug().noquote() << "delete QLayoutItem"
                            << layoutdumper::toString(item);
 #endif
         delete item;
-#ifdef DEBUG_LAYOUT
+#ifdef DEBUG_LAYOUT_VERBOSE
         qDebug() << "... deleted";
 #endif
     }
@@ -117,7 +126,18 @@ FlowLayoutHfw::~FlowLayoutHfw()
 
 void FlowLayoutHfw::addWidget(QWidget* w)
 {
+    // QLayout::addWidget() does this:
+    //      addChildWidget(w);
+    //      addItem(QLayoutPrivate::createWidgetItem(this, w));
+    // Instead of adding a QWidgetItem, we will add our custom version,
+    // qtlayouthelpers::WidgetItemHfw().
+
+#ifdef USE_WIDGETITEMHFW
+    addChildWidget(w);
+    addItem(new WidgetItemHfw(w));
+#else
     QLayout::addWidget(w);
+#endif
 }
 
 
@@ -199,12 +219,14 @@ bool FlowLayoutHfw::hasHeightForWidth() const
 int FlowLayoutHfw::heightForWidth(const int width) const
 {
     if (!m_width_to_height.contains(width)) {
+        // Not in cache; calculate and cache it
 #ifdef DEBUG_LAYOUT
         qDebug() << Q_FUNC_INFO << "- CALCULATING";
 #endif
-        QSize size = doLayout(QRect(0, 0, width, 0), true);
+        const QSize size = doLayout(QRect(0, 0, width, 0), true);
         m_width_to_height[width] = size.height();
     } else {
+        // In the cache already
 #ifdef DEBUG_LAYOUT
         qDebug() << Q_FUNC_INFO << "- using cached";
 #endif
@@ -230,12 +252,12 @@ QSize FlowLayoutHfw::sizeHint() const
 {
     // Hint is based on an area as wide as we could possibly want.
     if (!m_size_hint.isValid()) {
-#ifdef DEBUG_LAYOUT
+#ifdef DEBUG_LAYOUT_VERBOSE
         qDebug() << Q_FUNC_INFO << "- CALCULATING";
 #endif
         m_size_hint = doLayout(QRect(0, 0, QWIDGETSIZE_MAX, 0), true);
     } else {
-#ifdef DEBUG_LAYOUT
+#ifdef DEBUG_LAYOUT_VERBOSE
         qDebug() << Q_FUNC_INFO << "- using cached";
 #endif
     }
@@ -266,9 +288,9 @@ QSize FlowLayoutHfw::minimumSize() const
     qDebug() << Q_FUNC_INFO;
 #endif
     foreach (item, m_item_list) {
-        QSize item_minimum_size = item->minimumSize();
+        const QSize item_minimum_size = item->minimumSize();
         size = size.expandedTo(item_minimum_size);
-#ifdef DEBUG_LAYOUT
+#ifdef DEBUG_LAYOUT_VERBOSE
         qDebug().nospace() << "... item minimum " << item_minimum_size
                            << "; size now " << size;
 #endif
@@ -287,35 +309,40 @@ QSize FlowLayoutHfw::doLayout(const QRect& rect, const bool test_only) const
 {
     // RNC: substantial modifications including vertical alignment
 
-    Margins contents_margins = Margins::getContentsMargins(this);
-    QRect effective_rect = contents_margins.removeMarginsFrom(rect);
-    const int layout_width = effective_rect.width();
+    const Margins contents_margins = Margins::getContentsMargins(this);  // dead zone
+    const QRect effective_rect = contents_margins.removeMarginsFrom(rect);  // active rectangle
+    const int layout_width = effective_rect.width();  // width within which to work
 #ifdef DEBUG_LAYOUT
     qDebug() << Q_FUNC_INFO;
     qDebug() << "... test_only =" << test_only;
+    qDebug() << "... effective_rect =" << effective_rect;
     qDebug() << "... layout_width =" << layout_width;
+    qDebug() << "... horizontalSpacing() =" << horizontalSpacing();
+    qDebug() << "... verticalSpacing() =" << verticalSpacing();
 #endif
-    int x = effective_rect.x();
-    int max_x = x;
-    int y = effective_rect.y();
 
-    int row = 0;
-    int preceding_space_x = 0;
-    QVector<int> line_heights{0};
-    QVector<int> row_total_widths{0};
-    QVector<ItemCalc> itemcalcs;
+    int x = effective_rect.x();  // Working x coordinate
+    int max_row_width = 0;  // Maximum width of any row
+    int y = effective_rect.y();  // Working y coordinate
+    int row = 0;  // Current row
+    int preceding_space_x = 0;  // The space to the left of the widget we're inserting
+    QVector<int> line_heights{0};  // Heights of each row (line); last is the current row
+    QVector<int> row_total_widths{0};  // Total widths of each row (line); last is the current row
+    QVector<ItemCalc> itemcalcs;  // Calculation objects, one for each widget
 
     for (auto item : m_item_list) {
         ItemCalc calc;
         calc.item = item;
         QWidget* widget = calc.widget = item->widget();
 
-        int space_x = horizontalSpacing();
+        int space_x = horizontalSpacing();  // horizontal gap between items in each row
+        // ... specifically the space to the right of the widget we're inserting
         if (space_x == -1) {
             space_x = widget->style()->layoutSpacing(
                 QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Horizontal);
         }
-        int space_y = verticalSpacing();
+        int space_y = verticalSpacing();  // vertical gap between rows
+        // ... specifically, the space below the current row
         if (space_y == -1) {
             space_y = widget->style()->layoutSpacing(
                 QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Vertical);
@@ -324,13 +351,13 @@ QSize FlowLayoutHfw::doLayout(const QRect& rect, const bool test_only) const
         // RNC: modified here to handle height-for-width items, and deal with
         // a layout width smaller than the widget's preferred (but bigger than
         // their minimum).
-        int available_width = effective_rect.right() - x + 1;
+        const int available_width = effective_rect.right() - x + 1;
         // http://doc.qt.io/qt-5/qrect.html#details
 
-        QSize item_size_hint = item->sizeHint();
+        const QSize item_size_hint = item->sizeHint();
         int item_width = item_size_hint.width();  // item's preferred width
 
-#ifdef DEBUG_LAYOUT
+#ifdef DEBUG_LAYOUT_VERBOSE
         qDebug().nospace() << "... y=" << y
                            << ", x=" << x
                            << ", available_width " << available_width
@@ -339,7 +366,7 @@ QSize FlowLayoutHfw::doLayout(const QRect& rect, const bool test_only) const
 
         bool start_new_line = false;
         if (available_width < item_width) {
-            int relative_x = x - effective_rect.x();
+            const int relative_x = x - effective_rect.x();  // distance to the right of left edge
             if (relative_x > 0) {
                 start_new_line = true;
                 item_width = qMin(item_width, layout_width);
@@ -349,7 +376,7 @@ QSize FlowLayoutHfw::doLayout(const QRect& rect, const bool test_only) const
                 item_width = available_width;
                 // Should be at least item->minimumSize().width(), by the
                 // bottom-up (widget -> parent) constraints.
-#ifdef DEBUG_LAYOUT
+#ifdef DEBUG_LAYOUT_VERBOSE
                 qDebug() << "... alter item_width to" << item_width;
 #endif
             }
@@ -359,73 +386,81 @@ QSize FlowLayoutHfw::doLayout(const QRect& rect, const bool test_only) const
             // Overflowing to the right; start a new line.
             // Original Qt version also had "&& line_height > 0"; not sure
             // that helps.
-            x = effective_rect.x();
-            y = y + line_heights.back() + space_y;
+            x = effective_rect.x();  // all the way left again
+            y = y + line_heights.back() + space_y;  // and a bit further down
             preceding_space_x = 0;
             line_heights.push_back(0);
             row_total_widths.push_back(0);
             ++row;
-#ifdef DEBUG_LAYOUT
+#ifdef DEBUG_LAYOUT_VERBOSE
             qDebug().nospace() << "... start new line; item_width now "
                                << item_width << "; y now " << y;
 #endif
         }
 
-        int item_height = item->hasHeightForWidth()
+        const int item_height = item->hasHeightForWidth()
                 ? item->heightForWidth(item_width)
                 : item_size_hint.height();
-        max_x = qMax(max_x, x + item_width);
         calc.item_size = QSize(item_width, item_height);
         calc.layout_row = row;
         calc.layout_cell_top_left = QPoint(x, y);
-#ifdef DEBUG_LAYOUT
+
+        const int next_x = x + item_width + space_x;  // x coord for next item, if it fits on this row
+        x = next_x;
+        row_total_widths.back() += preceding_space_x + item_width;
+        max_row_width = qMax(max_row_width, row_total_widths.back());
+        preceding_space_x = space_x;
+        line_heights.back() = qMax(line_heights.back(), item_height);
+
+        itemcalcs.append(calc);
+
+#ifdef DEBUG_LAYOUT_VERBOSE
         qDebug() << "... inserting layout item with widget"
                  << layoutdumper::getWidgetDescriptor(widget)
                  << "in row" << row
                  << "in cell at" << calc.layout_cell_top_left
                  << "with size" << calc.item_size;
 #endif
-
-        int next_x = x + item_width + space_x;
-        x = next_x;
-        row_total_widths.back() += preceding_space_x + item_width;
-        preceding_space_x = space_x;
-        line_heights.back() = qMax(line_heights.back(), item_height);
-
-        itemcalcs.append(calc);
     }
 
     // Now apply any vertical alignments of widgets within their row,
     // or horizontal alignments of the whole row, and set the actual widget
     // position
     if (!test_only) {
-        int nrows = row + 1;  // row is zero-based
+        const int nrows = row + 1;  // row is zero-based
         // Collect offsets for each row
-        QVector<int> row_horiz_offsets(nrows);
+        QVector<int> row_horiz_offsets(nrows);  // amounts to shift each row right
         for (int r = 0; r < nrows; ++r) {
             row_horiz_offsets[r] = rowShiftToRight(layout_width,
                                                    row_total_widths.at(r));
         }
         // Apply alignment adjustments
         for (auto calc : itemcalcs) {
-            int row_height = line_heights.at(calc.layout_row);
+            const int row_height = line_heights.at(calc.layout_row);
             QPoint item_at = calc.layout_cell_top_left;
             item_at.rx() += row_horiz_offsets.at(calc.layout_row);
             item_at.ry() = itemTop(item_at.y(), calc.item_size.height(),
                                    row_height, calc.item->alignment());
             QRect geometry(item_at, calc.item_size);
 #ifdef DEBUG_LAYOUT
-            qDebug() << "... Final widget position for"
-                     << layoutdumper::getWidgetDescriptor(calc.widget)
-                     << "=" << geometry;
+            qDebug().nospace()
+                    << "... Final widget position for "
+                    << layoutdumper::getWidgetDescriptor(calc.widget)
+                    << " = " << geometry
+                    //<< " (but may be constrained by "
+                    //   "QLayoutItem::maximumSize(), which is "
+                    //<< calc.item->maximumSize()
+                    ;
 #endif
             calc.item->setGeometry(geometry);
+            // See qtlayouthelpers::WidgetItemHfw::setGeometry() for discussion.
         }
     }
 
-    int final_width = max_x - rect.x();
-    int final_height = y + line_heights.back() - rect.y() + contents_margins.bottom();
-    QSize final_size(final_width, final_height);
+    const int final_height = y + line_heights.back() - rect.y() +
+            contents_margins.bottom();
+    const int final_width = max_row_width + contents_margins.totalWidth();
+    const QSize final_size(final_width, final_height);
 #ifdef DEBUG_LAYOUT
     qDebug() << "... LAYOUT COMPLETE; final size" << final_size;
 #endif
@@ -459,6 +494,7 @@ int FlowLayoutHfw::itemTop(const int row_top,
     if (valignment & Qt::AlignBottom) {
         return row_top + (row_height - item_height);
     }
+    // Top align:
     return row_top;
 }
 
@@ -472,5 +508,6 @@ int FlowLayoutHfw::rowShiftToRight(const int layout_width,
     if (m_halign & Qt::AlignRight) {
         return layout_width - width_of_all_items;
     }
+    // Left align:
     return 0;
 }

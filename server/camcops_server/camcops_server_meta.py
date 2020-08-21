@@ -48,6 +48,12 @@ log = BraceStyleAdapter(logging.getLogger(__name__))
 THIS_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 PROJECT_BASE_DIRECTORY = os.path.abspath(os.path.join(THIS_DIRECTORY,
                                                       os.pardir))
+PYTHON_EXECUTABLE = sys.executable
+
+if "GENERATING_CAMCOPS_DOCS" in os.environ:
+    PROJECT_BASE_DIRECTORY = "/path/to/camcops/server"
+    PYTHON_EXECUTABLE = "/path/to/python"
+
 DEFAULT_CAMCOPS = os.path.join(PROJECT_BASE_DIRECTORY, 'camcops_server.py')
 
 
@@ -68,8 +74,8 @@ def meta_main() -> None:
         '--ccargs', nargs='*',
         help="List of CamCOPS arguments, to which '--' will be prefixed")
     parser.add_argument(
-        '--python', default=sys.executable,
-        help=f"Python interpreter (default: {sys.executable})")
+        '--python', default=PYTHON_EXECUTABLE,
+        help=f"Python interpreter (default: {PYTHON_EXECUTABLE})")
     parser.add_argument(
         '--camcops', default=DEFAULT_CAMCOPS,
         help=f"CamCOPS server executable (default: {DEFAULT_CAMCOPS})")

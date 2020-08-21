@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -47,12 +47,19 @@ struct DqrlsResult {
 
 
 // Solves XB = Y, for B.
+//
+// Provides the C++ equivalent of the Fortran dqrls code.
+// Calculates a least-squares solution to this matrix equation.
+//
 // - X has size (n, p)
 // - Y has size (n, ny)
 // - n: number of observations
 // - p: number of predictors
 // - ny: number of dependent variables
+//
 // - B will have size (p, ny).
+//
+// Returns a DqrlsResult object in which B is called "coefficients".
 DqrlsResult Cdqrls(const Eigen::MatrixXd& x,  // size (n, p)
                    const Eigen::MatrixXd& y,  // size (n, ny)
                    double tol,  // tolerance

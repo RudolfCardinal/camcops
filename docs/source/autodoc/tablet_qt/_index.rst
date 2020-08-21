@@ -199,6 +199,8 @@ tablet_qt
     layouts/qtlayouthelpers.h.rst
     layouts/vboxlayouthfw.cpp.rst
     layouts/vboxlayouthfw.h.rst
+    layouts/widgetitemhfw.cpp.rst
+    layouts/widgetitemhfw.h.rst
     lib/cloneable.h.rst
     lib/comparers.cpp.rst
     lib/comparers.h.rst
@@ -366,6 +368,8 @@ tablet_qt
     menulib/taskmenuitem.h.rst
     menulib/urlmenuitem.cpp.rst
     menulib/urlmenuitem.h.rst
+    qcustomplot/qcustomplot.cpp.rst
+    qcustomplot/qcustomplot.h.rst
     qobjects/cameraframegrabber.cpp.rst
     qobjects/cameraframegrabber.h.rst
     qobjects/debugeventwatcher.cpp.rst
@@ -510,6 +514,8 @@ tablet_qt
     questionnairelib/quthermometeritem.h.rst
     questionnairelib/quverticalcontainer.cpp.rst
     questionnairelib/quverticalcontainer.h.rst
+    questionnairelib/quzoomcontainer.cpp.rst
+    questionnairelib/quzoomcontainer.h.rst
     resources/camcops/camera_qml/CameraButton.qml.rst
     resources/camcops/camera_qml/CameraListButton.qml.rst
     resources/camcops/camera_qml/CameraListPopup.qml.rst
@@ -885,6 +891,10 @@ tablet_qt
     widgets/diagnosticcodeselector.h.rst
     widgets/fixedareahfwtestwidget.cpp.rst
     widgets/fixedareahfwtestwidget.h.rst
+    widgets/fixedaspectratiohfwtestwidget.cpp.rst
+    widgets/fixedaspectratiohfwtestwidget.h.rst
+    widgets/fixednumblockshfwtestwidget.cpp.rst
+    widgets/fixednumblockshfwtestwidget.h.rst
     widgets/graphicsrectitemclickable.cpp.rst
     widgets/graphicsrectitemclickable.h.rst
     widgets/growingplaintextedit.cpp.rst

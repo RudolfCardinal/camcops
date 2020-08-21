@@ -28,9 +28,9 @@ General:
   --show_config_only    Show config, then quit (default: False)
   --root_dir ROOT_DIR   Root directory for source and builds (default taken
                         from environment variable CAMCOPS_QT_BASE_DIR if
-                        present) (default: /home/rudolf/dev/qt_local_build)
+                        present) (default: /path/to/user/dev/qt_local_build)
   --nparallel NPARALLEL
-                        Number of parallel processes to run (default: 4)
+                        Number of parallel processes to run (default: 8)
   --force               Force build (default: False)
   --tee TEE             Copy stdout/stderr to this named file (default: None)
   --verbose {0,1,2}, -v {0,1,2}
@@ -102,10 +102,10 @@ Android:
 
   --android_sdk_root ANDROID_SDK_ROOT
                         Android SDK root directory (default:
-                        /home/rudolf/dev/android-sdk-linux)
+                        /path/to/user/dev/android-sdk-linux)
   --android_ndk_root ANDROID_NDK_ROOT
                         Android NDK root directory (default:
-                        /home/rudolf/dev/android-ndk-r20)
+                        /path/to/user/dev/android-ndk-r20)
   --android_ndk_host ANDROID_NDK_HOST
                         Android NDK host architecture (default: linux-x86_64)
   --android_toolchain_version ANDROID_TOOLCHAIN_VERSION

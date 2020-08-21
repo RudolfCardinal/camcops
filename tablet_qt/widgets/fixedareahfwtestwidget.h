@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -29,20 +29,23 @@ class FixedAreaHfwTestWidget : public QWidget
 
     Q_OBJECT
 public:
-    FixedAreaHfwTestWidget(int area = 50000,
+    FixedAreaHfwTestWidget(int area = 500 * 100,
                            int preferred_width = 1000,
-                           const QColor& background_colour = QColor(0, 0, 255),
+                           const QSize& min_size = QSize(10, 10),
+                           const QColor& background_colour = QColor(0, 0, 100),
                            int border_thickness = 0,
                            const QColor& border_colour = QColor(255, 0, 0),
-                           const QColor& text_colour = QColor(255, 0, 255),
+                           const QColor& text_colour = QColor(255, 255, 255),
                            QWidget* parent = nullptr);
     virtual QSize sizeHint() const override;
+    virtual QSize minimumSizeHint() const override;
     virtual bool hasHeightForWidth() const override;
     virtual int heightForWidth(int width) const override;
     virtual void paintEvent(QPaintEvent* event) override;
 protected:
     int m_area;
     int m_preferred_width;
+    QSize m_min_size;
     QColor m_background_colour;
     int m_border_thickness;
     QColor m_border_colour;

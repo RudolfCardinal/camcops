@@ -11,7 +11,7 @@ Operations:
         Extract messages from code that looks like, for example,
             _("please translate me"),
         in Python and Mako files. Write it to this .pot file:
-            /home/rudolf/Documents/code/camcops/server/camcops_server/translations/camcops_translations.pot
+            /path/to/camcops/server/translations/camcops_translations.pot
         
     init_missing
         For any locales that do not have a .po file, create one.

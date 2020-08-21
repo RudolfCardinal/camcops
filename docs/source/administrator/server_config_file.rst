@@ -100,6 +100,14 @@ Format of the configuration file
     for "no date/time".
 
 
+Note regarding Docker
+---------------------
+
+If you are using CamCOPS with Docker, see :ref:`The CamCOPS configuration file
+for Docker <camcops_config_file_docker>` as there are a few special
+requirements. Relevant sections are also marked below.
+
+
 Config file sections
 --------------------
 
@@ -164,6 +172,8 @@ http://docs.sqlalchemy.org/en/latest/core/engines.html. Examples:
 For our notes on database drivers for a different software package, see
 https://crateanon.readthedocs.io/en/latest/installation/database_drivers.html.
 
+.. include:: include_docker_config.rst
+
 
 DB_ECHO
 #######
@@ -213,7 +223,7 @@ LOCAL_INSTITUTION_URL
 *String.*
 
 Clicking on your institution's logo in the CamCOPS menu will take you to this
-URL. Edit this to point to your institution:
+URL. Edit this to point to your institution.
 
 
 LOCAL_LOGO_FILE_ABSOLUTE
@@ -225,7 +235,14 @@ Specify the full path to your institution's logo file, e.g.
 ``/var/www/logo_local_myinstitution.png``. It's used for PDF generation; HTML
 views use the fixed string ``static/logo_local.png``, aliased to your file via
 the Apache configuration file). Edit this setting to point to your local
-institution's logo file:
+institution's logo file.
+
+.. include:: include_docker_config.rst
+
+Your logo will be scaled to 45% of the active page width. You may need to add
+blank space to the left if it looks funny. See picture below.
+
+.. image:: images/scaling_logos.png
 
 
 CAMCOPS_LOGO_FILE_ABSOLUTE
@@ -235,6 +252,8 @@ CAMCOPS_LOGO_FILE_ABSOLUTE
 
 As for ``LOCAL_LOGO_FILE_ABSOLUTE``, but for the CamCOPS logo. It's fine not to
 specify this; a default will be used.
+
+.. include:: include_docker_config.rst
 
 
 .. _EXTRA_STRING_FILES:
@@ -248,6 +267,8 @@ A multiline list of filenames (with absolute paths), read by the server, and
 used as EXTRA STRING FILES. Should **as a minimum** point to the string file
 ``camcops.xml``. May use "glob" pattern-matching (see
 https://docs.python.org/3.5/library/glob.html).
+
+.. include:: include_docker_config.rst
 
 
 .. _RESTRICTED_TASKS:
@@ -309,6 +330,8 @@ Filename of special XML file containing SNOMED CT codes used by CamCOPS tasks.
 This file is OK to use in the UK, but not necessarily elsewhere. See
 :ref:`SNOMED CT <snomed>`.
 
+.. include:: include_docker_config.rst
+
 
 SNOMED_ICD9_XML_FILENAME
 ########################
@@ -320,6 +343,8 @@ Name of XML file mapping ICD-9-CM codes to SNOMED-CT.
 Created by ``camcops_server convert_athena_icd_snomed_to_xml``; see
 :ref:`SNOMED CT <snomed>`.
 
+.. include:: include_docker_config.rst
+
 
 SNOMED_ICD10_XML_FILENAME
 #########################
@@ -330,6 +355,8 @@ Name of XML file mapping ICD-10[-CM] codes to SNOMED-CT.
 
 Created by ``camcops_server convert_athena_icd_snomed_to_xml``; see
 :ref:`SNOMED CT <snomed>`.
+
+.. include:: include_docker_config.rst
 
 
 WKHTMLTOPDF_FILENAME
@@ -622,7 +649,13 @@ PERMIT_IMMEDIATE_DOWNLOADS
 *Boolean.* Default: false.
 
 Should the system allow users to use the front end web service to create and
-download files? This might be convenient, but the disadvantage is that
+download files? This might be convenient, but a disadvantage is that if the
+file to be downloaded is large, it will take a long time. Also if you close
+your web browser or lose your internet connection, the download will be lost.
+A further disadvantage is that it "ties up" one web front end process in
+creating the download (whereas creating file for later download, as below,
+uses a pool of back-end worker processes and does not; this may have some
+performance implications for your web site).
 
 
 .. _USER_DOWNLOAD_DIR:
@@ -731,6 +764,8 @@ Note some variations. For example, if your machine has an IP (v4) address of
 - Using ``localhost`` will trigger a lookup from ``localhost`` to an IP
   address, typically ``127.0.0.1``.
 
+.. include:: include_docker_config.rst
+
 
 .. _PORT:
 
@@ -740,6 +775,8 @@ PORT
 *Integer.* Default: 8000.
 
 TCP_ port number to listen on. (See also UNIX_DOMAIN_SOCKET_.)
+
+.. include:: include_docker_config.rst
 
 
 .. _UNIX_DOMAIN_SOCKET:
@@ -774,6 +811,8 @@ Standard <https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html>`_).
         The setuid bit: an indication that this is not a normal file!
 
 
+.. _SSL_CERTIFICATE:
+
 SSL_CERTIFICATE
 ###############
 
@@ -788,6 +827,8 @@ If you host CamCOPS behind Apache, it's likely that you'll want Apache to
 handle HTTPS and CamCOPS to operate unencrypted behind a reverse proxy, in
 which case don't set this or SSL_PRIVATE_KEY_.
 
+.. include:: include_docker_config.rst
+
 
 .. _SSL_PRIVATE_KEY:
 
@@ -800,6 +841,8 @@ SSL private key file for HTTPS_ (e.g.
 ``/etc/ssl/private/ssl-cert-snakeoil.key``).
 
 (Not applicable to the Pyramid test web server; CherryPy/Gunicorn only.)
+
+.. include:: include_docker_config.rst
 
 
 WSGI options
@@ -934,7 +977,7 @@ PROXY_SCRIPT_NAME
 
 Path at which this script is mounted. Set this if you are hosting this CamCOPS
 instance at a non-root path, unless you set trusted WSGI headers instead.
-            
+
 For example, if you are running an Apache server and want this instance of
 CamCOPS to appear at ``/somewhere/camcops``, then (a) configure your Apache
 instance to proxy requests to ``/somewhere/camcops/...`` to this server (e.g.
@@ -944,7 +987,7 @@ If this option is not set, then the OS environment variable ``SCRIPT_NAME``
 will be checked as well. If that is not set, the variables within
 ``HTTP_X_SCRIPT_NAME, HTTP_X_FORWARDED_SCRIPT_NAME`` will be used, if they are
 trusted.
-            
+
 This option affects the WSGI variables ``SCRIPT_NAME`` and ``PATH_INFO``.
 
 |use_trusted_headers|
@@ -1119,6 +1162,8 @@ DEBUG_SHOW_GUNICORN_OPTIONS
 Debugging option: show possible Gunicorn settings.
 
 
+.. _export_options:
+
 Options for the "[export]" section
 ----------------------------------
 
@@ -1173,6 +1218,8 @@ command used by ``camcops_server launch_scheduler``, after ``celery worker
 --app camcops_server --loglevel <LOGLEVEL>``.
 
 
+.. _CELERY_BROKER_URL:
+
 CELERY_BROKER_URL
 #################
 
@@ -1181,6 +1228,15 @@ CELERY_BROKER_URL
 Broker URL for Celery. See
 http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-broker-settings.
 
+Once you have enabled security in your broker, such as RabbitMQ, you will need
+to set this to a more secure URL (e.g. with username/password authentication).
+
+For RabbitMQ URLs, see e.g. https://www.rabbitmq.com/uri-spec.html.
+
+.. include:: include_docker_config.rst
+
+
+.. _CELERY_WORKER_EXTRA_ARGS:
 
 CELERY_WORKER_EXTRA_ARGS
 ########################
@@ -1190,6 +1246,49 @@ CELERY_WORKER_EXTRA_ARGS
 Each line of this multiline string is an extra option to the ``celery worker``
 command used by ``camcops_server launch_workers``, after ``celery worker --app
 camcops_server --loglevel <LOGLEVEL>``.
+
+Use ``celery worker --help`` to inspect the possible options. However, do not
+use the following options at any time (because CamCOPS does; see
+:func:`camcops_server.camcops_server_core.launch_celery_workers`):
+
+- ``--app``
+- ``-O`` (optimization)
+- ``--soft-time-limit``
+- ``--loglevel``
+
+and do not use these under Windows:
+
+- ``--concurrency``
+- ``--pool``
+
+An example to limit to a single worker (under Linux):
+
+.. code-block:: ini
+
+    CELERY_WORKER_EXTRA_ARGS =
+        --concurrency=1
+
+An example to prevent the :ref:`Celery-related memory leak
+<celery_memory_leak>`:
+
+.. code-block:: ini
+
+    CELERY_WORKER_EXTRA_ARGS =
+        --maxtasksperchild=20
+
+
+CELERY_EXPORT_TASK_RATE_LIMIT
+#############################
+
+*String.* Default: ``100/m``
+
+The per worker instance rate limit for exporting CamCOPS tasks.
+Integer or float values are interpreted as exports per second.
+
+The rate limits can be specified in seconds, minutes or hours by appending “/s”,
+“/m” or “/h” to the value.
+
+See https://docs.celeryproject.org/en/stable/userguide/tasks.html#Task.rate_limit
 
 
 .. _EXPORT_LOCKDIR:
@@ -1328,10 +1427,11 @@ TRANSMISSION_METHOD
 
 One of the following methods:
 
-- ``db``: Exports tasks to a relationship database.
+- ``db``: Exports tasks to a relational database.
 - ``email``: Sends tasks via e-mail.
 - ``hl7``: Sends HL7 messages across a TCP/IP network.
 - ``file``: Writes files to a local filesystem.
+- ``redcap``: :ref:`Exports tasks to REDCap <redcap>`.
 
 
 PUSH
@@ -1373,7 +1473,7 @@ One of the following:
 - ``html``
 - ``xml``
 
-Not relevant for database exports (see TRANSMISSION_METHOD_).
+Not relevant for REDCap or database exports (see TRANSMISSION_METHOD_).
 
 
 XML_FIELD_COMMENTS
@@ -1483,6 +1583,8 @@ Include anonymous tasks?
 - Note that anonymous tasks cannot be sent via HL7; the HL7 specification is
   heavily tied to identification.
 
+- Note that anonymous tasks cannot be sent via REDCap.
+
 - Note also that this setting operates independently of the
   REQUIRE_PRIMARY_IDNUM_MANDATORY_IN_POLICY_ setting.
 
@@ -1528,6 +1630,8 @@ Options applicable to database export only
 
 At present, only full (not incremental) database export is supported.
 
+
+.. _EXPORT_DB_URL:
 
 DB_URL
 ######
@@ -1935,14 +2039,62 @@ Correspondence", but the code will be defined within the local RiO system
 configuration.
 
 
+.. _redcap_config_options:
+
+Extra options for export to REDCap
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+See :ref:`REDCap export <redcap>`.
+
+
+.. _REDCAP_API_URL:
+
+REDCAP_API_URL
+##############
+
+*String.*
+
+URL of the API on the redcap instance, such as
+``https://domain.of.redcap.server/api/``.
+
+
+.. _REDCAP_API_KEY:
+
+REDCAP_API_KEY
+##############
+
+*String.*
+
+API key, as provided by the REDCap instance, for a user who has permissions to
+import and export data to and from REDCap.
+
+In REDCap, open your project, and click "API" to see this key.
+
+
+.. _REDCAP_FIELDMAP_FILENAME:
+
+REDCAP_FIELDMAP_FILENAME
+########################
+
+*String.*
+
+Name of the REDCap XML fieldmap file for CamCOPS.
+See :ref:`REDCap export <redcap>`.
+
+
 Demonstration config file
 -------------------------
 
-Here’s a specimen configuration file, generated via the command
+Below is a specimen configuration file, generated via the command
 
 .. code-block:: bash
 
     camcops_server demo_camcops_config > demo_camcops_config.ini
+
+Note that if you are using Docker, then the command
+:ref:`print_demo_camcops_config <docker_print_demo_camcops_config>` will give
+you a config file with appropriate defaults for the Docker environment
+(slightly different from what follows).
 
 ..  literalinclude:: demo_camcops_config.ini
     :language: ini

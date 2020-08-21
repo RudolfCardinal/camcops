@@ -35,8 +35,11 @@
 
 .. _server_configuration:
 
-Configuring the server
-======================
+(MANUAL) Configuring the server
+===============================
+
+.. include:: include_this_is_manual_see_docker.rst
+
 
 The majority of CamCOPS configuration takes place via the :ref:`server
 configuration file <server_config_file>`. Here, we deal with everything else.
@@ -348,6 +351,51 @@ work under Linux, use Gunicorn, with the `serve_gunicorn` command; see the
 :ref:`options for the camcops_server command <camcops_cli>`.
 
 
+Notes on supervisor and its config files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Supervisor is a system for controlling background processes running on
+  UNIX-like operating systems. See http://supervisord.org
+
+- On Ubuntu systems, you would typically install supervisor with ``sudo apt
+  install supervisor`` and then save this file as
+  ``/etc/supervisor/conf.d/camcops.conf``.
+
+- **If you edit a supervisord config file,** run ``sudo service supervisor
+  restart`` (Ubuntu) or ``sudo service supervisord restart`` (CentOS 6).
+
+- **To monitor supervisor,** run ``sudo supervisorctl status``, or just ``sudo
+  supervisorctl`` for an interactive prompt.
+
+- Regarding the supervisor config files:
+
+  - Indented lines are treated as continuation (even in commands; no need for
+    end-of-line backslashes or similar).
+  - The downside of that is that indented comment blocks can join onto your
+    commands! Beware that.
+  - Indented comment blocks can also break supervisord entirely. If it won't
+    start, try inspecting with ``supervisord -n -c
+    /etc/supervisor/supervisord.conf``.
+  - You can't put quotes around the directory variable
+    (http://stackoverflow.com/questions/10653590).
+  - Python programs that are installed within a Python virtual environment
+    automatically use the virtualenv's copy of Python via their shebang; you do
+    not need to specify that by hand, nor the PYTHONPATH.
+  - The ``environment`` parameter sets the OS environment.
+  - Creating a group (see below; a.k.a. a "heterogeneous process group") allows
+    you to control all parts of CamCOPS together, as ``camcops`` in this
+    example (see
+    http://supervisord.org/configuration.html#group-x-section-settings). Thus,
+    you can do, for example: ``sudo supervisorctl start camcops:*``
+
+- **Specific extra notes for CamCOPS:**
+
+  - The ``MPLCONFIGDIR`` environment variable specifies a cache directory for
+    ``matplotlib``, which greatly speeds up its subsequent loading.
+  - The typical "web server" user is ``www-data`` under Ubuntu Linux and
+    ``apache`` under CentOS; see :ref:`Linux flavours <linux_flavours>`.
+
+
 .. _configure_apache:
 
 Point the front-end web server to CamCOPS
@@ -547,18 +595,6 @@ See also:
 
 - http://dev.mysql.com/doc/refman/5.5/en/innodb-parameters.html
 
-
-Cosmetics
----------
-
-Your institutional logo
-~~~~~~~~~~~~~~~~~~~~~~~
-
-Your logos (see the :ref:`configuration file <server_config_file>`) will be
-scaled to 45% of the active page width. You may need to add blank space to the
-left if they look funny. See picture below.
-
-.. image:: images/scaling_logos.png
 
 
 ===============================================================================

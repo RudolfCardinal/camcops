@@ -126,7 +126,7 @@ Several compilers are possible, in principle.
       environment.
 
     - Upshot: I tried hard. As of 2017-11-19:
-    
+
       - MinGW itself is the old version and has been superseded by
         mingw-w64 (a.k.a. mingw64).
       - attempts to use MinGW-W64 to build 32-bit Windows code (via the MXE
@@ -135,7 +135,7 @@ Several compilers are possible, in principle.
       - getting Qt happy is very hard
       - For the 64-bit compilation, I ended up with a "make" process that
         reaches this error:
-        
+
         .. code-block:: none
 
             /home/rudolf/dev/qt_local_build/src/qt5/qtwebglplugin/src/plugins/platforms/webgl/qwebglwindow_p.h:64:48: error: field 'defaults' has incomplete type 'std::promise<QMap<unsigned int, QVariant> >'
@@ -298,7 +298,7 @@ To update an existing Qt5 git repository, from its root directory:
     # https://wiki.qt.io/Building_Qt_5_from_Git
     git pull
     perl init-repository -f  # -f for force
-    
+
 To update a specific submodule, e.g. qtbase:
 
 .. code-block:: bash
@@ -309,7 +309,7 @@ To update a specific submodule, e.g. qtbase:
     # ... seems to work; that is a specific commit at
     # https://github.com/qt/qtbase/commit/067664531853a1e857c777c1cc56fc64b272e021#diff-0b4799f074ffd43c60d33464189578b7
     # that fixes this bug.
-    
+
 See patch_qt_for_android_ndk_20().
 
 However, this went away with Qt 5.12.4.
@@ -326,9 +326,9 @@ Problems with 64-bit ARM
     qt_memfill32
     qt_blend_rgb32_on_rgb32_neon
     qt_blend_rgb16_on_argb32_neon
-    
+
     ... etc. (lots of "_neon") suffixes
-    
+
 Using
 
 .. code-block:: bash
@@ -369,7 +369,7 @@ As of 2018-06-18:
 
 Advice:
 
-- Do not proceed ahead of official releases. Sometimes Qt Creator doesn't 
+- Do not proceed ahead of official releases. Sometimes Qt Creator doesn't
   recognize the version. It's always tricky to manage.
 
 
@@ -473,6 +473,9 @@ EXIT_FAILURE = 1
 # -----------------------------------------------------------------------------
 # Default directories
 # -----------------------------------------------------------------------------
+
+if "GENERATING_CAMCOPS_DOCS" in os.environ:
+    USER_DIR = "/path/to/user"
 
 DEFAULT_ROOT_DIR = join(USER_DIR, "dev", "qt_local_build")
 
@@ -1103,9 +1106,9 @@ class Platform(object):
         """
         Architecture name to pass to Xcode's clang etc. Don't alter.
         Architecture conversions:
-        
+
         - https://stackoverflow.com/questions/27016612/compiling-external-c-library-for-use-with-ios-project
-        
+
         Which architectures does Xcode's clang support?
         - https://stackoverflow.com/questions/15036909/clang-how-to-list-supported-target-architectures
         If in doubt, running "clang -arch SOMETHING" will produce an error
@@ -1130,9 +1133,9 @@ class Platform(object):
     def apple_cpu_name_for_triplet(self) -> str:
         """
         CPU name to make a cpu-vendor-os triplet.
-        
+
         See :meth:`apple_arch_name`.
-        
+
         Note that "arm64" is a valid architecture but fails here (e.g.
         SQLCipher ``configure``) with ``Invalid configuration
         'arm64-apple-darwin': machine 'arm64-apple' not recognized". The
@@ -1422,7 +1425,7 @@ class Platform(object):
         tool (either build or target).
 
         Within SQLCipher, the program that parses these is config.sub
-        
+
         See also
         https://www.gnu.org/software/autoconf/manual/autoconf-2.65/html_node/Specifying-Target-Triplets.html
         """  # noqa
@@ -2237,7 +2240,7 @@ def escape_literal_for_shell(x: str) -> str:
 UBUNTU_PACKAGE_HELP = """
 Linux (Ubuntu)
 -------------------------------------------------------------------------------
-              
+
 ar          } Should be pre-installed!
 cmake       }       ... sudo apt install cmake
 gcc         }

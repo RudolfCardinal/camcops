@@ -75,7 +75,7 @@ import datetime
 import os
 import logging
 import re
-from typing import Dict, Generator, List, Optional, Union
+from typing import Any, Dict, Generator, List, Optional, Union
 from unittest import TestCase
 
 from cardinal_pythonlib.configfiles import (
@@ -84,6 +84,8 @@ from cardinal_pythonlib.configfiles import (
     get_config_parameter_loglevel,
     get_config_parameter_multiline
 )
+from cardinal_pythonlib.docker import running_under_docker
+from cardinal_pythonlib.fileops import relative_filename_within_dir
 from cardinal_pythonlib.logs import BraceStyleAdapter
 from cardinal_pythonlib.randomness import create_base64encoded_randomness
 from cardinal_pythonlib.reprfunc import auto_repr
@@ -96,13 +98,9 @@ from cardinal_pythonlib.sqlalchemy.engine_func import (
 )
 from cardinal_pythonlib.sqlalchemy.logs import pre_disable_sqlalchemy_extra_echo_log  # noqa
 from cardinal_pythonlib.sqlalchemy.schema import get_table_names
-from cardinal_pythonlib.sqlalchemy.session import (
-    get_safe_url_from_engine,
-    make_mysql_url,
-)
+from cardinal_pythonlib.sqlalchemy.session import get_safe_url_from_engine
 from cardinal_pythonlib.wsgi.reverse_proxied_mw import ReverseProxiedMiddleware
 import celery.schedules
-from pendulum import DateTime as Pendulum
 from sqlalchemy.engine import create_engine
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import sessionmaker
@@ -112,13 +110,9 @@ from camcops_server.cc_modules.cc_baseconstants import (
     ALEMBIC_BASE_DIR,
     ALEMBIC_CONFIG_FILENAME,
     ALEMBIC_VERSION_TABLE,
-    DEFAULT_EXTRA_STRINGS_DIR,
     ENVVAR_CONFIG_FILE,
-    LINUX_DEFAULT_LOCK_DIR,
     LINUX_DEFAULT_MATPLOTLIB_CACHE_DIR,
-    LINUX_DEFAULT_USER_DOWNLOAD_DIR,
     ON_READTHEDOCS,
-    STATIC_ROOT_DIR,
 )
 from camcops_server.cc_modules.cc_cache import cache_region_static, fkg
 from camcops_server.cc_modules.cc_constants import (
@@ -130,6 +124,7 @@ from camcops_server.cc_modules.cc_constants import (
     ConfigParamExportRecipient,
     ConfigParamServer,
     ConfigParamSite,
+    DockerConstants,
 )
 from camcops_server.cc_modules.cc_exportrecipientinfo import (
     ExportRecipientInfo,
@@ -181,46 +176,127 @@ DEFAULT_LINUX_USER = "www-data"  # Ubuntu default
 
 
 # =============================================================================
+# Helper functions
+# =============================================================================
+
+def warn_if_not_within_docker_dir(param_name: str,
+                                  filespec: str,
+                                  permit_cfg: bool = False,
+                                  permit_venv: bool = False,
+                                  permit_tmp: bool = False,
+                                  param_contains_not_is: bool = False) -> None:
+    """
+    If the specified filename isn't within a relevant directory that will be
+    used by CamCOPS when operating within a Docker Compose application, warn
+    the user.
+
+    Args:
+        param_name:
+            Name of the parameter in the CamCOPS config file.
+        filespec:
+            Filename (or filename-like thing) to check.
+        permit_cfg:
+            Permit the file to be in the configuration directory.
+        permit_venv:
+            Permit the file to be in the virtual environment directory.
+        permit_tmp:
+            Permit the file to be in the shared temporary space.
+        param_contains_not_is:
+            The parameter "contains", not "is", the filename.
+    """
+    if not filespec:
+        return
+    is_phrase = "contains" if param_contains_not_is else "is"
+    permitted_dirs = []  # type: List[str]
+    if permit_cfg:
+        permitted_dirs.append(DockerConstants.CONFIG_DIR)
+    if permit_venv:
+        permitted_dirs.append(DockerConstants.VENV_DIR)
+    if permit_tmp:
+        permitted_dirs.append(DockerConstants.TMP_DIR)
+    ok = any(
+        relative_filename_within_dir(filespec, d)
+        for d in permitted_dirs
+    )
+    if not ok:
+        log.warning(
+            f"Config parameter {param_name} {is_phrase} {filespec!r}, "
+            f"which is not within the permitted Docker directories "
+            f"{permitted_dirs!r}"
+        )
+
+
+def warn_if_not_docker_value(param_name: str,
+                             actual_value: Any,
+                             required_value: Any) -> None:
+    """
+    Warn the user if a parameter does not match the specific value required
+    when operating under Docker.
+
+    Args:
+        param_name:
+            Name of the parameter in the CamCOPS config file.
+        actual_value:
+            Value in the config file.
+        required_value:
+            Value that should be used.
+    """
+    if actual_value != required_value:
+        log.warning(
+            f"Config parameter {param_name} is {actual_value!r}, "
+            f"but should be {required_value!r} when running inside Docker"
+        )
+
+
+def warn_if_not_present(param_name: str, value: Any) -> None:
+    """
+    Warn the user if a parameter is not set (None, or an empty string), for
+    when operating under Docker.
+
+    Args:
+        param_name:
+            Name of the parameter in the CamCOPS config file.
+        value:
+            Value in the config file.
+    """
+    if value is None or value == "":
+        log.warning(
+            f"Config parameter {param_name} is not specified, "
+            f"but should be specified when running inside Docker"
+        )
+
+
+# =============================================================================
 # Demo config
 # =============================================================================
 
 # Cosmetic demonstration constants:
-DEFAULT_DB_NAME = 'camcops'
-DEFAULT_DB_USER = 'YYY_USERNAME_REPLACE_ME'
-DEFAULT_DB_PASSWORD = 'ZZZ_PASSWORD_REPLACE_ME'
 DEFAULT_DB_READONLY_USER = 'QQQ_USERNAME_REPLACE_ME'
 DEFAULT_DB_READONLY_PASSWORD = 'PPP_PASSWORD_REPLACE_ME'
 DUMMY_INSTITUTION_URL = 'http://www.mydomain/'
 
 
-def get_demo_config(extra_strings_dir: str = None,
-                    lock_dir: str = None,
-                    static_dir: str = None,
-                    db_url: str = None,
-                    user_download_dir: str = None) -> str:
+def get_demo_config(for_docker: bool = False) -> str:
     """
     Returns a demonstration config file based on the specified parameters.
+
+    Args:
+        for_docker:
+            Adjust defaults for the Docker environment.
     """
-    extra_strings_dir = extra_strings_dir or DEFAULT_EXTRA_STRINGS_DIR
-    extra_strings_spec = os.path.join(extra_strings_dir, '*.xml')
-    lock_dir = lock_dir or LINUX_DEFAULT_LOCK_DIR
-    static_dir = static_dir or STATIC_ROOT_DIR
-    user_download_dir = user_download_dir or LINUX_DEFAULT_USER_DOWNLOAD_DIR
     # ...
     # http://www.debian.org/doc/debian-policy/ch-opersys.html#s-writing-init
     # https://people.canonical.com/~cjwatson/ubuntu-policy/policy.html/ch-opersys.html  # noqa
     session_cookie_secret = create_base64encoded_randomness(num_bytes=64)
 
-    if not db_url:
-        db_url = make_mysql_url(username=DEFAULT_DB_USER,
-                                password=DEFAULT_DB_PASSWORD,
-                                dbname=DEFAULT_DB_NAME)
-    cd = ConfigDefaults
+    cd = ConfigDefaults(docker=for_docker)
     return f"""
 # Demonstration CamCOPS server configuration file.
-# Created by CamCOPS server version {CAMCOPS_SERVER_VERSION_STRING} at {str(
-        Pendulum.now())}.
+#
+# Created by CamCOPS server version {CAMCOPS_SERVER_VERSION_STRING}.
 # See help at https://camcops.readthedocs.io/.
+#
+# Using defaults for Docker environment: {for_docker}
 
 # =============================================================================
 # CamCOPS site
@@ -232,7 +308,7 @@ def get_demo_config(extra_strings_dir: str = None,
 # Database connection
 # -----------------------------------------------------------------------------
 
-{ConfigParamSite.DB_URL} = {db_url}
+{ConfigParamSite.DB_URL} = {cd.demo_db_url}
 {ConfigParamSite.DB_ECHO} = {cd.DB_ECHO}
 
 # -----------------------------------------------------------------------------
@@ -240,10 +316,10 @@ def get_demo_config(extra_strings_dir: str = None,
 # -----------------------------------------------------------------------------
 
 {ConfigParamSite.LOCAL_INSTITUTION_URL} = {DUMMY_INSTITUTION_URL}
-{ConfigParamSite.LOCAL_LOGO_FILE_ABSOLUTE} = {static_dir}/logo_local.png
-{ConfigParamSite.CAMCOPS_LOGO_FILE_ABSOLUTE} = {static_dir}/logo_camcops.png
+{ConfigParamSite.LOCAL_LOGO_FILE_ABSOLUTE} = {cd.LOCAL_LOGO_FILE_ABSOLUTE}
+{ConfigParamSite.CAMCOPS_LOGO_FILE_ABSOLUTE} = {cd.CAMCOPS_LOGO_FILE_ABSOLUTE}
 
-{ConfigParamSite.EXTRA_STRING_FILES} = {extra_strings_spec}
+{ConfigParamSite.EXTRA_STRING_FILES} = {cd.EXTRA_STRING_FILES}
 {ConfigParamSite.RESTRICTED_TASKS} =
 {ConfigParamSite.LANGUAGE} = {cd.LANGUAGE}
 
@@ -293,7 +369,7 @@ def get_demo_config(extra_strings_dir: str = None,
 # -----------------------------------------------------------------------------
 
 {ConfigParamSite.PERMIT_IMMEDIATE_DOWNLOADS} = {cd.PERMIT_IMMEDIATE_DOWNLOADS}
-{ConfigParamSite.USER_DOWNLOAD_DIR} = {user_download_dir}
+{ConfigParamSite.USER_DOWNLOAD_DIR} = {cd.USER_DOWNLOAD_DIR}
 {ConfigParamSite.USER_DOWNLOAD_FILE_LIFETIME_MIN} = {cd.USER_DOWNLOAD_FILE_LIFETIME_MIN}
 {ConfigParamSite.USER_DOWNLOAD_MAX_SPACE_MB} = {cd.USER_DOWNLOAD_MAX_SPACE_MB}
 
@@ -366,6 +442,7 @@ def get_demo_config(extra_strings_dir: str = None,
 {ConfigParamServer.GUNICORN_TIMEOUT_S} = {cd.GUNICORN_TIMEOUT_S}
 {ConfigParamServer.DEBUG_SHOW_GUNICORN_OPTIONS} = {cd.DEBUG_SHOW_GUNICORN_OPTIONS}
 
+
 # =============================================================================
 # Export options
 # =============================================================================
@@ -373,15 +450,17 @@ def get_demo_config(extra_strings_dir: str = None,
 [{CONFIG_FILE_EXPORT_SECTION}]
 
 {ConfigParamExportGeneral.CELERY_BEAT_EXTRA_ARGS} =
-{ConfigParamExportGeneral.CELERY_BEAT_SCHEDULE_DATABASE} = {lock_dir}/camcops_celerybeat_schedule
+{ConfigParamExportGeneral.CELERY_BEAT_SCHEDULE_DATABASE} = {cd.CELERY_BEAT_SCHEDULE_DATABASE}
 {ConfigParamExportGeneral.CELERY_BROKER_URL} = {cd.CELERY_BROKER_URL}
 {ConfigParamExportGeneral.CELERY_WORKER_EXTRA_ARGS} =
-{ConfigParamExportGeneral.EXPORT_LOCKDIR} = {lock_dir}
+{ConfigParamExportGeneral.CELERY_EXPORT_TASK_RATE_LIMIT} = 100/m
+{ConfigParamExportGeneral.EXPORT_LOCKDIR} = {cd.EXPORT_LOCKDIR}
 
 {ConfigParamExportGeneral.RECIPIENTS} =
 
 {ConfigParamExportGeneral.SCHEDULE_TIMEZONE} = {cd.SCHEDULE_TIMEZONE}
 {ConfigParamExportGeneral.SCHEDULE} =
+
 
 # =============================================================================
 # Details for each export recipient
@@ -497,7 +576,15 @@ def get_demo_config(extra_strings_dir: str = None,
 {ConfigParamExportRecipient.RIO_UPLOADING_USER} = CamCOPS
 {ConfigParamExportRecipient.RIO_DOCUMENT_TYPE} = CC
 
-    """  # noqa
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Extra options for REDCap export
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+{ConfigParamExportRecipient.REDCAP_API_URL} = https://domain.of.redcap.server/api/
+{ConfigParamExportRecipient.REDCAP_API_KEY} = myapikey
+{ConfigParamExportRecipient.REDCAP_FIELDMAP_FILENAME} = /location/of/fieldmap.xml
+
+    """.strip()  # noqa
 
 
 # =============================================================================
@@ -520,52 +607,9 @@ def get_demo_supervisor_config() -> str:
     return f"""
 # =============================================================================
 # Demonstration 'supervisor' (supervisord) config file for CamCOPS.
-# Created by CamCOPS version {CAMCOPS_SERVER_VERSION_STRING} at {str(
-        Pendulum.now())}.
+# Created by CamCOPS version {CAMCOPS_SERVER_VERSION_STRING}.
 # =============================================================================
-    # - Supervisor is a system for controlling background processes running on
-    #   UNIX-like operating systems. See:
-    #       http://supervisord.org
-    #
-    # - On Ubuntu systems, you would typically install supervisor with
-    #       sudo apt install supervisor
-    #   and then save this file as
-    #       /etc/supervisor/conf.d/camcops.conf
-    #
-    # - IF YOU EDIT THIS FILE, run:
-    #       sudo service supervisor restart  # Ubuntu
-    #       sudo service supervisord restart  # CentOS 6
-    #
-    # - TO MONITOR SUPERVISOR, run:
-    #       sudo supervisorctl status
-    #   ... or just "sudo supervisorctl" for an interactive prompt.
-    #
-    # NOTES ON THE SUPERVISOR CONFIG FILE AND ENVIRONMENT:
-    #
-    # - Indented lines are treated as continuation (even in commands; no need
-    #   for end-of-line backslashes or similar).
-    # - The downside of that is that indented comment blocks can join onto your
-    #   commands! Beware that.
-    # - You can't put quotes around the directory variable
-    #   (http://stackoverflow.com/questions/10653590).
-    # - Python programs that are installed within a Python virtual environment
-    #   automatically use the virtualenv's copy of Python via their shebang;
-    #   you do not need to specify that by hand, nor the PYTHONPATH.
-    # - The "environment" setting sets the OS environment. The "--env"
-    #   parameter to gunicorn, if you use it, sets the WSGI environment.
-    # - Creating a group (see below; a.k.a. a "heterogeneous process group")
-    #   allows you to control all parts of CamCOPS together, as "camcops" in
-    #   this example (see
-    #   http://supervisord.org/configuration.html#group-x-section-settings).
-    #   Thus, you can do, for example:
-    #       sudo supervisorctl start camcops:*
-    #
-    # SPECIFIC EXTRA NOTES FOR CAMCOPS:
-    #
-    # - The MPLCONFIGDIR environment variable specifies a cache directory for
-    #   matplotlib, which greatly speeds up its subsequent loading.
-    # - The typical "web server" user is "www-data" under Ubuntu Linux and
-    #   "apache" under CentOS.
+# See https://camcops.readthedocs.io/en/latest/administrator/server_configuration.html#start-camcops
 
 [program:camcops_server]
 
@@ -616,27 +660,28 @@ stopwaitsecs = {stopwaitsecs}
 
 programs = camcops_server, camcops_workers, camcops_scheduler
 
-    """
+    """.strip()  # noqa
 
 
 def get_demo_apache_config(
         rootpath: str = "camcops",  # no slash
-        specimen_internal_port: int = ConfigDefaults.PORT,
+        specimen_internal_port: int = None,
         specimen_socket_file: str = DEFAULT_SOCKET_FILENAME) -> str:
     """
     Returns a demo Apache HTTPD config file section applicable to CamCOPS.
     """
+    cd = ConfigDefaults()
+    specimen_internal_port = specimen_internal_port or cd.PORT
     urlbase = "/" + rootpath
     return f"""
-    # Demonstration Apache config file section for CamCOPS.
-    # Created by CamCOPS version {CAMCOPS_SERVER_VERSION_STRING} at {str(
-        Pendulum.now())}.
-    #
-    # Under Ubuntu, the Apache config will be somewhere in /etc/apache2/
-    # Under CentOS, the Apache config will be somewhere in /etc/httpd/
-    #
-    # This section should go within the <VirtualHost> directive for the secure
-    # (SSL, HTTPS) part of the web site.
+# Demonstration Apache config file section for CamCOPS.
+# Created by CamCOPS version {CAMCOPS_SERVER_VERSION_STRING}.
+#
+# Under Ubuntu, the Apache config will be somewhere in /etc/apache2/
+# Under CentOS, the Apache config will be somewhere in /etc/httpd/
+#
+# This section should go within the <VirtualHost> directive for the secure
+# (SSL, HTTPS) part of the web site.
 
 <VirtualHost *:443>
     # ...
@@ -827,9 +872,10 @@ def get_demo_apache_config(
 
         Require all granted
 
-        # ... for old Apache version (e.g. 2.2), use instead:
-        # Order allow,deny
-        # Allow from all
+            # ... for old Apache versions (e.g. 2.2), use instead:
+            #
+            #   Order allow,deny
+            #   Allow from all
 
             # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             # (d) Tell the proxied application that we are using HTTPS, and
@@ -837,40 +883,24 @@ def get_demo_apache_config(
             # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             #     ... https://stackoverflow.com/questions/16042647
             #
-            # EITHER enable mod_headers (e.g. "sudo a2enmod headers") and set:
+            # Enable mod_headers (e.g. "sudo a2enmod headers") and set:
 
         RequestHeader set X-Forwarded-Proto https
         RequestHeader set X-Script-Name {urlbase}
 
-            # and call CamCOPS like:
+            # ... then ensure the TRUSTED_PROXY_HEADERS setting in the CamCOPS
+            # config file includes:
             #
-            # camcops serve_gunicorn \\
-            #       --config SOMECONFIG \\
-            #       --trusted_proxy_headers \\
-            #           HTTP_X_FORWARDED_HOST \\
-            #           HTTP_X_FORWARDED_SERVER \\
-            #           HTTP_X_FORWARDED_PORT \\
-            #           HTTP_X_FORWARDED_PROTO \\
+            #           HTTP_X_FORWARDED_HOST
+            #           HTTP_X_FORWARDED_SERVER
+            #           HTTP_X_FORWARDED_PORT
+            #           HTTP_X_FORWARDED_PROTO
             #           HTTP_X_SCRIPT_NAME
             #
             # (X-Forwarded-For, X-Forwarded-Host, and X-Forwarded-Server are
-            # supplied by Apache automatically)
-            #
-            # ... OR specify those options by hand in the CamCOPS command.
+            # supplied by Apache automatically.)
 
     </Location>
-
-        # ---------------------------------------------------------------------
-        # 3. For additional CamCOPS instances
-        # ---------------------------------------------------------------------
-        # (a) duplicate section 1 above, editing the base URL and CamCOPS
-        #     connection (socket/port);
-        # (b) you will also need to create an additional CamCOPS instance,
-        #     as above;
-        # (c) add additional static aliases (in section 2 above).
-        #
-        # HOWEVER, consider adding more CamCOPS groups, rather than creating
-        # additional instances; the former are *much* easier to administer!
 
     #==========================================================================
     # SSL security (for HTTPS)
@@ -912,7 +942,7 @@ def get_demo_apache_config(
 
 </VirtualHost>
 
-    """  # noqa
+    """.strip()  # noqa
 
 
 # =============================================================================
@@ -1026,15 +1056,18 @@ class CamcopsConfig(object):
     Class representing the CamCOPS configuration.
     """
 
-    def __init__(self, config_filename: str,
+    def __init__(self,
+                 config_filename: str,
                  config_text: str = None) -> None:
         """
         Initialize by reading the config file.
 
         Args:
-            config_filename: filename of the config file (usual method)
-            config_text: text contents of the config file (alternative method
-                for special circumstances); overrides ``config_filename``
+            config_filename:
+                Filename of the config file (usual method)
+            config_text:
+                Text contents of the config file (alternative method for
+                special circumstances); overrides ``config_filename``
         """
         def _get_str(section: str, paramname: str,
                      default: str = None) -> Optional[str]:
@@ -1077,6 +1110,11 @@ class CamcopsConfig(object):
                                (x.split("#")[0].strip() for x in lines if x)))
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # Learn something about our environment
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        self.running_under_docker = running_under_docker()
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # Open config file
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         self.camcops_config_filename = config_filename
@@ -1099,7 +1137,7 @@ class CamcopsConfig(object):
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         s = CONFIG_FILE_SITE_SECTION
         cs = ConfigParamSite
-        cd = ConfigDefaults
+        cd = ConfigDefaults()
 
         self.allow_insecure_cookies = _get_bool(
             s, cs.ALLOW_INSECURE_COOKIES, cd.ALLOW_INSECURE_COOKIES)
@@ -1307,6 +1345,8 @@ class CamcopsConfig(object):
             es, ce.CELERY_BROKER_URL, cd.CELERY_BROKER_URL)
         self.celery_worker_extra_args = _get_multiline(
             es, ce.CELERY_WORKER_EXTRA_ARGS)
+        self.celery_export_task_rate_limit = _get_str(
+            es, ce.CELERY_EXPORT_TASK_RATE_LIMIT)
 
         self.export_lockdir = _get_str(es, ce.EXPORT_LOCKDIR)
         if not self.export_lockdir:
@@ -1354,6 +1394,107 @@ class CamcopsConfig(object):
         # Other attributes
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         self._sqla_engine = None
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # Docker checks
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        if self.running_under_docker:
+            log.info("Docker environment detected")
+
+            # Values expected to be fixed
+            warn_if_not_docker_value(
+                param_name=ConfigParamExportGeneral.CELERY_BROKER_URL,
+                actual_value=self.celery_broker_url,
+                required_value=DockerConstants.CELERY_BROKER_URL
+            )
+            warn_if_not_docker_value(
+                param_name=ConfigParamServer.HOST,
+                actual_value=self.host,
+                required_value=DockerConstants.HOST
+            )
+
+            # Values expected to be present
+            #
+            # - Re SSL certificates: reconsidered. People may want to run
+            #   internal plain HTTP but then an Apache front end, and they
+            #   wouldn't appreciate the warnings.
+            #
+            # warn_if_not_present(
+            #     param_name=ConfigParamServer.SSL_CERTIFICATE,
+            #     value=self.ssl_certificate
+            # )
+            # warn_if_not_present(
+            #     param_name=ConfigParamServer.SSL_PRIVATE_KEY,
+            #     value=self.ssl_private_key
+            # )
+
+            # Config-related files
+            warn_if_not_within_docker_dir(
+                param_name=ConfigParamServer.SSL_CERTIFICATE,
+                filespec=self.ssl_certificate,
+                permit_cfg=True
+            )
+            warn_if_not_within_docker_dir(
+                param_name=ConfigParamServer.SSL_PRIVATE_KEY,
+                filespec=self.ssl_private_key,
+                permit_cfg=True
+            )
+            warn_if_not_within_docker_dir(
+                param_name=ConfigParamSite.LOCAL_LOGO_FILE_ABSOLUTE,
+                filespec=self.local_logo_file_absolute,
+                permit_cfg=True,
+                permit_venv=True
+            )
+            warn_if_not_within_docker_dir(
+                param_name=ConfigParamSite.CAMCOPS_LOGO_FILE_ABSOLUTE,
+                filespec=self.camcops_logo_file_absolute,
+                permit_cfg=True,
+                permit_venv=True
+            )
+            for esf in self.extra_string_files:
+                warn_if_not_within_docker_dir(
+                    param_name=ConfigParamSite.EXTRA_STRING_FILES,
+                    filespec=esf,
+                    permit_cfg=True,
+                    permit_venv=True,
+                    param_contains_not_is=True
+                )
+            warn_if_not_within_docker_dir(
+                param_name=ConfigParamSite.SNOMED_ICD9_XML_FILENAME,
+                filespec=self.snomed_icd9_xml_filename,
+                permit_cfg=True,
+                permit_venv=True
+            )
+            warn_if_not_within_docker_dir(
+                param_name=ConfigParamSite.SNOMED_ICD10_XML_FILENAME,
+                filespec=self.snomed_icd10_xml_filename,
+                permit_cfg=True,
+                permit_venv=True
+            )
+            warn_if_not_within_docker_dir(
+                param_name=ConfigParamSite.SNOMED_TASK_XML_FILENAME,
+                filespec=self.snomed_task_xml_filename,
+                permit_cfg=True,
+                permit_venv=True
+            )
+
+            # Temporary/scratch space that needs to be shared between Docker
+            # containers
+            warn_if_not_within_docker_dir(
+                param_name=ConfigParamSite.USER_DOWNLOAD_DIR,
+                filespec=self.user_download_dir,
+                permit_tmp=True
+            )
+            warn_if_not_within_docker_dir(
+                param_name=ConfigParamExportGeneral.CELERY_BEAT_SCHEDULE_DATABASE,  # noqa
+                filespec=self.celery_beat_schedule_database,
+                permit_tmp=True
+            )
+            warn_if_not_within_docker_dir(
+                param_name=ConfigParamExportGeneral.EXPORT_LOCKDIR,
+                filespec=self.export_lockdir,
+                permit_tmp=True
+            )
 
     # -------------------------------------------------------------------------
     # Database functions

@@ -27,6 +27,8 @@ server database(s).
 Upgrade the CamCOPS software
 ----------------------------
 
+.. include:: include_this_is_manual_see_docker.rst
+
 For Linux, this script will automate much of the work:
 
 .. literalinclude:: upgrade_camcops_server.sh

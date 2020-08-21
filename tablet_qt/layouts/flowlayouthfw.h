@@ -56,11 +56,16 @@
 #include <QRect>
 #include <QStyle>
 
+
 class FlowLayoutHfw : public QLayout
 {
     // Flow layout, as per FlowLayout Qt demo, but modified to support
     // height-for-width better (better as in: word-wrapping labels etc. get the
     // maximum width allowed, aiming for the minimum height).
+
+    // NOTE THAT THIS IS NOT A "TOP-LEVEL" HFW WIDGET THAT CAN RESIZE ITS
+    // PARENT WIDGET (compare BoxLayoutHfw, GridLayoutHfw). So it should be
+    // displayed within one of those.
 
     Q_OBJECT  // RNC
 public:
@@ -74,7 +79,7 @@ public:
     // QVBoxLayout/QHBoxLayout supply:
     //    void addWidget(QWidget* widget, int stretch, Qt::Alignment alignment);
     // Alignment does make sense, specifically top alignment.
-    void addWidget(QWidget* w);  // RNC: just routes to QLayout version (for disambiguating conversions)
+    void addWidget(QWidget* w);  // RNC
     void addWidget(QWidget* w, Qt::Alignment alignment);  // RNC
     virtual void addItem(QLayoutItem* item) override;
 
@@ -93,24 +98,34 @@ public:
     virtual void invalidate() override;  // RNC
 
 protected:  // RNC (was private)
+
+    // The main thinking function.
     virtual QSize doLayout(const QRect& rect, bool test_only) const;
+
+    // Autocalculate spacing between items when none is specified explicitly.
     int smartSpacing(QStyle::PixelMetric pm) const;
+
+    // Vertical coordinate of a given item, taking into account vertical
+    // alignment.
     int itemTop(int row_top, int item_height, int row_height,
                 Qt::Alignment valignment) const;  // RNC
-    int rowShiftToRight(int layout_width, int width_of_all_items) const;  // RNC
 
-    QVector<QLayoutItem*> m_item_list;
-    int m_h_space;
-    int m_v_space;
-    mutable QSize m_size_hint;
-    mutable QMap<int, int> m_width_to_height;  // RNC
-    Qt::Alignment m_halign;  // RNC
+    // Number of pixels to shift an entire row right, to satisfy the horizontal
+    // alignment.
+    int rowShiftToRight(int layout_width, int width_of_all_items) const;
+
+    QVector<QLayoutItem*> m_item_list;  // our widgets
+    int m_h_space;  // horizontal spacing between items
+    int m_v_space;  // vertical spacing between rows
+    mutable QSize m_size_hint;  // cached size hint
+    mutable QMap<int, int> m_width_to_height;  // cached width-to-height map
+    Qt::Alignment m_halign;  // horizontal alignment
 
     struct ItemCalc {
-        QLayoutItem* item;
-        QWidget* widget;
-        int layout_row;
-        QSize item_size;
-        QPoint layout_cell_top_left;
+        QLayoutItem* item;  // the layout item
+        QWidget* widget;  // the widget
+        int layout_row;  // the row number this item will sit in
+        QSize item_size;  // the item's size
+        QPoint layout_cell_top_left;  // the item's top-left coordinate
     };
 };

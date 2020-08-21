@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -39,6 +39,13 @@ namespace sizehelpers {
 /*
 
 QSizePolicy: https://doc.qt.io/qt-5/qsizepolicy.html
+
+    QSizePolicy::GrowFlag	1	The widget can grow beyond its size hint if necessary.
+    QSizePolicy::ExpandFlag	2	The widget should get as much space as possible.
+    QSizePolicy::ShrinkFlag	4	The widget can shrink below its size hint if necessary.
+    QSizePolicy::IgnoreFlag	8	The widget's size hint is ignored. The widget will get as much space as possible.
+
+So...
 
 Fixed = 0
 
@@ -141,11 +148,24 @@ QSize spacingAsSize(const QLayout* layout);
 
 // How much extra space does a QWidget need for its layout margins or its
 // stylesheet?
+// - widget: the widget to examine
+// - opt: "option" parameter passed to QStyle::sizeFromContents()
+// - child_size: "contentsSize" parameter passed to QStyle::sizeFromContents()
+// - add_style_element: add the size for the style, as well as for the margins
+//   of any layout installed on the widget?
+// - contents_type: "type" parameter passed to QStyle::sizeFromContents()
 QSize widgetExtraSizeForCssOrLayout(const QWidget* widget,
                                     const QStyleOption* opt,
                                     const QSize& child_size,
                                     bool add_style_element,
                                     QStyle::ContentsType contents_type);
+
+// Guess the QStyle::ContentsType applicable to a widget.
+// I don't know why this should be necessary...
+QStyle::ContentsType guessStyleContentsType(const QWidget* widget);
+
+// Autodetecting version.
+QSize widgetExtraSizeForCssOrLayout(const QWidget* widget);
 
 // widgetExtraSizeForCssOrLayout() for QPushButton.
 QSize pushButtonExtraSizeRequired(const QPushButton* button,
@@ -164,5 +184,20 @@ QSize labelExtraSizeRequired(const QLabel* label,
 
 // Does the widget have a fixed height that is equal to "height"?
 bool fixedHeightEquals(QWidget* widget, int height);
+
+// Is a size policy an HFW one that allows vertical shrinkage?
+bool canHFWPolicyShrinkVertically(const QSizePolicy& sp);
+
+// Is this an HFW widget that appears to have an area constraint, and trading
+// width for height -- e.g. word-wrapped text -- detected as one whose
+// preferred height appears (in a very simple test) to get SMALLER as its
+// width gets larger?
+bool isWidgetHFWTradingDimensions(const QWidget* widget);
+
+// Is this an HFW widget that appears to have an aspect ratio constraint, e.g.
+// a resizable widget -- detected as one whose preferred height appears (in a
+// very simple test) to get LARGER as its width gets larger?
+bool isWidgetHFWMaintainingAspectRatio(const QWidget* widget);
+
 
 }  // namespace sizehelpers

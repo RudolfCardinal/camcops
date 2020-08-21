@@ -87,12 +87,12 @@ class Das28Metaclass(DeclarativeMeta):
 
         setattr(
             cls, 'crp',
-            Column('crp', Integer, comment="CRP (0-300 mg/L)")
+            Column('crp', Float, comment="CRP (0-300 mg/L)")
         )
 
         setattr(
             cls, 'esr',
-            Column('esr', Integer, comment="ESR (1-300 mm/h)")
+            Column('esr', Float, comment="ESR (1-300 mm/h)")
         )
 
         super().__init__(name, bases, classdict)
@@ -158,19 +158,19 @@ class Das28(TaskHasPatientMixin,
             SummaryElement(
                 name="das28_crp", coltype=Float(),
                 value=self.das28_crp(),
-                comment=f"DAS28-CRP"),
+                comment="DAS28-CRP"),
             SummaryElement(
                 name="activity_state_crp", coltype=SummaryCategoryColType,
                 value=self.activity_state_crp(req, self.das28_crp()),
-                comment=f"Activity state (CRP)"),
+                comment="Activity state (CRP)"),
             SummaryElement(
                 name="das28_esr", coltype=Float(),
                 value=self.das28_esr(),
-                comment=f"DAS28-ESR"),
+                comment="DAS28-ESR"),
             SummaryElement(
                 name="activity_state_esr", coltype=SummaryCategoryColType,
                 value=self.activity_state_esr(req, self.das28_esr()),
-                comment=f"Activity state (ESR)"),
+                comment="Activity state (ESR)"),
         ]
 
     def is_complete(self) -> bool:

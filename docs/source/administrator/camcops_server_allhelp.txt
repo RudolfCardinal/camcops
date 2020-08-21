@@ -1,4 +1,4 @@
-usage: camcops_server [-h] [--allhelp] [--version] [-v]
+usage: camcops_server [-h] [--allhelp] [--version] [-v] [--no_log]
                       {docs,demo_camcops_config,demo_supervisor_config,demo_apache_config,upgrade_db,dev_upgrade_db,dev_downgrade_db,dev_add_dummy_data,show_db_title,show_db_schema,merge_db,create_db,ddl,reindex,check_index,make_superuser,reset_password,enable_user,export,show_export_queue,crate_dd,cris_dd,serve_cherrypy,serve_gunicorn,serve_pyramid,convert_athena_icd_snomed_to_xml,launch_workers,launch_scheduler,launch_monitor,housekeeping,purge_jobs,show_tests,self_test,dev_cli}
                       ...
 
@@ -10,6 +10,7 @@ optional arguments:
   --allhelp             show help for all commands and exit
   --version             show program's version number and exit
   -v, --verbose         Be verbose
+  --no_log              Disable log (stderr) entirely.
 
 commands:
   Valid CamCOPS commands are as follows.
@@ -313,8 +314,8 @@ optional arguments:
   -v, --verbose      Be verbose (default: False)
   --config CONFIG    Configuration file (if not specified, the environment
                      variable CAMCOPS_CONFIG_FILE is checked) (default: None)
-  --dialect DIALECT  SQL dialect (options: mysql, postgresql, sqlite, sybase,
-                     mssql, firebird, oracle) (default: mysql)
+  --dialect DIALECT  SQL dialect (options: firebird, mssql, mysql, oracle,
+                     postgresql, sqlite, sybase) (default: mysql)
 
 ===============================================================================
 Help for command 'reindex'
@@ -401,6 +402,7 @@ Help for command 'export'
 usage: camcops_server export [-h] [-v] [--config CONFIG]
                              [--recipients [RECIPIENTS [RECIPIENTS ...]]]
                              [--all_recipients] [--disable_task_index]
+                             [--schedule_via_backend]
 
 Trigger pending exports
 
@@ -416,6 +418,8 @@ optional arguments:
   --all_recipients      Use all recipients (default: False)
   --disable_task_index  Disable use of the task index (for debugging only)
                         (default: False)
+  --schedule_via_backend
+                        Export tasks as a background job (default: False)
 
 ===============================================================================
 Help for command 'show_export_queue'

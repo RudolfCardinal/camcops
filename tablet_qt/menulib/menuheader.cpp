@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -27,6 +27,7 @@
 #include "dbobjects/patient.h"
 #include "layouts/flowlayouthfw.h"
 #include "layouts/layouts.h"
+#include "lib/sizehelpers.h"
 #include "lib/uifunc.h"
 #include "widgets/basewidget.h"
 #include "widgets/horizontalline.h"
@@ -63,6 +64,7 @@ MenuHeader::MenuHeader(QWidget* parent,
 
     // Left
     m_top_bar = new BaseWidget();
+    m_top_bar->setSizePolicy(sizehelpers::expandingFixedHFWPolicy());
     auto toprowlayout = new HBoxLayout();
     m_top_bar->setLayout(toprowlayout);
     mainlayout->addWidget(m_top_bar);

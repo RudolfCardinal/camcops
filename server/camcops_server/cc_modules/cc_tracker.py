@@ -42,8 +42,8 @@ from camcops_server.cc_modules.cc_constants import (
     CssClass,
     CSS_PAGED_MEDIA,
     DateFormat,
-    FULLWIDTH_PLOT_WIDTH,
-    WHOLE_PANEL,
+    MatplotlibConstants,
+    PlotDefaults,
 )
 from camcops_server.cc_modules.cc_filename import get_export_filename
 from camcops_server.cc_modules.cc_plot import matplotlib
@@ -105,7 +105,8 @@ def consistency(req: "CamcopsRequest",
                 servervalue: Any = None,
                 case_sensitive: bool = True) -> Tuple[bool, str]:
     """
-    Checks for consistency in a set of values (e.g. ID numbers, names).
+    Checks for consistency in a set of values (e.g. names, dates of birth).
+    (ID numbers are done separately via :func:`consistency_idnums`.)
 
     The list of values (with the ``servervalue`` appended, if not ``None``) is
     checked to ensure that it contains only one unique value (ignoring ``None``
@@ -151,9 +152,10 @@ def consistency_idnums(req: "CamcopsRequest",
     "Are all these records from the same patient?"
 
     Args:
-        req: a :class:`camcops_server.cc_modules.cc_request.CamcopsRequest`
-        idnum_lists: a list of lists (one per
-            :class:`camcops_server.cc_modules.cc_patient.Patient` instance) of
+        req:
+            a :class:`camcops_server.cc_modules.cc_request.CamcopsRequest`
+        idnum_lists:
+            a list of lists (one per task/patient instance) of
             :class:`PatientIdNum` objects
 
     Returns:
@@ -161,15 +163,34 @@ def consistency_idnums(req: "CamcopsRequest",
         ``msg`` is a descriptive HTML message
 
     """
-    known = {}  # type: Dict[int, Set[int]]  # maps which_idnum -> set of idnum_values  # noqa
-    for idnum_list in idnum_lists:
-        for idnum in idnum_list:
+    # 1. Generate "known", mapping which_idnum -> set of observed non-NULL
+    # idnum_values
+    known = {}  # type: Dict[int, Set[int]]
+    for task_idnum_list in idnum_lists:
+        for idnum in task_idnum_list:
             idnum_value = idnum.idnum_value
             if idnum_value is not None:
                 which_idnum = idnum.which_idnum
                 if which_idnum not in known:
                     known[which_idnum] = set()  # type: Set[int]
                 known[which_idnum].add(idnum_value)
+
+    # 2. For every observed which_idnum, was it observed in all tasks?
+    present_in_all = {}  # type: Dict[int, bool]
+    for which_idnum in known.keys():
+        present_for_all_tasks = all(
+            # "For all tasks..."
+            (
+                # "At least one ID number record relates to this which_idnum".
+                any(idnum.which_idnum == which_idnum
+                    and idnum.idnum_value is not None)
+                for idnum in task_idnum_list
+            )
+            for task_idnum_list in idnum_lists
+        )
+        present_in_all[which_idnum] = present_for_all_tasks
+
+    # 3. Summarize
     failures = []  # type: List[str]
     successes = []  # type: List[str]
     _ = req.gettext
@@ -179,8 +200,12 @@ def consistency_idnums(req: "CamcopsRequest",
             failures.append(
                 f"idnum{which_idnum} {_('contains values')} {value_str}")
         else:
-            successes.append(
-                f"idnum{which_idnum} {_('all blank or')} {value_str}")
+            if present_in_all[which_idnum]:
+                successes.append(
+                    f"idnum{which_idnum} {_('consistent')} ({value_str})")
+            else:
+                successes.append(
+                    f"idnum{which_idnum} {_('all blank or')} {value_str}")
     if failures:
         return False, (
             f"<b>{_('INCONSISTENT')} ({'; '.join(failures + successes)})</b>"
@@ -650,17 +675,27 @@ class Tracker(TrackerCtvCommon):
         horizontal_labels = specimen_tracker.horizontal_labels
         aspect_ratio = specimen_tracker.aspect_ratio
 
-        figsize = (FULLWIDTH_PLOT_WIDTH,
-                   (1.0/float(aspect_ratio)) * FULLWIDTH_PLOT_WIDTH)
+        figsize = (
+            PlotDefaults.FULLWIDTH_PLOT_WIDTH,
+            (1.0 / float(aspect_ratio)) * PlotDefaults.FULLWIDTH_PLOT_WIDTH
+        )
         fig = self.req.create_figure(figsize=figsize)
-        ax = fig.add_subplot(WHOLE_PANEL)
+        ax = fig.add_subplot(MatplotlibConstants.WHOLE_PANEL)
         x = [matplotlib.dates.date2num(t) for t in datetimes]
         datelabels = [dt.strftime(TRACKER_DATEFORMAT) for dt in datetimes]
 
-        # First plot
-        ax.plot(x, values, color="b", linestyle="-", marker="+",
-                markeredgecolor="r", markerfacecolor="r", label=None)
-        # ... NB command performed twice, see below
+        # Plot lines and markers (on top of lines)
+        ax.plot(
+            x,  # x
+            values,  # y
+            color=MatplotlibConstants.COLOUR_BLUE,  # line colour
+            linestyle=MatplotlibConstants.LINESTYLE_SOLID,
+            marker=MatplotlibConstants.MARKER_PLUS,  # point shape
+            markeredgecolor=MatplotlibConstants.COLOUR_RED,  # point colour
+            markerfacecolor=MatplotlibConstants.COLOUR_RED,  # point colour
+            label=None,
+            zorder=PlotDefaults.ZORDER_DATA_LINES_POINTS
+        )
 
         # x axis
         ax.set_xlabel("Date/time", fontdict=self.req.fontdict)
@@ -686,8 +721,16 @@ class Tracker(TrackerCtvCommon):
 
         # y axis
         ax.set_ylabel(axis_label, fontdict=self.req.fontdict)
-        axis_min = min(axis_min, min(nonblank_values)) if axis_min else min(nonblank_values)  # noqa
-        axis_max = max(axis_max, max(nonblank_values)) if axis_max else max(nonblank_values)  # noqa
+        axis_min = (
+            min(axis_min, min(nonblank_values))
+            if axis_min is not None
+            else min(nonblank_values)
+        )
+        axis_max = (
+            max(axis_max, max(nonblank_values))
+            if axis_max is not None
+            else max(nonblank_values)
+        )
         # ... the supplied values are stretched if the data are outside them
         # ... but min(something, None) is None, so beware
         # If we get something with no sense of scale whatsoever, then what
@@ -710,8 +753,13 @@ class Tracker(TrackerCtvCommon):
         stupid_jitter = 0.001
         if horizontal_lines is not None:
             for y in horizontal_lines:
-                ax.plot(xlim, [y, y + stupid_jitter], color="0.5",
-                        linestyle=":")
+                ax.plot(
+                    xlim,  # x
+                    [y, y + stupid_jitter],  # y
+                    color=MatplotlibConstants.COLOUR_GREY_50,
+                    linestyle=MatplotlibConstants.LINESTYLE_DOTTED,
+                    zorder=PlotDefaults.ZORDER_PRESET_LINES
+                )
                 # PROBLEM: horizontal lines becoming invisible
                 # (whether from ax.axhline or plot)
 
@@ -722,16 +770,22 @@ class Tracker(TrackerCtvCommon):
                 y = lab.y
                 l_ = lab.label
                 va = lab.vertical_alignment.value
-                ax.text(label_left, y, l_, verticalalignment=va, alpha=0.5,
-                        fontdict=self.req.fontdict)
-                # was "0.5" rather than 0.5, which led to a tricky-to-find
-                # "TypeError: a float is required" exception after switching
-                # to Python 3.
-
-        # replot so the data are on top of the rest:
-        ax.plot(x, values, color="b", linestyle="-", marker="+",
-                markeredgecolor="r", markerfacecolor="r", label=None)
-        # ... NB command performed twice, see above
+                ax.text(
+                    label_left,  # x
+                    y,  # y
+                    l_,  # text
+                    verticalalignment=va,
+                    # alpha=0.5,
+                    # ... was "0.5" rather than 0.5, which led to a
+                    # tricky-to-find "TypeError: a float is required" exception
+                    # after switching to Python 3.
+                    # ... and switched to grey colour with zorder on 2020-06-28
+                    # after wkhtmltopdf 0.12.5 had problems rendering
+                    # opacity=0.5 with SVG lines
+                    color=MatplotlibConstants.COLOUR_GREY_50,
+                    fontdict=self.req.fontdict,
+                    zorder=PlotDefaults.ZORDER_PRESET_LABELS
+                )
 
         self.req.set_figure_font_sizes(ax)
 

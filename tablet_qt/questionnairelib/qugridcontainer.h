@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -57,12 +57,24 @@ public:
     // See top of .cpp file for discussion.
     QuGridContainer* setColumnStretch(int column, int stretch);
 
-    // Set "fixed grid" mode. In "fixed grid" mode, columns have equal width,
-    // unless specified; widgets are told to expand right as required.
-    // Default is true.
+    // Set "fixed grid" mode.
+    // - In "fixed grid" mode, grid columns have equal width, unless specified;
+    //   widgets are told to expand right as required. That is:
+    //   (1) The grid will set its minimum widths to 1 and its column
+    //       stretches to 1 (unless the column stretches are later overridden)
+    //       via the setColumnStretch() method.
+    //   (2) The grid will enforce a horizontal size policy of Expanding upon
+    //       the widget.
+    // - Otherwise (fixed_grid = false), neither of those things are done.
+    //
+    // The default is true.
     QuGridContainer* setFixedGrid(bool fixed_grid);
 
     // Should the whole grid expand to the far right of the screen?
+    // - If true, the "grid widget" takes the grid layout as its primary
+    //   layout.
+    // - If false, the "grid widget" uses a horizontal layout containing (a)
+    //   the grid, and (b) a "stretch".
     // Default is true.
     QuGridContainer* setExpandHorizontally(bool expand);
 

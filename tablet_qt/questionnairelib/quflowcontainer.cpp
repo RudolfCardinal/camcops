@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -72,6 +72,10 @@ QPointer<QWidget> QuFlowContainer::makeWidget(
                 ? DefaultWidgetAlignment
                 : e->getWidgetAlignment();
         QPointer<QWidget> w = e->widget(questionnaire);
+        if (!w) {
+            qWarning() << Q_FUNC_INFO << "Element failed to create a widget!";
+            continue;
+        }
         layout->addWidget(w, alignment);  // this is QLayout::setAlignment
     }
     return widget;

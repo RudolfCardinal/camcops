@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -28,7 +28,16 @@
 QuLineEditDouble::QuLineEditDouble(FieldRefPtr fieldref,
                                    const bool allow_empty) :
     QuLineEdit(fieldref),
-    m_minimum(std::numeric_limits<double>::min()),
+    /* Compare
+       https://en.cppreference.com/w/cpp/types/numeric_limits/min
+       https://en.cppreference.com/w/cpp/types/numeric_limits/lowest
+       "For floating-point types with denormalization, min returns the minimum
+       positive normalized value. Note that this behavior may be unexpected,
+       especially when compared to the behavior of min for integral types.
+       To find the value that has no values less than it, use
+       numeric_limits::lowest."
+    */
+    m_minimum(std::numeric_limits<double>::lowest()),
     m_maximum(std::numeric_limits<double>::max()),
     m_decimals(2),
     m_allow_empty(allow_empty),

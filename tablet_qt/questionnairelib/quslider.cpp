@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -296,7 +296,7 @@ QPointer<QWidget> QuSlider::makeWidget(Questionnaire* questionnaire)
     const QSizePolicy::Policy parallel_policy = m_abs_length_cm > 0
             ? (m_abs_length_can_shrink ? QSizePolicy::Maximum
                                        : QSizePolicy::Fixed)
-            : QSizePolicy::Preferred;
+            : (m_horizontal ? QSizePolicy::Expanding : QSizePolicy::Preferred);
     const QSizePolicy::Policy perpendicular_policy = QSizePolicy::Fixed;
     if (m_horizontal) {
         // --------------------------------------------------------------------

@@ -70,6 +70,7 @@ QT += gui  # included by default; QtGui module
 QT += multimedia  # or: undefined reference to QMedia*::*
 QT += multimediawidgets
 # QT += network  # required to #include <QtNetwork/...>
+# QT += printsupport  # QCustomPlot says it needs this, but it appears not
 QT += quick  # for QML, e.g. for camera
 QT += quickwidgets  # for QQuickWidget
 QT += sql  # required to #include <QSqlDatabase>
@@ -555,6 +556,7 @@ SOURCES += \
     layouts/hboxlayouthfw.cpp \
     layouts/qtlayouthelpers.cpp \
     layouts/vboxlayouthfw.cpp \
+    layouts/widgetitemhfw.cpp \
     lib/comparers.cpp \
     lib/containers.cpp \
     lib/convert.cpp \
@@ -636,6 +638,7 @@ SOURCES += \
     menulib/taskchainmenuitem.cpp \
     menulib/taskmenuitem.cpp \
     menulib/urlmenuitem.cpp \
+    qcustomplot/qcustomplot.cpp \
     qobjects/cameraframegrabber.cpp \
     qobjects/debugeventwatcher.cpp \
     qobjects/flickcharm.cpp \
@@ -708,6 +711,7 @@ SOURCES += \
     questionnairelib/quthermometer.cpp \
     questionnairelib/quthermometeritem.cpp \
     questionnairelib/quverticalcontainer.cpp \
+    questionnairelib/quzoomcontainer.cpp \
     taskchains/khandakermojochain.cpp \
     tasklib/inittasks.cpp \
     tasklib/task.cpp \
@@ -881,6 +885,8 @@ SOURCES += \
     widgets/clickablelabelwordwrapwide.cpp \
     widgets/diagnosticcodeselector.cpp \
     widgets/fixedareahfwtestwidget.cpp \
+    widgets/fixedaspectratiohfwtestwidget.cpp \
+    widgets/fixednumblockshfwtestwidget.cpp \
     widgets/graphicsrectitemclickable.cpp \
     widgets/growingplaintextedit.cpp \
     widgets/growingtextedit.cpp \
@@ -992,6 +998,7 @@ HEADERS += \
     layouts/layouts.h \
     layouts/qtlayouthelpers.h \
     layouts/vboxlayouthfw.h \
+    layouts/widgetitemhfw.h \
     lib/cloneable.h \
     lib/comparers.h \
     lib/containers.h \
@@ -1078,6 +1085,7 @@ HEADERS += \
     menulib/taskchainmenuitem.h \
     menulib/taskmenuitem.h \
     menulib/urlmenuitem.h \
+    qcustomplot/qcustomplot.h \
     qobjects/cameraframegrabber.h \
     qobjects/debugeventwatcher.h \
     qobjects/flickcharm.h \
@@ -1150,6 +1158,7 @@ HEADERS += \
     questionnairelib/quthermometer.h \
     questionnairelib/quthermometeritem.h \
     questionnairelib/quverticalcontainer.h \
+    questionnairelib/quzoomcontainer.h \
     taskchains/khandakermojochain.h \
     tasklib/inittasks.h \
     tasklib/task.h \
@@ -1323,6 +1332,8 @@ HEADERS += \
     widgets/clickablelabelwordwrapwide.h \
     widgets/diagnosticcodeselector.h \
     widgets/fixedareahfwtestwidget.h \
+    widgets/fixedaspectratiohfwtestwidget.h \
+    widgets/fixednumblockshfwtestwidget.h \
     widgets/graphicsrectitemclickable.h \
     widgets/growingplaintextedit.h \
     widgets/growingtextedit.h \

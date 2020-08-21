@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -e
+
+echo installing pip packages
+pip install -e server/.
+
+echo checking packages for conflicts
+pip check
+
+echo installing safety checker
+pip install safety
+
+echo checking packages for vulnerabilities
+safety check
+
+echo checking python for style and errors
+flake8 --config=setup.cfg server/camcops_server
+
+# Not actually used by the tests but celery will complain if we don't do this
+export CAMCOPS_CONFIG_FILE="${HOME}/camcops.cfg"
+camcops_server demo_camcops_config > "${CAMCOPS_CONFIG_FILE}"
+
+echo running tests
+camcops_server self_test

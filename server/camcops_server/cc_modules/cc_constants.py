@@ -34,7 +34,14 @@ import logging
 import multiprocessing
 import os
 
-from camcops_server.cc_modules.cc_baseconstants import STATIC_ROOT_DIR
+from cardinal_pythonlib.sqlalchemy.session import make_mysql_url
+
+from camcops_server.cc_modules.cc_baseconstants import (
+    DEFAULT_EXTRA_STRINGS_DIR,
+    LINUX_DEFAULT_LOCK_DIR,
+    LINUX_DEFAULT_USER_DOWNLOAD_DIR,
+    STATIC_ROOT_DIR,
+)
 from camcops_server.cc_modules.cc_language import DEFAULT_LOCALE
 
 
@@ -169,16 +176,63 @@ PDF_ENGINE = "pdfkit"  # working
 # PDF_ENGINE = "weasyprint"  # working but table <tr> element bugs
 # ... value must be one of: xhtml2pdf, weasyprint, pdfkit
 
+
 # =============================================================================
 # Simple constants for HTML/plots/display
 # =============================================================================
 
-WHOLE_PANEL = 111  # as in: ax = fig.add_subplot(111)
+class PlotDefaults(object):
+    """
+    Defaults used with matplotlib plotting.
+    """
+    DEFAULT_PLOT_DPI = 300
 
-DEFAULT_PLOT_DPI = 300
+    FULLWIDTH_PLOT_WIDTH = 6.7  # inches: full width is ~170mm
+
+    # zorder parameter:
+    # - higher = on top
+    # - defaults relate to the type of thing being plotted:
+    #   https://matplotlib.org/3.1.1/gallery/misc/zorder_demo.html
+    #   - Patch / PatchCollection = 1
+    #   - Line2D / LineCollection = 2
+    #   - Text = 3
+    # - within a Line2D object (points and lines), the default is
+    #   "markers on top of lines"
+    ZORDER_PRESET_LINES = 1
+    ZORDER_PRESET_LABELS = 2
+    ZORDER_DATA_LINES_POINTS = 3  # the default
+
+
+class MatplotlibConstants(object):
+    """
+    Constants used by matplotlib
+    """
+    # https://matplotlib.org/tutorials/colors/colors.html
+    COLOUR_BLACK = "k"
+    COLOUR_BLUE = "b"
+    COLOUR_GREEN = "g"
+    COLOUR_GREY_50 = "0.5"
+    COLOUR_GREY_90 = "0.9"  # 0.9 is close to white (0 black, 1 white)
+    COLOUR_RED = "r"
+
+    # https://matplotlib.org/gallery/lines_bars_and_markers/line_styles_reference.html  # noqa
+    # https://matplotlib.org/3.1.0/gallery/lines_bars_and_markers/linestyles.html  # noqa
+    LINESTYLE_DOTTED = ":"
+    LINESTYLE_SOLID = "-"
+    LINESTYLE_NONE = "None"
+
+    # https://matplotlib.org/3.1.1/api/markers_api.html
+    MARKER_CIRCLE = "o"
+    MARKER_NONE = ""  # also "None", " "
+    MARKER_PLUS = "+"
+    MARKER_STAR = "*"
+
+    WHOLE_PANEL = 111  # as in: ax = fig.add_subplot(111)
+
 
 # Debugging option
 USE_SVG_IN_HTML = True  # set to False for PNG debugging
+
 
 # =============================================================================
 # CSS/HTML constants
@@ -197,6 +251,7 @@ WKHTMLTOPDF_OPTIONS = {  # dict for pdfkit
     "header-spacing": "3",  # mm, from content up to bottom of header
     "footer-spacing": "3",  # mm, from content down to top of footer
     "quiet": "",  # Suppress "Loading pages (1/6)" etc.
+    "enable-local-file-access": "",
 }
 
 
@@ -294,7 +349,6 @@ DATA_COLLECTION_UNLESS_UPGRADED_DIV = """
         original task.
     </div>
 """
-FULLWIDTH_PLOT_WIDTH = 6.7  # inches: full width is ~170mm
 ICD10_COPYRIGHT_DIV = """
     <div class="copyright">
         ICD-10 criteria: Copyright © 1992 World Health Organization.
@@ -405,6 +459,7 @@ class ConfigParamExportGeneral(object):
     CELERY_BEAT_SCHEDULE_DATABASE = "CELERY_BEAT_SCHEDULE_DATABASE"
     CELERY_BROKER_URL = "CELERY_BROKER_URL"
     CELERY_WORKER_EXTRA_ARGS = "CELERY_WORKER_EXTRA_ARGS"
+    CELERY_EXPORT_TASK_RATE_LIMIT = "CELERY_EXPORT_TASK_RATE_LIMIT"
     EXPORT_LOCKDIR = "EXPORT_LOCKDIR"
     RECIPIENTS = "RECIPIENTS"
     SCHEDULE = "SCHEDULE"
@@ -456,6 +511,9 @@ class ConfigParamExportRecipient(object):
     INCLUDE_ANONYMOUS = "INCLUDE_ANONYMOUS"
     PRIMARY_IDNUM = "PRIMARY_IDNUM"
     PUSH = "PUSH"
+    REDCAP_API_KEY = "REDCAP_API_KEY"
+    REDCAP_API_URL = "REDCAP_API_URL"
+    REDCAP_FIELDMAP_FILENAME = "REDCAP_FIELDMAP_FILENAME"
     REQUIRE_PRIMARY_IDNUM_MANDATORY_IN_POLICY = "REQUIRE_PRIMARY_IDNUM_MANDATORY_IN_POLICY"  # noqa
     RIO_DOCUMENT_TYPE = "RIO_DOCUMENT_TYPE"
     RIO_IDNUM = "RIO_IDNUM"
@@ -467,18 +525,51 @@ class ConfigParamExportRecipient(object):
     XML_FIELD_COMMENTS = "XML_FIELD_COMMENTS"
 
 
+class StandardPorts(object):
+    """
+    Standard TCP port numbers.
+    """
+    ALTERNATIVE_HTTP = 8000
+    AMQP = 5672
+    SMTP = 25
+    SMTP_TLS = 587
+    HL7_MLLP = 2575
+    MYSQL = 3306
+
+
+class DockerConstants(object):
+    """
+    Constants for the Docker environment.
+    """
+    # Directories
+    DOCKER_CAMCOPS_ROOT_DIR = "/camcops"
+    CONFIG_DIR = os.path.join(DOCKER_CAMCOPS_ROOT_DIR, "cfg")
+    TMP_DIR = os.path.join(DOCKER_CAMCOPS_ROOT_DIR, "tmp")
+    VENV_DIR = os.path.join(DOCKER_CAMCOPS_ROOT_DIR, "venv")
+
+    DEFAULT_USER_DOWNLOAD_DIR = os.path.join(TMP_DIR, "user_downloads")
+    DEFAULT_LOCKDIR = os.path.join(TMP_DIR, "lock")
+
+    # Container (internal) names
+    CONTAINER_RABBITMQ = "rabbitmq"
+    CONTAINER_MYSQL = "mysql"
+
+    # Other
+    CELERY_BROKER_URL = f"amqp://{CONTAINER_RABBITMQ}:{StandardPorts.AMQP}/"
+    DEFAULT_MYSQL_CAMCOPS_USER = "camcops"
+    HOST = "0.0.0.0"
+    # ... not "localhost" or "127.0.0.1"; see
+    # https://nickjanetakis.com/blog/docker-tip-54-fixing-connection-reset-by-peer-or-similar-errors  # noqa
+
+
 # =============================================================================
 # Configuration defaults
 # =============================================================================
 
-SMTP_PORT = 25
-SMTP_TLS_PORT = 587
-DEFAULT_HL7_MLLP_PORT = 2575
-
-
 class ConfigDefaults(object):
     """
-    Contains default values for the config.
+    Contains default values for the config, plus some cosmetic defaults for
+    generating specimen config files.
 
     - Re ``CHERRYPY_THREADS_MAX``: beware the default MySQL connection limit of
       151; https://dev.mysql.com/doc/refman/5.7/en/too-many-connections.html
@@ -489,12 +580,16 @@ class ConfigDefaults(object):
                                               "logo_camcops.png")
     CLIENT_API_LOGLEVEL = logging.INFO
     CLIENT_API_LOGLEVEL_TEXTFORMAT = "info"  # should match CLIENT_API_LOGLEVEL
+    DB_DATABASE = "camcops"  # for demo configs only
     DB_ECHO = False
-    DB_PORT = 3306
-    DB_SERVER = "localhost"
+    DB_PORT = StandardPorts.MYSQL  # for demo configs only
+    DB_SERVER = "localhost"  # for demo configs only
+    DB_USER = "YYY_USERNAME_REPLACE_ME"  # cosmetic; for demo configs only
+    DB_PASSWORD = "ZZZ_PASSWORD_REPLACE_ME"  # cosmetic; for demo configs only
     DISABLE_PASSWORD_AUTOCOMPLETE = True
-    EMAIL_PORT = SMTP_TLS_PORT  # or SMTP_PORT
+    EMAIL_PORT = StandardPorts.SMTP_TLS
     EMAIL_USE_TLS = True
+    EXTRA_STRING_FILES = os.path.join(DEFAULT_EXTRA_STRINGS_DIR, "*.xml")  # cosmetic; for demo configs only  # noqa
     LANGUAGE = DEFAULT_LOCALE
     LOCAL_INSTITUTION_URL = "http://www.camcops.org/"
     LOCAL_LOGO_FILE_ABSOLUTE = os.path.join(STATIC_ROOT_DIR, "logo_local.png")
@@ -504,6 +599,7 @@ class ConfigDefaults(object):
     PATIENT_SPEC_IF_ANONYMOUS = "anonymous"
     PERMIT_IMMEDIATE_DOWNLOADS = False
     SESSION_TIMEOUT_MINUTES = 30
+    USER_DOWNLOAD_DIR = LINUX_DEFAULT_USER_DOWNLOAD_DIR  # for demo configs only  # noqa
     USER_DOWNLOAD_FILE_LIFETIME_MIN = 60
     USER_DOWNLOAD_MAX_SPACE_MB = 100
     WEBVIEW_LOGLEVEL = logging.INFO
@@ -525,15 +621,18 @@ class ConfigDefaults(object):
     GUNICORN_NUM_WORKERS = 2 * multiprocessing.cpu_count()
     GUNICORN_TIMEOUT_S = 30
     HOST = "127.0.0.1"
-    PORT = 8000
+    PORT = StandardPorts.ALTERNATIVE_HTTP
     PROXY_REWRITE_PATH_INFO = False
     SHOW_REQUEST_IMMEDIATELY = False
     SHOW_REQUESTS = False
     SHOW_RESPONSE = False
     SHOW_TIMING = False
 
-    # Export section
+    # [export] section
     CELERY_BROKER_URL = "amqp://"
+    CELERY_BEAT_SCHEDULE_DATABASE = os.path.join(
+        LINUX_DEFAULT_LOCK_DIR, "camcops_celerybeat_schedule")  # for demo configs only  # noqa
+    EXPORT_LOCKDIR = LINUX_DEFAULT_LOCK_DIR  # for demo configs only
     SCHEDULE_TIMEZONE = "UTC"
 
     # Individual export recipients
@@ -555,12 +654,43 @@ class ConfigDefaults(object):
     HL7_KEEP_REPLY = False
     HL7_NETWORK_TIMEOUT_MS = 10000
     HL7_PING_FIRST = True
-    HL7_PORT = DEFAULT_HL7_MLLP_PORT
+    HL7_PORT = StandardPorts.HL7_MLLP
     INCLUDE_ANONYMOUS = False
     PUSH = False
     REQUIRE_PRIMARY_IDNUM_MANDATORY_IN_POLICY = True
     TASK_FORMAT = FileType.PDF
     XML_FIELD_COMMENTS = True
+
+    def __init__(self, docker: bool = False) -> None:
+        """
+        Args:
+            docker:
+                Amend defaults so it works within a Docker Compose application
+                without much fiddling?
+
+        Defaults for use within Docker:
+
+        - Note that a URL to another container/service looks like
+          ``protocol://container:port/``. Values here must match the Docker
+          Compose file.
+        """
+        if docker:
+            self.CELERY_BROKER_URL = DockerConstants.CELERY_BROKER_URL
+            self.CELERY_BEAT_SCHEDULE_DATABASE = os.path.join(
+                DockerConstants.DEFAULT_LOCKDIR, "camcops_celerybeat_schedule")
+            self.DB_SERVER = DockerConstants.CONTAINER_MYSQL
+            self.DB_USER = DockerConstants.DEFAULT_MYSQL_CAMCOPS_USER
+            self.EXPORT_LOCKDIR = DockerConstants.DEFAULT_LOCKDIR
+            self.HOST = DockerConstants.HOST
+            self.USER_DOWNLOAD_DIR = DockerConstants.DEFAULT_USER_DOWNLOAD_DIR
+
+    @property
+    def demo_db_url(self) -> str:
+        return make_mysql_url(host=self.DB_SERVER,
+                              port=self.DB_PORT,
+                              username=self.DB_USER,
+                              password=self.DB_PASSWORD,
+                              dbname=self.DB_DATABASE)
 
 
 MINIMUM_PASSWORD_LENGTH = 8

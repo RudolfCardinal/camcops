@@ -38,7 +38,8 @@ from sqlalchemy.sql.sqltypes import Float, Integer
 
 from camcops_server.cc_modules.cc_constants import (
     CssClass,
-    FULLWIDTH_PLOT_WIDTH,
+    MatplotlibConstants,
+    PlotDefaults,
 )
 from camcops_server.cc_modules.cc_db import (
     ancillary_relationship,
@@ -663,7 +664,12 @@ class CardinalExpectationDetection(TaskHasPatientMixin, Task):
             xlabel = "Z(FA)"
             ylabel = "Z(H)"
         # Plot
-        ax.plot(x, y, marker="+", color="b",   linestyle="-")
+        ax.plot(
+            x, y,
+            marker=MatplotlibConstants.MARKER_PLUS,
+            color=MatplotlibConstants.COLOUR_BLUE,
+            linestyle=MatplotlibConstants.LINESTYLE_SOLID
+        )
         ax.set_xlabel(xlabel if show_x_label else "", fontdict=req.fontdict)
         ax.set_ylabel(ylabel if show_y_label else "", fontdict=req.fontdict)
         ax.set_title(subtitle, fontdict=req.fontdict)
@@ -710,7 +716,10 @@ class CardinalExpectationDetection(TaskHasPatientMixin, Task):
                                 plainroc: bool) -> str:
         if not trialarray or not grouparray:
             return WARNING_INSUFFICIENT_DATA
-        figsize = (FULLWIDTH_PLOT_WIDTH*2, FULLWIDTH_PLOT_WIDTH)
+        figsize = (
+            PlotDefaults.FULLWIDTH_PLOT_WIDTH * 2,
+            PlotDefaults.FULLWIDTH_PLOT_WIDTH
+        )
         html = ""
         fig = req.create_figure(figsize=figsize)
         warned = False
@@ -749,7 +758,10 @@ class CardinalExpectationDetection(TaskHasPatientMixin, Task):
                                           plainroc: bool) -> str:
         if not trialarray or not self.num_blocks:
             return WARNING_INSUFFICIENT_DATA
-        figsize = (FULLWIDTH_PLOT_WIDTH, FULLWIDTH_PLOT_WIDTH/2)
+        figsize = (
+            PlotDefaults.FULLWIDTH_PLOT_WIDTH,
+            PlotDefaults.FULLWIDTH_PLOT_WIDTH / 2
+        )
         html = ""
         fig = req.create_figure(figsize=figsize)
         warned = False

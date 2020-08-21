@@ -25,7 +25,7 @@ Distress Thermometer
 History and guide
 ~~~~~~~~~~~~~~~~~
 
-Original: Roth et al. (1998), http://www.pubmed.com/9587123.
+Original: Roth et al. (1998), http://www.pubmed.gov/9587123.
 
 Originally a 1-item measure, but supplementary questions are added by some.
 

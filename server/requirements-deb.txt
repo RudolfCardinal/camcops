@@ -1,4 +1,4 @@
-# requirements-deb.txt
+# server/requirements-deb.txt
 #
 # This file is hand-edited.
 # Comments will be stripped out.

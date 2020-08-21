@@ -65,7 +65,7 @@ from wsgiref.simple_server import make_server  # noqa: E402
 from cardinal_pythonlib.classes import gen_all_subclasses  # noqa: E402
 from cardinal_pythonlib.fileops import mkdir_p  # noqa: E402
 from cardinal_pythonlib.process import nice_call  # noqa: E402
-from cardinal_pythonlib.ui import ask_user, ask_user_password  # noqa: E402
+from cardinal_pythonlib.ui_commandline import ask_user, ask_user_password  # noqa: E402,E501
 from cardinal_pythonlib.wsgi.request_logging_mw import RequestLoggingMiddleware  # noqa: E402,E501
 from cardinal_pythonlib.wsgi.reverse_proxied_mw import (  # noqa: E402
     ReverseProxiedConfig,
@@ -314,12 +314,15 @@ def ensure_ok_for_webserver() -> None:
 
 
 def test_serve_pyramid(application: "Router",
-                       host: str = ConfigDefaults.HOST,
-                       port: int = ConfigDefaults.PORT) -> None:
+                       host: str = None,
+                       port: int = None) -> None:
     """
     Launches an extremely simple Pyramid web server (via
     ``wsgiref.make_server``).
     """
+    cd = ConfigDefaults()
+    host = host or cd.HOST
+    port = port or cd.PORT
     ensure_ok_for_webserver()
     server = make_server(host, port, application)
     log.info("Serving on host={}, port={}", host, port)
@@ -575,21 +578,27 @@ def cmd_show_export_queue(recipient_names: List[str] = None,
 
 def cmd_export(recipient_names: List[str] = None,
                all_recipients: bool = False,
-               via_index: bool = True) -> None:
+               via_index: bool = True,
+               schedule_via_backend: bool = False) -> None:
     """
     Send all outbound incremental export messages (e.g. HL7).
 
     Args:
-        recipient_names: list of export recipient names (as per the config
-            file)
-        all_recipients: use all recipients?
-        via_index: use the task index (faster)?
+        recipient_names:
+            List of export recipient names (as per the config file).
+        all_recipients:
+            Use all recipients?
+        via_index:
+            Use the task index (faster)?
+        schedule_via_backend:
+            Schedule the export via the backend, rather than performing it now.
     """
     with command_line_request_context() as req:
         export(req,
                recipient_names=recipient_names,
                all_recipients=all_recipients,
-               via_index=via_index)
+               via_index=via_index,
+               schedule_via_backend=schedule_via_backend)
 
 
 def make_data_dictionary(filename: str, recipient_name: str,

@@ -46,6 +46,11 @@ from camcops_server.cc_modules.cc_report import (
     Report,
 )
 from camcops_server.cc_modules.cc_request import CamcopsRequest
+from camcops_server.cc_modules.cc_sqla_coltypes import (
+    CamcopsColumn,
+    ZERO_TO_FIVE_CHECKER,
+    ZERO_TO_TWO_CHECKER,
+)
 from camcops_server.cc_modules.cc_task import Task
 from camcops_server.cc_modules.cc_tsv import TsvPage
 from camcops_server.cc_modules.cc_unittest import DemoDatabaseTestCase
@@ -67,32 +72,39 @@ class APEQCPFTPerinatal(Task):
     FN_QPREFIX = "q"
     MAIN_EXPLANATION = " (0 no, 1 yes to some extent, 2 yes)"
 
-    q1 = Column(
+    q1 = CamcopsColumn(
         "q1", Integer,
+        permitted_value_checker=ZERO_TO_TWO_CHECKER,
         comment="Q1. Treated with respect/dignity" + MAIN_EXPLANATION
     )
-    q2 = Column(
+    q2 = CamcopsColumn(
         "q2", Integer,
+        permitted_value_checker=ZERO_TO_TWO_CHECKER,
         comment="Q2. Felt listened to" + MAIN_EXPLANATION
     )
-    q3 = Column(
+    q3 = CamcopsColumn(
         "q3", Integer,
+        permitted_value_checker=ZERO_TO_TWO_CHECKER,
         comment="Q3. Needs were understood" + MAIN_EXPLANATION
     )
-    q4 = Column(
+    q4 = CamcopsColumn(
         "q4", Integer,
+        permitted_value_checker=ZERO_TO_TWO_CHECKER,
         comment="Q4. Given info about team" + MAIN_EXPLANATION
     )
-    q5 = Column(
+    q5 = CamcopsColumn(
         "q5", Integer,
+        permitted_value_checker=ZERO_TO_TWO_CHECKER,
         comment="Q5. Family considered/included" + MAIN_EXPLANATION
     )
-    q6 = Column(
+    q6 = CamcopsColumn(
         "q6", Integer,
+        permitted_value_checker=ZERO_TO_TWO_CHECKER,
         comment="Q6. Views on treatment taken into account" + MAIN_EXPLANATION
     )
-    ff_rating = Column(
+    ff_rating = CamcopsColumn(
         "ff_rating", Integer,
+        permitted_value_checker=ZERO_TO_FIVE_CHECKER,
         comment="How likely to recommend service to friends and family "
                 "(0 don't know, 1 extremely unlikely, 2 unlikely, "
                 "3 neither likely nor unlikely, 4 likely, 5 extremely likely)"

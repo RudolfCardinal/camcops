@@ -19,6 +19,7 @@
 
 .. |denovo| replace:: *de novo*
 
+
 Licences
 ========
 
@@ -123,6 +124,13 @@ See:
 
 ..  literalinclude:: licence_floatingpoint.txt
     :language: none
+
+
+QCustomPlot
+-----------
+
+The CamCOPS client uses QCustomPlot for some graphs. This is licensed under the
+GNU GPL v3+ (as for CamCOPS). See https://www.qcustomplot.com/.
 
 
 .. _licence_snomed:

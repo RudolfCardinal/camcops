@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -196,7 +196,6 @@ OpenableWidget* Eq5d5l::editor(const bool read_only)
         "0", 0
     ));
 
-    const int overspill_rows = 3;
     QString itemtext;
     for (int i = 1; i < 100; ++i) {
 
@@ -213,8 +212,7 @@ OpenableWidget* Eq5d5l::editor(const bool read_only)
             uifunc::resourceFilename(resource.arg("_sel")),  // active
             uifunc::resourceFilename(resource.arg("_unsel")),  // inactive
             itemtext,  // text
-            i,  // value
-            overspill_rows
+            i  // value
         );
 
         items.append(item);
@@ -247,22 +245,38 @@ OpenableWidget* Eq5d5l::editor(const bool read_only)
         }
     ));
 
-    QuThermometer* therm = new QuThermometer(fr_vas, items);
+    const QString xtherm = xstring("t2_h");
+
+    auto therm = new QuThermometer(fr_vas, items);
     // ... will be owned by the grid when inserted;
     therm->setRescale(true, 0.4, true);
 
-    const QString xtherm = xstring("t2_h");
+    const bool allow_scroll = false;
+    const bool zoomable = false;
+
+    // Just having a non-scrolling page doesn't prevent the thermometer from
+    // getting too big vertically and disappearing... until Martin's fix
+    // capping Thermometer::heightForWidth(). Then it works very well.
+    //
+    // Using "zoomable" works fine, but can make the text a bit small (since
+    // the zoom is applied to both the text and the thermometer).
+    // An attempt via QuZoomContainer hasn't been very successful so far.
+
     pages.append(QuPagePtr(
         (new QuPage{
-            new QuGridContainer{
+            (new QuGridContainer{
                 QuGridCell(
                     new QuVerticalContainer{instructions},
                     0, 0, 1, 1, Qt::AlignLeft | Qt::AlignTop),
-                QuGridCell(therm, 0, 1, 1, 1, Qt::AlignHCenter | Qt::AlignTop)
-            }
+                QuGridCell(therm,
+                           0, 1, 1, 1, Qt::AlignHCenter | Qt::AlignTop)
+            })
+                // For equal column widths:
+             ->setFixedGrid(true)
+             ->setExpandHorizontally(true)
         })->setTitle(QString("%1: %2").arg(sname, xtherm))
           ->setIndexTitle(xtherm)
-          ->allowScroll(false)  // for a resizable thermometer
+          ->allowScroll(allow_scroll, zoomable)
     ));
 
     auto questionnaire = new Questionnaire(m_app, pages);

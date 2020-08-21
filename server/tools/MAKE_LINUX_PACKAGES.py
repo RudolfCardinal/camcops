@@ -172,7 +172,7 @@ running_centos()
 service_exists()
 {
     # arguments: $1 is the service being tested
-    
+
     servicename=$1
 
     # Ubuntu used to give "unrecognized service"
@@ -186,7 +186,7 @@ service_exists()
     # return 0  # true
 
     # And a better way: return codes; will be 4 for an unknown service [2, 3]:
-    
+
     service $servicename status >/dev/null 2>&1
     exitcode=$?
     if [ $exitcode -eq 4 ]; then
@@ -197,7 +197,7 @@ service_exists()
     # Other codes mean e.g. "running" (0) or "not running" (e.g. 1, 2, 3)
     echo "Service $servicename exists"
     return 0  # true
-    
+
     # [1] http://unix.stackexchange.com/questions/37313/how-do-i-grep-for-multiple-patterns
     # [2] https://unix.stackexchange.com/questions/226484/does-an-init-script-always-return-a-proper-exit-code-when-running-status
     # [3] http://refspecs.linuxbase.org/LSB_3.0.0/LSB-PDA/LSB-PDA/iniscrptact.html
@@ -208,7 +208,7 @@ service_supervisord_command()
     # argument: argument to "service", such as "start", "stop", "restart"
 
     # The exact supervisor program name is impossible to predict (e.g. in
-    # "supervisorctl stop camcops-gunicorn"), as it's user-defined, so we just 
+    # "supervisorctl stop camcops-gunicorn"), as it's user-defined, so we just
     # start/stop everything.
     # Ubuntu: service supervisor
     # CentOS: service supervisord
@@ -241,7 +241,7 @@ system_python_executable()
 {
     # Echoes the preferred Python executable on the destination system.
     # Use as: $(system_python_executable) ...
-    
+
     python_options=(python3.6 python36 python3 python)
     for option in ${python_options[@]}; do
         python_exe=$(which $option)
@@ -572,7 +572,9 @@ def get_changelog() -> str:
 # -----------------------------------------------------------------------------
 
 def get_preinst() -> str:
-    return """#!/usr/bin/env bash
+    # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=953428
+    # #!/usr/bin/env bash not allowed?
+    return """#!/bin/bash
 # Exit on any errors? (Lintian strongly advises this.)
 set -e
 
@@ -588,7 +590,7 @@ echo '{PACKAGE}: preinst file executing'
 stop_supervisord
 
 echo '{PACKAGE}: preinst file finished'
-    
+
     """.format(
         BASHFUNC=BASHFUNC,
         PACKAGE=PACKAGE_DEB_NAME,
@@ -601,7 +603,9 @@ echo '{PACKAGE}: preinst file finished'
 
 def get_postinst(sdist_basefilename: str) -> str:
     dst_sdist_file = join(DSTBASEDIR, sdist_basefilename)
-    return """#!/usr/bin/env bash
+    # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=953428
+    # #!/usr/bin/env bash not allowed?
+    return """#!/bin/bash
 # Exit on any errors? (Lintian strongly advises this.)
 set -e
 
@@ -701,7 +705,9 @@ echo '{PACKAGE}: postinst file finished'
 # -----------------------------------------------------------------------------
 
 def get_prerm() -> str:
-    return """#!/usr/bin/env bash
+    # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=953428
+    # #!/usr/bin/env bash not allowed?
+    return """#!/bin/bash
 set -e
 
 {BASHFUNC}
@@ -735,7 +741,9 @@ echo '{PACKAGE}: prerm file finished'
 # -----------------------------------------------------------------------------
 
 def get_postrm() -> str:
-    return """#!/usr/bin/env bash
+    # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=953428
+    # #!/usr/bin/env bash not allowed?
+    return """#!/bin/bash
 set -e
 
 {BASHFUNC}
@@ -827,7 +835,7 @@ def get_camcops_server_launcher() -> str:
 echo 'Launching CamCOPS command-line tool...' >&2
 
 {DST_CAMCOPS_LAUNCHER} "$@"
-    
+
     """.format(
         DST_CAMCOPS_LAUNCHER=DST_CAMCOPS_LAUNCHER,
     )
@@ -840,7 +848,7 @@ def get_camcops_server_meta_launcher() -> str:
 echo 'Launching CamCOPS meta-command tool...' >&2
 
 {DST_CAMCOPS_META_LAUNCHER} "$@"
-    
+
     """.format(
         DST_CAMCOPS_META_LAUNCHER=DST_CAMCOPS_META_LAUNCHER,
     )

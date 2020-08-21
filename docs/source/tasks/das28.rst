@@ -39,18 +39,21 @@ protein), in the DAS28-CRP.
 
 - sw28 = number of swollen joints, range [0, 28].
 
-- The CRP units are mg/L, constrained to be integer and in the range [0, 300].
+- The CRP units are mg/L and in the range [0, 300].
 
-- The ESR units are mm/hr, constrained to be integer and in the range [1, 300].
+- The ESR units are mm/hr and in the range [1, 300].
 
-- The VAS units are mm, range [0, 100]. Low is inactive arthritis; high is
-  extremely active arthritis.
+- The VAS (visual analogue scale) units are mm, range [0, 100]. Low is inactive
+  arthritis; high is extremely active arthritis.
 
 DAS28 score = 0.56 × √(t28) + 0.28 × √(sw28) + 0.70 × ln(ESR) + 0.014 × VAS
 
 DAS28-CRP score = 0.56 × √(t28) + 0.28 × √(sw28) + 0.36 × ln(CRP + 1) + 0.014 ×
 VAS + 0.96.
 
+These are the "4-variable" DAS scales (tenderness, swelling, inflammatory
+marker, VAS). There are different 3-variables scales too, without the VAS, not
+implemented here.
 
 
 Intellectual property rights
@@ -73,10 +76,13 @@ History
 
   [Original version using ESR.]
 
-- Fransen J,  Welsing PMJ, de Keijzer RMH, van Riel PLCM (2003).
+- Fransen J, Welsing PMJ, de Keijzer RMH, van Riel PLCM (2003).
   Disease activity scores using C-reactive protein: CRP may replace ESR in the
   assessment of RA disease activity.
   *Ann Rheum Dis* 62(Suppl. 1): 151.
+  https://www.researchgate.net/publication/291893932_Disease_activity_scores_using_C-reactive_protein_CRP_may_replace_ESR_in_the_assessment_of_RA_disease_activity.
+  (That says 2004, but vol. 62 supplement 2 was in 2003 according to
+  https://www.ncbi.nlm.nih.gov/pmc/journals/149/ so 2003 probably correct.)
 
   [DAS-28-CRP source, according to Hensor et al. 2010 as below.]
 
@@ -106,6 +112,16 @@ Source
 - https://eprovide.mapi-trust.org/instruments/disease-activity-score-c-reactive-protein#contact_and_conditions_of_use
 
 - https://www.das28.nl/
+
+  ... the Excel file ``dasculators.xls`` (created 2003-01-13) provides the
+  following rules:
+
+  - Tender joint count range [0, 28].
+  - Swollen joint count range [0, 28].
+  - CRP integer only; CRP in range [1, 300] according to the warning when you
+    enter invalid values, but actually [0, 300] accepted.
+  - ESR integer only; ESR in range [1, 300].
+  - VAS general health integer only; range [0, 100].
 
 - DAS-ESR cutoffs as per:
 

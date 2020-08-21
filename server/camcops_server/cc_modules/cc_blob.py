@@ -291,11 +291,11 @@ def blob_relationship(classname: str,
             #     at least for its fancier things:
             # http://docs.sqlalchemy.org/en/latest/orm/join_conditions.html#relationship-primaryjoin  # noqa
 
-        Note that this refers to the CURRENT version of the BLOB. If there is
-        an editing chain, older BLOB versions are not retrieved.
+    Note that this refers to the CURRENT version of the BLOB. If there is
+    an editing chain, older BLOB versions are not retrieved.
 
-        Compare :class:`camcops_server.cc_modules.cc_task.TaskHasPatientMixin`,
-        which uses the same strategy, as do several other similar functions.
+    Compare :class:`camcops_server.cc_modules.cc_task.TaskHasPatientMixin`,
+    which uses the same strategy, as do several other similar functions.
 
     """
     return relationship(

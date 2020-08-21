@@ -243,7 +243,7 @@ todo_include_todos = True
 def setup(app: Sphinx) -> None:
     # Add CSS
     # - https://stackoverflow.com/questions/23462494/how-to-add-a-custom-css-file-to-sphinx  # noqa
-    app.add_stylesheet('css/camcops_docs.css')  # may also be an URL
+    app.add_css_file('css/camcops_docs.css')  # may also be an URL
 
 
 # -----------------------------------------------------------------------------

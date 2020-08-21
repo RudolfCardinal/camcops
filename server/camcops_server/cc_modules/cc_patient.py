@@ -30,7 +30,7 @@ camcops_server/cc_modules/cc_patient.py
 
 import logging
 from typing import (
-    Any, Dict, Generator, List, Optional, Set, Tuple, TYPE_CHECKING, Union,
+    Any, Dict, Generator, List, Optional, Tuple, TYPE_CHECKING, Union,
 )
 
 from cardinal_pythonlib.classes import classproperty
@@ -855,14 +855,8 @@ class Patient(GenericTabletRecordMixin, Base):
         Generates all :class:`PatientIdNum` objects, including non-current
         ones.
         """
-        seen = set()  # type: Set[PatientIdNum]
-        for live_pidnum in self.idnums:
-            for lineage_member in live_pidnum.get_lineage():  # type: PatientIdNum  # noqa
-                if lineage_member in seen:
-                    continue
-                # noinspection PyTypeChecker
-                seen.add(lineage_member)
-                yield lineage_member
+        for lineage_member in self._gen_unique_lineage_objects(self.idnums):  # type: PatientIdNum  # noqa
+            yield lineage_member
 
     def delete_with_dependants(self, req: "CamcopsRequest") -> None:
         """
@@ -1069,3 +1063,44 @@ class PatientTests(DemoDatabaseTestCase):
         self.assertIsInstance(p.is_preserved(), bool)
         self.assertIsInstance(p.is_editable, bool)
         self.assertIsInstance(p.user_may_edit(req), bool)
+
+
+class LineageTests(DemoDatabaseTestCase):
+    def create_tasks(self) -> None:
+        # Actually not creating any tasks but we don't want the patients
+        # created by default in the baseclass
+
+        # First record for patient 1
+        self.set_era("2020-01-01")
+
+        self.patient_1 = Patient()
+        self.patient_1.id = 1
+        self._apply_standard_db_fields(self.patient_1)
+        self.dbsession.add(self.patient_1)
+
+        # First ID number record for patient 1
+        self.patient_idnum_1_1 = PatientIdNum()
+        self.patient_idnum_1_1.id = 3
+        self._apply_standard_db_fields(self.patient_idnum_1_1)
+        self.patient_idnum_1_1.patient_id = 1
+        self.patient_idnum_1_1.which_idnum = self.nhs_iddef.which_idnum
+        self.patient_idnum_1_1.idnum_value = 555
+        self.dbsession.add(self.patient_idnum_1_1)
+
+        # Second ID number record for patient 1
+        self.patient_idnum_1_2 = PatientIdNum()
+        self.patient_idnum_1_2.id = 3
+        self._apply_standard_db_fields(self.patient_idnum_1_2)
+        # This one is not current
+        self.patient_idnum_1_2._current = False
+        self.patient_idnum_1_2.patient_id = 1
+        self.patient_idnum_1_2.which_idnum = self.nhs_iddef.which_idnum
+        self.patient_idnum_1_2.idnum_value = 555
+        self.dbsession.add(self.patient_idnum_1_2)
+
+        self.dbsession.commit()
+
+    def test_gen_patient_idnums_even_noncurrent(self) -> None:
+        idnums = list(self.patient_1.gen_patient_idnums_even_noncurrent())
+
+        self.assertEqual(len(idnums), 2)

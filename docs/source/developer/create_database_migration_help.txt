@@ -3,8 +3,7 @@ usage: create_database_migration.py [-h] [--verbose] message
 Create database revision. Note:
 
 - The config used will be that from the environment variable
-  CAMCOPS_CONFIG_FILE (currently '/home/rudolf/Documents/code/camcops/working_l
-  ocal_secret/camcops_py3_test.ini').
+  CAMCOPS_CONFIG_FILE (currently '/path/to/camcops/config_file.ini').
 
 - Alembic compares (a) the current state of the DATABASE to (b) the state of
   the SQLAlchemy metadata (i.e. the CODE). It creates a migration file to

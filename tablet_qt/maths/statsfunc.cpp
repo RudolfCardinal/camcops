@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -22,6 +22,8 @@
 #include <limits>
 #include "maths/eigenfunc.h"
 using namespace Eigen;
+using eigenfunc::ArrayXb;
+
 
 // ============================================================================
 // Static (file-local) definitions
@@ -94,6 +96,18 @@ ArrayXXd oneArray(const ArrayXXd& x)
 }
 
 
+Eigen::ArrayXXd logArray(const Eigen::ArrayXXd& x)
+{
+    return x.log();  // or Eigen::log(x)
+}
+
+
+Eigen::ArrayXXd expArray(const Eigen::ArrayXXd& x)
+{
+    return x.exp();  // or Eigen::exp(x);
+}
+
+
 double logistic(const double x)
 {
     // = 1 / (1 + exp(-x))
@@ -142,6 +156,7 @@ double derivativeOfLogistic(const double x)
     // In R's family.c, logit_mu_eta
     // Let's follow R's method, but improve its sequencing (it calculates opexp
     // when it may ignore the result).
+    // Notation: "opexp" = "one plus exp()".
     if (x > THRESH || x < MTHRESH) {
         return DOUBLE_EPS;
     }
@@ -173,20 +188,36 @@ ArrayXXd logitArray(const ArrayXXd& p)
 }
 
 
+bool alwaysTrue(const ArrayXd& x)
+{
+    Q_UNUSED(x)
+    return true;
+}
+
+
+bool allInteger(const Eigen::ArrayXd& x, double threshold)
+{
+    return ((x - x.round()).abs() <= threshold).all();
+    //       ^^^^^^^^^^^^^
+    //       non-integer part
+    //      ^^^^^^^^^^^^^^^^^^^^^
+    //      absolute non-integer part
+}
+
+
+// ============================================================================
+// Functions for specific GLM families
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// binomial
+// ----------------------------------------------------------------------------
+
 ArrayXXd binomialVariance(const ArrayXXd& mu)
 {
     // - R: binomial()$variance
     // - https://en.wikipedia.org/wiki/Variance_function#Example_.E2.80.93_Bernoulli
     return mu * (1.0 - mu);
-}
-
-
-ArrayXd gaussianDevResids(const ArrayXd& y,
-                          const ArrayXd& mu,
-                          const ArrayXd& wt)
-{
-    // R: gaussian()$dev.resids
-    return wt * ((y - mu).square());
 }
 
 
@@ -211,93 +242,10 @@ ArrayXd binomialDevResids(const ArrayXd& y,
 }
 
 
-double gaussianAIC(const ArrayXd& y,
-                   const ArrayXd& n,
-                   const ArrayXd& mu,
-                   const ArrayXd& wt,
-                   const double dev)
-{
-    // R: gaussian()$aic
-    Q_UNUSED(n)
-    Q_UNUSED(mu)
-    const Index nobs = y.size();
-    return nobs * (std::log(dev / nobs * 2 * PI) + 1) + 2 - wt.log().sum();
-}
-
-
-#ifdef STATSFUNC_OFFER_AIC
-double dbinom(const double x,
-              const int n, const double p, const bool log)
-{
-    // As per R's dbinom.c
-}
-
-
-ArrayXd dbinom(const ArrayXd& x, const ArrayXi& n, const ArrayXd& p,
-               const bool log)
-{
-    // R recycles arguments, I think; we'll ignore that for now.
-    Q_ASSERT(n.size() == x.size());
-    Q_ASSERT(p.size() == x.size());
-    const int len = x.size();
-    ArrayXd d(len);
-    for (int i = 0; i < len; ++i) {
-        d[i] = dbinom(x[i], n[i], p[i], log);
-    }
-}
-
-
-double binomialAIC(const ArrayXd& y,
-                   const ArrayXd& n,
-                   const ArrayXd& mu,
-                   const ArrayXd& wt,
-                   const double dev)
-{
-    // R: binomial()$aic
-    const int nobs = y.size();
-
-    ArrayXd m(nobs);
-    if ((n > 1).any()) {
-        m = n;
-    } else {
-        m = wt;
-    }
-
-    // -2 * sum(ifelse(m > 0,
-    //                 (wt/m),
-    //                 0)      * dbinom(round(m * y),   // x
-    //                                  round(m),       // size
-    //                                  mu,             // prob
-    //                                  log = TRUE)   )
-
-    ArrayXd wt_over_m = (m > 0).select(wt / m, 0);
-    ArrayXd binom_dens = dbinom((m * y).round(), m.round(), mu, true);
-    return -2 * (wt_over_m * binom_dens).sum();
-}
-#endif
-
-
-bool alwaysTrue(const ArrayXd& x)
-{
-    Q_UNUSED(x)
-    return true;
-}
-
-
-bool allInteger(const Eigen::ArrayXd& x, double threshold)
-{
-    return ((x - x.round()).abs() <= threshold).all();
-    //       ^^^^^^^^^^^^^
-    //       non-integer part
-    //      ^^^^^^^^^^^^^^^^^^^^^
-    //      absolute non-integer part
-}
-
-
-bool binomialValidMu(const ArrayXd& x)
+bool binomialValidMu(const ArrayXd& mu)
 {
     // R: binomial()$validmu
-    return x.isFinite().all() && (x > 0 && x < 1).all();
+    return mu.isFinite().all() && (mu > 0 && mu < 1).all();
 }
 
 
@@ -356,6 +304,71 @@ bool binomialInitialize(QStringList& errors,
 }
 
 
+#ifdef STATSFUNC_OFFER_AIC
+double dbinom(const double x,
+              const int n, const double p, const bool log)
+{
+    // As per R's dbinom.c
+}
+
+
+ArrayXd dbinom(const ArrayXd& x, const ArrayXi& n, const ArrayXd& p,
+               const bool log)
+{
+    // R recycles arguments, I think; we'll ignore that for now.
+    Q_ASSERT(n.size() == x.size());
+    Q_ASSERT(p.size() == x.size());
+    const int len = x.size();
+    ArrayXd d(len);
+    for (int i = 0; i < len; ++i) {
+        d[i] = dbinom(x[i], n[i], p[i], log);
+    }
+}
+
+
+double binomialAIC(const ArrayXd& y,
+                   const ArrayXd& n,
+                   const ArrayXd& mu,
+                   const ArrayXd& wt,
+                   const double dev)
+{
+    // R: binomial()$aic
+    const int nobs = y.size();
+
+    ArrayXd m(nobs);
+    if ((n > 1).any()) {
+        m = n;
+    } else {
+        m = wt;
+    }
+
+    // -2 * sum(ifelse(m > 0,
+    //                 (wt/m),
+    //                 0)      * dbinom(round(m * y),   // x
+    //                                  round(m),       // size
+    //                                  mu,             // prob
+    //                                  log = TRUE)   )
+
+    ArrayXd wt_over_m = (m > 0).select(wt / m, 0);
+    ArrayXd binom_dens = dbinom((m * y).round(), m.round(), mu, true);
+    return -2 * (wt_over_m * binom_dens).sum();
+}
+#endif
+
+
+// ----------------------------------------------------------------------------
+// gaussian
+// ----------------------------------------------------------------------------
+
+ArrayXd gaussianDevResids(const ArrayXd& y,
+                          const ArrayXd& mu,
+                          const ArrayXd& wt)
+{
+    // R: gaussian()$dev.resids
+    return wt * ((y - mu).square());
+}
+
+
 bool gaussianInitialize(QStringList& errors,
                         const LinkFunctionFamily& family,
                         Eigen::ArrayXd& y,
@@ -384,6 +397,89 @@ bool gaussianInitialize(QStringList& errors,
 
     return true;
 }
+
+
+#ifdef STATSFUNC_OFFER_AIC
+
+double gaussianAIC(const ArrayXd& y,
+                   const ArrayXd& n,
+                   const ArrayXd& mu,
+                   const ArrayXd& wt,
+                   const double dev)
+{
+    // R: gaussian()$aic
+    Q_UNUSED(n)
+    Q_UNUSED(mu)
+    const Index nobs = y.size();
+    return nobs * (std::log(dev / nobs * 2 * PI) + 1) + 2 - wt.log().sum();
+}
+
+#endif
+
+
+// ----------------------------------------------------------------------------
+// poisson
+// ----------------------------------------------------------------------------
+
+bool poissonValidMu(const Eigen::ArrayXd& mu)
+{
+    return mu.isFinite().all() && (mu > 0).all();
+}
+
+
+ArrayXd poissonDevResids(const ArrayXd& y,
+                         const ArrayXd& mu,
+                         const ArrayXd& wt)
+{
+    // R: poisson()$dev.resids
+    // Original:
+    //      r <- mu * wt
+    //      p <- which(y > 0)
+    //      r[p] <- (wt * (y * log(y/mu) - (y - mu)))[p]
+    //      2 * r
+
+    const ArrayXb p = y > 0;
+    const ArrayXd r = p.select(
+        // where p true (y > 0):
+        wt * (y * log(y / mu) - (y - mu)),
+        // where p false (y = 0):
+        wt * mu
+    );
+    return 2 * r;
+}
+
+
+bool poissonInitialize(QStringList& errors,
+                       const LinkFunctionFamily& family,
+                       Eigen::ArrayXd& y,
+                       Eigen::ArrayXd& n,
+                       Eigen::ArrayXd& m,
+                       Eigen::ArrayXd& weights,
+                       Eigen::ArrayXd& start,
+                       Eigen::ArrayXd& etastart,
+                       Eigen::ArrayXd& mustart)
+{
+    // R: poisson()$initialize
+
+    Q_UNUSED(errors)
+    Q_UNUSED(family)
+    Q_UNUSED(m)
+    Q_UNUSED(weights)
+    Q_UNUSED(start)
+    Q_UNUSED(etastart)
+
+    if ((y < 0).any()) {
+        qWarning() << "negative values not allowed for the 'Poisson' family";
+        return false;
+    }
+
+    const Index nobs = y.size();
+    n = ArrayXd::Ones(nobs);
+    mustart = y + 0.1;
+
+    return true;
+}
+
 
 // ============================================================================
 // Solving

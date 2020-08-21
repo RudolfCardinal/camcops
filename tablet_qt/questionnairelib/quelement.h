@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -42,9 +42,10 @@ class QuElement : public QObject
     friend class Questionnaire;
     friend class QuPage;
     friend class QuFlowContainer;
+    friend class QuGridContainer;
     friend class QuHorizontalContainer;
     friend class QuVerticalContainer;
-    friend class QuGridContainer;
+    friend class QuZoomContainer;
     friend class SettingsMenu;
     friend class WidgetTestMenu;
 

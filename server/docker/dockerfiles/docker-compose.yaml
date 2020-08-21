@@ -1,0 +1,345 @@
+# server/docker/dockerfiles/docker-compose.yaml
+#
+# See the help!
+# https://camcops.readthedocs.io/en/latest/administrator/docker.html
+
+# =============================================================================
+# Environment variables used (see help)
+# =============================================================================
+#
+# Those with defaults in the .env file in this directory:
+#
+#   CAMCOPS_DOCKER_CAMCOPS_CONFIG_FILENAME
+#   CAMCOPS_DOCKER_CAMCOPS_HOST_PORT
+#   CAMCOPS_DOCKER_CAMCOPS_INTERNAL_PORT
+#   CAMCOPS_DOCKER_FLOWER_HOST_PORT
+#   CAMCOPS_DOCKER_MYSQL_CAMCOPS_DATABASE_NAME
+#   CAMCOPS_DOCKER_MYSQL_CAMCOPS_USER_NAME
+#   CAMCOPS_DOCKER_MYSQL_HOST_PORT
+#   COMPOSE_PROJECT_NAME -- used by Docker Compose itself
+#
+# Those without defaults:
+#
+#   CAMCOPS_DOCKER_CONFIG_HOST_DIR
+#   CAMCOPS_DOCKER_MYSQL_CAMCOPS_USER_PASSWORD
+#   CAMCOPS_DOCKER_MYSQL_ROOT_PASSWORD
+
+
+# =============================================================================
+# docker-compose file syntax version
+# =============================================================================
+
+version: "3.5"
+    # - Ubuntu 18.04 LTS comes with docker-compose version 1.17.1 and docker
+    #   version 19.03.6. The help seems to suggest that this should support
+    #   version 3.7 (certainly, the Docker Engine version is high enough at
+    #   19.03.0+), but it doesn't (suggesting the docker-compose version is too
+    #   old). Empirically, the highest supported version appears to be 3.5.
+    #
+    # - Version 3.7 works fine with whatever comes with Ubuntu 20.04 LTS.
+    #
+    # - The docker-compose release notes indicate that v3.7 was supported by
+    #   docker-compose 1.22.0, and v3.6 by docker-compose 1.20.0.
+    #
+    # - We're not using v3.6+ features yet, so fine to stick with v3.5.
+    #
+    # - https://docs.docker.com/compose/compose-file/compose-versioning/
+    # - https://docs.docker.com/compose/compose-file/compose-versioning/#version-3
+    # - https://github.com/docker/compose/releases
+
+
+# =============================================================================
+# Data volumes
+# =============================================================================
+
+volumes:
+    # See Docker Compose "Volume configuration reference". Note that the syntax
+    # here is not the same as for "volumes:" within a service (container).
+
+    db_data_volume:
+        # Without any options, the default driver (usually "local") is used.
+        # This will probably create a volume at
+        # /var/lib/docker/volumes/VOLUME/_data on the host.
+
+    rabbitmq_volume:
+        # Again, we make it explicit (or we get Docker gibberish names).
+        
+    camcops_config_volume:
+        # Should contain a file whose name is set by the environment variable
+        # CAMCOPS_DOCKER_CAMCOPS_CONFIG_FILENAME.
+        #
+        # The alternative to mounting a directory is Docker "configs" but these
+        # are a bit different and don't allow single-file bind-mounting under
+        # Windows. See https://docs.docker.com/engine/swarm/configs/
+        
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            # We use environment variable substitution.
+            # https://docs.docker.com/compose/compose-file/#variable-substitution
+            device: "${CAMCOPS_DOCKER_CAMCOPS_CONFIG_FILENAMECAMCOPS_DOCKER_CONFIG_HOST_DIR}"
+
+    camcops_tmp_volume:
+        # Space to put lock files, user downloads, etc., that need to be shared
+        # between containers, but which are expected to be temporary.
+
+
+# =============================================================================
+# Containers (services)
+# =============================================================================
+
+services:
+
+    # -------------------------------------------------------------------------
+    # MySQL container, providing database services
+    # -------------------------------------------------------------------------
+
+    mysql:
+
+        # Base Docker image. We use a standard MySQL image; see
+        # https://hub.docker.com/_/mysql
+        image: mysql:5.7
+
+        # Restart policy.
+        # - I am slightly confused between "when the computer reboots" and
+        #   "if the container crashes".
+        # - See Docker Compose docs, but also
+        #   https://stackoverflow.com/questions/30449313/how-do-i-make-a-docker-container-start-automatically-on-system-boot
+        # - Empirically:
+        #   - "no" means "neither on reboot nor container crash".
+        #   - "always" includes reboots and crashes.
+        #   - The other options are "on-failure" and "unless-stopped".
+        #   - There doesn't appear to be an option for "restart on reboot, but
+        #     leave stopped if it crashed".
+        # - So: always.
+        restart: "always"
+
+        # Environment variables.
+        # See https://hub.docker.com/_/mysql
+        environment:
+            # Create database with this name at first container startup.
+            MYSQL_DATABASE: "${CAMCOPS_DOCKER_MYSQL_CAMCOPS_DATABASE_NAME}"
+
+            # Create user with this name at first container startup, with
+            # GRANT ALL access to the database named in MYSQL_DATABASE.
+            MYSQL_USER: "${CAMCOPS_DOCKER_MYSQL_CAMCOPS_USER_NAME}"
+
+            # Password for MYSQL_USER (set at first container startup).
+            MYSQL_PASSWORD: "${CAMCOPS_DOCKER_MYSQL_CAMCOPS_USER_PASSWORD}"
+
+            # Password for user "root" (set at first container startup).
+            MYSQL_ROOT_PASSWORD: "${CAMCOPS_DOCKER_MYSQL_ROOT_PASSWORD}"
+            
+        # Expose ports from the container, "publishing" them to the host.
+        # For example, if you offer a MySQL server via "9999:3306", you should
+        # be able to run
+        #
+        #   $ mysql --host=127.0.0.1 --port=9999 --user=root --password
+        #
+        # on the host, and connect to the server.
+        ports:
+            # Short format is: "HOST_PORT:CONTAINER_PORT".
+            # Should always use explicit string format here.
+            # MySQL offers port 3306 by default.
+            - "${CAMCOPS_DOCKER_MYSQL_HOST_PORT}:3306"
+
+        # Expose ports to linked services without publishing them to the host.
+        # Specify the container (internal) port.
+        expose:
+            - "3306"
+
+        # Note that if you do not specify mount points, some are created
+        # anyway; for example, the MySQL image wants something at
+        # /var/lib/mysql (internally) and on the hose this might actually be
+        # e.g. /var/lib/docker/volumes/<gibberish>/_data
+        volumes:
+            # Format is "[SOURCE:]TARGET[:MODE]", such as
+            # "VOLUME_NAME:CONTAINER_PATH" to use a named volume.
+            - db_data_volume:/var/lib/mysql
+
+
+    # -------------------------------------------------------------------------
+    # RabbitMQ container, providing a message queue.
+    # -------------------------------------------------------------------------
+    # AMQP security is not a concern because this is only used internally to
+    # the Docker container group.
+
+    rabbitmq:
+
+        # Base Docker image.
+        image: rabbitmq:3.8.5
+
+        # Restart policy
+        restart: "always"
+
+        # Expose ports to linked services without publishing them to the host.
+        # Specify the container (internal) port.
+        expose:
+            # The default RabbitMQ port is 5672.
+            - "5672"
+
+        # Specify volumes by name, having explored the default container to
+        # find out what it creates (and where it mounts it) otherwise.
+        # (You can't have no volume.)
+        volumes:
+            - rabbitmq_volume:/var/lib/rabbitmq
+
+
+    # -------------------------------------------------------------------------
+    # CamCOPS image, with build commands (to create from the Dockerfile),
+    # running the workers.
+    # -------------------------------------------------------------------------
+
+    camcops_workers:
+        # Build a container from a Dockerfile.
+        build:
+            # Context for Docker to build the image (relative to this file).
+            context: ../../
+            
+            # Filename of the Dockerfile to use, relative to the context.
+            dockerfile: docker/dockerfiles/camcops.Dockerfile
+        
+        # If you specify "image" as well as "build", Compose names the built
+        # image. Syntax is "IMAGE[:TAG]".
+        image: camcops_server
+
+        # Start order. See docs -- note that this is "order to start", not
+        # "wait for startup to complete".
+        depends_on:
+            - mysql
+            - rabbitmq
+
+        # Restart policy
+        restart: "always"
+
+        # Mount config file directory
+        volumes:
+            - camcops_config_volume:/camcops/cfg
+            - camcops_tmp_volume:/camcops/tmp
+
+        # Environment variables
+        environment:
+            CAMCOPS_CONFIG_FILE: "/camcops/cfg/${CAMCOPS_DOCKER_CAMCOPS_CONFIG_FILENAME}"
+
+        # Command to execute
+        command: [
+            "wait-for-it", "--host=mysql", "--port=3306", "--timeout=0", "--strict", "--",
+            "wait-for-it", "--host=rabbitmq", "--port=5672", "--timeout=0", "--strict", "--",
+            "/camcops/venv/bin/camcops_server", "launch_workers",
+        ]
+
+
+    # -------------------------------------------------------------------------
+    # Re-use the CamCOPS image, but run the scheduler.
+    # -------------------------------------------------------------------------
+
+    camcops_scheduler:
+
+        # Re-use the image built above.
+        image: camcops_server
+
+        # Start order.
+        depends_on:
+            - camcops_workers
+
+        # Restart policy
+        restart: "always"
+
+        # Mount config file directory
+        volumes:
+            - camcops_config_volume:/camcops/cfg
+            - camcops_tmp_volume:/camcops/tmp
+
+        # Environment variables
+        environment:
+            CAMCOPS_CONFIG_FILE: "/camcops/cfg/${CAMCOPS_DOCKER_CAMCOPS_CONFIG_FILENAME}"
+
+        # Command to execute
+        command: [
+            "wait-for-it", "--host=mysql", "--port=3306", "--timeout=0", "--strict", "--",
+            "wait-for-it", "--host=rabbitmq", "--port=5672", "--timeout=0", "--strict", "--",
+            "/camcops/venv/bin/camcops_server", "launch_scheduler",
+        ]
+
+
+    # -------------------------------------------------------------------------
+    # Re-use the CamCOPS image, but run the CamCOPS web server.
+    # -------------------------------------------------------------------------
+
+    camcops_server:
+        # Re-use the image built above.
+        image: camcops_server
+
+        # Start order.
+        depends_on:
+            - camcops_scheduler
+
+        # Restart policy
+        restart: "always"
+        
+        # Publish port to host.
+        ports:
+            - "${CAMCOPS_DOCKER_CAMCOPS_HOST_PORT}:${CAMCOPS_DOCKER_CAMCOPS_INTERNAL_PORT}"
+
+        # Mount config file directory
+        volumes:
+            - camcops_config_volume:/camcops/cfg
+            - camcops_tmp_volume:/camcops/tmp
+
+        # Environment variables
+        environment:
+            CAMCOPS_CONFIG_FILE: "/camcops/cfg/${CAMCOPS_DOCKER_CAMCOPS_CONFIG_FILENAME}"
+
+        # Command to execute
+        # Can use shell-style or list-style syntax.
+        command: [
+            "wait-for-it", "--host=mysql", "--port=3306", "--timeout=0", "--strict", "--",
+            "wait-for-it", "--host=rabbitmq", "--port=5672", "--timeout=0", "--strict", "--",
+            "/camcops/venv/bin/camcops_server", "serve_cherrypy",
+            # "serve_gunicorn",
+        ]
+
+
+    # -------------------------------------------------------------------------
+    # Apache?
+    # -------------------------------------------------------------------------
+    # We considered Apache, as the front-end web server providing SSL.
+    # This would be via the "httpd:2.4" image, or similar.
+    # However, since Docker can guarantee us a Linux kernel, we can just use
+    # SSL via Gunicorn directly, and this saves us some complexity.
+
+
+    # -------------------------------------------------------------------------
+    # CamCOPS background monitor, using Flower
+    # -------------------------------------------------------------------------
+
+    flower:
+        # Re-use the image built above.
+        image: camcops_server
+
+        # Start order.
+        depends_on:
+            - camcops_server
+
+        # Restart policy
+        restart: "always"
+
+        # Publish port to host.
+        ports:
+            # Default internal Flower port is 5555.
+            - "${CAMCOPS_DOCKER_FLOWER_HOST_PORT}:5555"
+
+        # Mount config file directory
+        volumes:
+            - camcops_config_volume:/camcops/cfg
+            - camcops_tmp_volume:/camcops/tmp
+
+        # Environment variables
+        environment:
+            CAMCOPS_CONFIG_FILE: "/camcops/cfg/${CAMCOPS_DOCKER_CAMCOPS_CONFIG_FILENAME}"
+
+        command: [
+            "wait-for-it", "--host=rabbitmq", "--port=5672", "--timeout=0", "--strict", "--",
+            "/camcops/venv/bin/camcops_server", "launch_monitor",
+        ]

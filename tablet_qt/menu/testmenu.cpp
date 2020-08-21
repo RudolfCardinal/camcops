@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -187,8 +187,18 @@ void TestMenu::makeItems()
             spanner
         ),
         MenuItem(
-            tr("Test logistic regression, and the underlying generalized linear model (GLM)"),
+            tr("Test logistic regression, and the underlying generalized linear model (GLM) (binomial)"),
             std::bind(&TestMenu::testLogisticRegression, this),
+            spanner
+        ),
+        MenuItem(
+            tr("Test GLM: Gaussian"),
+            std::bind(&TestMenu::testGLMGaussian, this),
+            spanner
+        ),
+        MenuItem(
+            tr("Test GLM: Poisson"),
+            std::bind(&TestMenu::testGLMPoisson, this),
             spanner
         ),
         MAKE_MENU_MENU_ITEM(WhiskerTestMenu, m_app),
@@ -460,7 +470,7 @@ summary(model)
 # R gives coefficients: intercept = -4.0777, x = 1.5046
 # (as per Wikipedia also)
 
-Our results: intercept = %1, slope = %2)
+CamCOPS results: intercept = %1, slope = %2
         )").arg(ld1.intercept()).arg(ld1.slope()));
 
     qInfo() << Q_FUNC_INFO
@@ -521,7 +531,6 @@ OUT time to fit (ms): %10
         crosscheck_x(i) = ld2.x(p);
     }
 
-#ifdef GLM_OFFER_R_GLM_FIT
     qInfo() << Q_FUNC_INFO
             << "1d. LogisticRegression(), IRLS implemented as per R glm.fit";
     LogisticRegression lr1d(Glm::SolveMethod::IRLS_R_glmfit);
@@ -530,7 +539,6 @@ OUT time to fit (ms): %10
     const VectorXd coeffs1d = lr1d.coefficients();
     results.append(QString("With our implementation of R's glm.fit IRLS: "
                            "%1").arg(qStringFromEigenMatrixOrArray(coeffs1d)));
-#endif
 
     results.append(QString(R"(
 Now some silly things:
@@ -602,7 +610,6 @@ CamCOPS: coefficients: IRLS-SVD-Newton: %2
             .arg(qStringFromEigenMatrixOrArray(coeffs2a),
                  qStringFromEigenMatrixOrArray(coeffs2b)));
 
-#ifdef GLM_OFFER_R_GLM_FIT
     qInfo() << Q_FUNC_INFO << "2c. And again with the R glm.fit method.";
     LogisticRegression lr2c(Glm::SolveMethod::IRLS_R_glmfit);
     lr2c.setVerbose(true);
@@ -611,7 +618,6 @@ CamCOPS: coefficients: IRLS-SVD-Newton: %2
     results.append(QString(
            "CamCOPS: coefficients: RNC implementation of R's "
            "glm.fit IRLS: %1").arg(qStringFromEigenMatrixOrArray(coeffs2c)));
-#endif
 
     /*
 
@@ -666,8 +672,105 @@ Rcpp
 
     */
 
+    uifunc::alertLogMessageBox(
+                results.join("\n"),
+                tr("Test logistic regression and binomial GLM"),
+                false);
+}
+
+
+void TestMenu::testGLMGaussian()
+{
+    using namespace eigenfunc;
+    using namespace Eigen;
+    QStringList results;
+
+    const int n = 20;
+    MatrixXd x(n, 1);
+    x <<    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1;
+    VectorXd y(n);
+    y <<    10.073, 10.006, 9.922, 10.172,
+            10.001, 10.588, 9.708, 10.451,
+            10.672, 10.390,
+            22.398, 23.426, 21.437, 21.459,
+            16.693, 18.478, 17.298, 22.090,
+            18.551, 22.266;
+    Glm model(x, y, LINK_FN_FAMILY_GAUSSIAN);
+    results.append(QString(R"(
+# R code:
+
+d <- data.frame(
+    x = c(rep(0, 10), rep(1, 10)),
+    y = c(10.073, 10.006, 9.922, 10.172,
+          10.001, 10.588, 9.708, 10.451,
+          10.672, 10.390,  # from rnorm(n=10, mean=10, sd=0.5)
+          22.398, 23.426, 21.437, 21.459,
+          16.693, 18.478, 17.298, 22.090,
+          18.551, 22.266)  # from rnorm(n=10, mean=20, sd=4)
+)
+model <- glm(y ~ x, family = gaussian(), data = d)
+summary(model)
+predict(model)  # link and response are the same for gaussian()
+
+# R gives coefficients: intercept = 10.1983, x = 10.2113
+
+CamCOPS results:
+- fitted: %1
+- coefficients: %2
+- predicted: %3
+    )").arg(
+        model.fitted() ? "Y" : "N",
+        qStringFromEigenMatrixOrArray(model.coefficients()),
+        qStringFromEigenMatrixOrArray(model.predict())
+    ));
+
     uifunc::alertLogMessageBox(results.join("\n"),
-                               tr("Test logistic regression"), false);
+                               tr("Test GLM: Gaussian"), false);
+}
+
+
+void TestMenu::testGLMPoisson()
+{
+    using namespace eigenfunc;
+    using namespace Eigen;
+    QStringList results;
+
+    const int n = 20;
+    MatrixXd x(n, 1);
+    x <<    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1;
+    VectorXd y(n);
+    y <<     7,  5, 16,  7, 11,  7, 18,  5, 10, 14,
+            22, 20, 15, 22, 28, 12, 24, 25, 13, 18;
+    Glm model(x, y, LINK_FN_FAMILY_POISSON);
+    results.append(QString(R"(
+# R code:
+
+d <- data.frame(
+    x = c(rep(0, 10), rep(1, 10)),
+    y = c( 7,  5, 16,  7, 11,  7, 18,  5, 10, 14,  # from rpois(n=10, lambda=10)
+          22, 20, 15, 22, 28, 12, 24, 25, 13, 18)  # from rpois(n=10, lambda=20)
+)
+model <- glm(y ~ x, family = poisson(), data = d)
+summary(model)
+predict(model, type = "link")  # eta, the linear predictor; NB the DEFAULT for predict.glm
+predict(model, type = "response")  # mu, the prediction of y
+
+# R gives coefficients: intercept = 2.3026, x = 0.6881
+
+CamCOPS results:
+- fitted: %1
+- coefficients: %2
+- predicted: %3
+    )").arg(
+        model.fitted() ? "Y" : "N",
+        qStringFromEigenMatrixOrArray(model.coefficients()),
+        qStringFromEigenMatrixOrArray(model.predict())
+    ));
+
+    uifunc::alertLogMessageBox(results.join("\n"),
+                               tr("Test GLM: Poisson"), false);
 }
 
 

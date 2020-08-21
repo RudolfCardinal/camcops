@@ -31,8 +31,8 @@ client.**
 
 from collections import OrderedDict
 import logging
-from typing import (Any, Callable, Dict, Generator, List, Optional, Set, Tuple,
-                    Type, TYPE_CHECKING, TypeVar, Union)
+from typing import (Any, Callable, Dict, Generator, Iterable, List, Optional,
+                    Set, Tuple, Type, TYPE_CHECKING, TypeVar, Union)
 
 from cardinal_pythonlib.logs import BraceStyleAdapter
 from cardinal_pythonlib.sqlalchemy.orm_inspect import gen_columns
@@ -748,13 +748,9 @@ class GenericTabletRecordMixin(object):
         Generates all ancillary objects of this object, even non-current
         ones.
         """
-        seen = set()  # type: Set[GenericTabletRecordMixin]
-        for ancillary in self.gen_ancillary_instances():
-            for lineage_member in ancillary.get_lineage():
-                if lineage_member in seen:
-                    continue
-                seen.add(lineage_member)
-                yield lineage_member
+        for lineage_member in self._gen_unique_lineage_objects(
+                self.gen_ancillary_instances()):
+            yield lineage_member
 
     def gen_blobs(self) -> Generator["Blob", None, None]:
         """
@@ -771,16 +767,9 @@ class GenericTabletRecordMixin(object):
         """
         Generates all BLOBs owned by this object, even non-current ones.
         """
-        seen = set()  # type: Set["Blob"]
-        for blob in self.gen_blobs():
-            if blob is None:
-                continue
-            for lineage_member in blob.get_lineage():  # type: "Blob"
-                if lineage_member in seen:
-                    continue
-                # noinspection PyTypeChecker
-                seen.add(lineage_member)
-                yield lineage_member
+        for lineage_member in self._gen_unique_lineage_objects(
+                self.gen_blobs()):  # type: "Blob"
+            yield lineage_member
 
     def get_lineage(self) -> List["GenericTabletRecordMixin"]:
         """
@@ -789,6 +778,8 @@ class GenericTabletRecordMixin(object):
         - of the same class;
         - matching on id/device_id/era;
         - including both current and any historical non-current versions.
+
+        Will include the "self" object.
 
         """
         dbsession = SqlASession.object_session(self)
@@ -800,6 +791,26 @@ class GenericTabletRecordMixin(object):
             .filter(cls._era == self._era)
         )
         return list(q)
+
+    @staticmethod
+    def _gen_unique_lineage_objects(
+            collection: Iterable["GenericTabletRecordMixin"]) \
+            -> Generator["GenericTabletRecordMixin", None, None]:
+        """
+        Given an iterable of database records, generate all related lineage
+        objects for each of them (via :meth:`get_lineage`) that are unique by
+        PK.
+        """
+        seen_pks = set()  # type: Set[int]
+        for item in collection:
+            if item is None:
+                continue
+            for lineage_member in item.get_lineage():
+                pk = lineage_member.get_pk()
+                if pk in seen_pks:
+                    continue
+                seen_pks.add(pk)
+                yield lineage_member
 
     # -------------------------------------------------------------------------
     # Retrieving a linked record by client ID

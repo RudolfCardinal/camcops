@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -62,7 +62,7 @@ public:
     bool show_widget_stylesheets = false;
     // ... the CSS attached by the user
 
-    int spaces_per_level = 4;
+    int spaces_per_level = 4;  // indentation
 
     bool use_ultimate_parent = false;
     // ... travel up to the ultimate parent before travelling down

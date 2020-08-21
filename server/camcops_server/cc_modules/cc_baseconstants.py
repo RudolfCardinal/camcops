@@ -42,7 +42,8 @@ import sys
 # Environment variable names
 # =============================================================================
 
-ENVVAR_CONFIG_FILE = "CAMCOPS_CONFIG_FILE"
+ENVVAR_CONFIG_FILE = "CAMCOPS_CONFIG_FILE"  # external or internal
+
 
 # =============================================================================
 # Directories and filenames
@@ -50,6 +51,9 @@ ENVVAR_CONFIG_FILE = "CAMCOPS_CONFIG_FILE"
 
 _this_directory = dirname(abspath(__file__))  # cc_modules
 CAMCOPS_SERVER_DIRECTORY = abspath(join(_this_directory, pardir))  # camcops_server  # noqa
+
+if "GENERATING_CAMCOPS_DOCS" in os.environ:
+    CAMCOPS_SERVER_DIRECTORY = "/path/to/camcops/server"
 
 ALEMBIC_BASE_DIR = CAMCOPS_SERVER_DIRECTORY
 
@@ -85,11 +89,13 @@ else:
 
 ALEMBIC_CONFIG_FILENAME = join(ALEMBIC_BASE_DIR, 'alembic.ini')
 
+
 # =============================================================================
 # Significant table names
 # =============================================================================
 
 ALEMBIC_VERSION_TABLE = "_alembic_version"
+
 
 # =============================================================================
 # URLs
@@ -97,12 +103,14 @@ ALEMBIC_VERSION_TABLE = "_alembic_version"
 
 DOCUMENTATION_URL = "https://camcops.readthedocs.io/"
 
+
 # =============================================================================
 # Special environment detection
 # =============================================================================
 
 # Is this program running on readthedocs.org?
 ON_READTHEDOCS = os.environ.get('READTHEDOCS') == 'True'
+
 
 # =============================================================================
 # Exit codes

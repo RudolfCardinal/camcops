@@ -18,8 +18,10 @@
     along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
 
 
-Installing third-party software
-===============================
+(MANUAL) Installing third-party software
+========================================
+
+.. include:: include_this_is_manual_see_docker.rst
 
 This sections contains some instructions and tips on installing third-party
 software. It's particularly relevant for Windows, which doesn't have a good "X

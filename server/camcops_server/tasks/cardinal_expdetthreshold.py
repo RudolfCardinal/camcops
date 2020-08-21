@@ -38,8 +38,8 @@ from sqlalchemy.sql.sqltypes import Float, Integer, Text, UnicodeText
 
 from camcops_server.cc_modules.cc_constants import (
     CssClass,
-    FULLWIDTH_PLOT_WIDTH,
-    WHOLE_PANEL,
+    MatplotlibConstants,
+    PlotDefaults,
 )
 from camcops_server.cc_modules.cc_db import (
     ancillary_relationship,
@@ -302,6 +302,25 @@ class CardinalExpDetThreshold(TaskHasPatientMixin, Task):
         return bool(self.finished)
 
     def get_trial_html(self, req: CamcopsRequest) -> str:
+        """
+        Note re plotting markers without lines:
+
+        .. code-block:: python
+
+            import matplotlib.pyplot as plt
+
+            fig, ax = plt.subplots()
+            ax.plot([1, 2], [1, 2], marker="+", color="r", linestyle="-")
+            ax.plot([1, 2], [2, 1], marker="o", color="b", linestyle="None")
+            fig.savefig("test.png")
+            # ... the "absent" line does NOT "cut" the red one.
+
+        Args:
+            req:
+
+        Returns:
+
+        """
         trialarray = self.trials
         html = CardinalExpDetThresholdTrial.get_html_table_header()
         for t in trialarray:
@@ -314,13 +333,16 @@ class CardinalExpDetThreshold(TaskHasPatientMixin, Task):
 
         # Add figures
 
-        figsize = (FULLWIDTH_PLOT_WIDTH/2, FULLWIDTH_PLOT_WIDTH/2)
+        figsize = (
+            PlotDefaults.FULLWIDTH_PLOT_WIDTH / 2,
+            PlotDefaults.FULLWIDTH_PLOT_WIDTH / 2
+        )
         jitter_step = 0.02
         dp_to_consider_same_for_jitter = 3
         y_extra_space = 0.1
         x_extra_space = 0.02
         trialfig = req.create_figure(figsize=figsize)
-        trialax = trialfig.add_subplot(WHOLE_PANEL)
+        trialax = trialfig.add_subplot(MatplotlibConstants.WHOLE_PANEL)
         notcalc_detected_x = []
         notcalc_detected_y = []
         notcalc_missed_x = []
@@ -361,20 +383,55 @@ class CardinalExpDetThreshold(TaskHasPatientMixin, Task):
                 else:
                     catch_missed_x.append(x)
                     catch_missed_y.append(y)
-        trialax.plot(all_x,              all_y,              marker="",
-                     color="0.9", linestyle="-", label=None)
-        trialax.plot(notcalc_missed_x,   notcalc_missed_y,   marker="o",
-                     color="k",   linestyle="None", label="miss")
-        trialax.plot(notcalc_detected_x, notcalc_detected_y, marker="+",
-                     color="k",   linestyle="None", label="hit")
-        trialax.plot(calc_missed_x,      calc_missed_y,      marker="o",
-                     color="r",   linestyle="None", label="miss, scored")
-        trialax.plot(calc_detected_x,    calc_detected_y,    marker="+",
-                     color="b",   linestyle="None", label="hit, scored")
-        trialax.plot(catch_missed_x,     catch_missed_y,     marker="o",
-                     color="g",   linestyle="None", label="CR")
-        trialax.plot(catch_detected_x,   catch_detected_y,   marker="*",
-                     color="g",   linestyle="None", label="FA")
+        trialax.plot(
+            all_x, all_y,
+            marker=MatplotlibConstants.MARKER_NONE,
+            color=MatplotlibConstants.COLOUR_GREY_50,
+            linestyle=MatplotlibConstants.LINESTYLE_SOLID,
+            label=None
+        )
+        trialax.plot(
+            notcalc_missed_x, notcalc_missed_y,
+            marker=MatplotlibConstants.MARKER_CIRCLE,
+            color=MatplotlibConstants.COLOUR_BLACK,
+            linestyle=MatplotlibConstants.LINESTYLE_NONE,
+            label="miss"
+        )
+        trialax.plot(
+            notcalc_detected_x, notcalc_detected_y,
+            marker=MatplotlibConstants.MARKER_PLUS,
+            color=MatplotlibConstants.COLOUR_BLACK,
+            linestyle=MatplotlibConstants.LINESTYLE_NONE,
+            label="hit"
+        )
+        trialax.plot(
+            calc_missed_x, calc_missed_y,
+            marker=MatplotlibConstants.MARKER_CIRCLE,
+            color=MatplotlibConstants.COLOUR_RED,
+            linestyle=MatplotlibConstants.LINESTYLE_NONE,
+            label="miss, scored"
+        )
+        trialax.plot(
+            calc_detected_x, calc_detected_y,
+            marker=MatplotlibConstants.MARKER_PLUS,
+            color=MatplotlibConstants.COLOUR_BLUE,
+            linestyle=MatplotlibConstants.LINESTYLE_NONE,
+            label="hit, scored"
+        )
+        trialax.plot(
+            catch_missed_x, catch_missed_y,
+            marker=MatplotlibConstants.MARKER_CIRCLE,
+            color=MatplotlibConstants.COLOUR_GREEN,
+            linestyle=MatplotlibConstants.LINESTYLE_NONE,
+            label="CR"
+        )
+        trialax.plot(
+            catch_detected_x, catch_detected_y,
+            marker=MatplotlibConstants.MARKER_STAR,
+            color=MatplotlibConstants.COLOUR_GREEN,
+            linestyle=MatplotlibConstants.LINESTYLE_NONE,
+            label="FA"
+        )
         leg = trialax.legend(
             numpoints=1,
             fancybox=True,  # for set_alpha (below)
@@ -393,7 +450,7 @@ class CardinalExpDetThreshold(TaskHasPatientMixin, Task):
         fitfig = None
         if self.k is not None and self.theta is not None:
             fitfig = req.create_figure(figsize=figsize)
-            fitax = fitfig.add_subplot(WHOLE_PANEL)
+            fitax = fitfig.add_subplot(MatplotlibConstants.WHOLE_PANEL)
             detected_x = []
             detected_x_approx = []
             detected_y = []
@@ -418,12 +475,23 @@ class CardinalExpDetThreshold(TaskHasPatientMixin, Task):
                         missed_x_approx.append(approx_x)
             fit_x = np.arange(0.0 - x_extra_space, 1.0 + x_extra_space, 0.001)
             fit_y = logistic(fit_x, self.k, self.theta)
-            fitax.plot(fit_x,      fit_y,
-                       color="g", linestyle="-")
-            fitax.plot(missed_x,   missed_y,   marker="o",
-                       color="r", linestyle="None")
-            fitax.plot(detected_x, detected_y, marker="+",
-                       color="b", linestyle="None")
+            fitax.plot(
+                fit_x, fit_y,
+                color=MatplotlibConstants.COLOUR_GREEN,
+                linestyle=MatplotlibConstants.LINESTYLE_SOLID
+            )
+            fitax.plot(
+                missed_x, missed_y,
+                marker=MatplotlibConstants.MARKER_CIRCLE,
+                color=MatplotlibConstants.COLOUR_RED,
+                linestyle=MatplotlibConstants.LINESTYLE_NONE
+            )
+            fitax.plot(
+                detected_x, detected_y,
+                marker=MatplotlibConstants.MARKER_PLUS,
+                color=MatplotlibConstants.COLOUR_BLUE,
+                linestyle=MatplotlibConstants.LINESTYLE_NONE
+            )
             fitax.set_ylim(0 - y_extra_space, 1 + y_extra_space)
             fitax.set_xlim(np.amin(all_x) - x_extra_space,
                            np.amax(all_x) + x_extra_space)
@@ -432,8 +500,18 @@ class CardinalExpDetThreshold(TaskHasPatientMixin, Task):
                 x = inv_logistic(y, self.k, self.theta)
                 marker_points.append((x, y))
             for p in marker_points:
-                fitax.plot([p[0], p[0]], [-1, p[1]], color="0.5", linestyle=":")
-                fitax.plot([-1, p[0]], [p[1], p[1]], color="0.5", linestyle=":")
+                fitax.plot(
+                    [p[0], p[0]],  # x
+                    [-1, p[1]],  # y
+                    color=MatplotlibConstants.COLOUR_GREY_50,
+                    linestyle=MatplotlibConstants.LINESTYLE_DOTTED
+                )
+                fitax.plot(
+                    [-1, p[0]],  # x
+                    [p[1], p[1]],  # y
+                    color=MatplotlibConstants.COLOUR_GREY_50,
+                    linestyle=MatplotlibConstants.LINESTYLE_DOTTED
+                )
             fitax.set_xlabel("Intensity", fontdict=req.fontdict)
             fitax.set_ylabel("Detected? (0=no, 1=yes; jittered)",
                              fontdict=req.fontdict)

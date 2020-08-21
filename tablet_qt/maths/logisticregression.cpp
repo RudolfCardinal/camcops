@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -17,11 +17,8 @@
     along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// #define DEBUG_DESIGN_MATRIX
-
 #include "logisticregression.h"
 #include <QDebug>
-#include "maths/eigenfunc.h"
 #include "maths/linkfunctionfamily.h"
 using namespace Eigen;
 
@@ -166,7 +163,7 @@ void LogisticRegression::fitAddingIntercept(
         const MatrixXd& X,  // predictors, EXCLUDING intercept
         const VectorXi& y)  // depvar
 {
-    const MatrixXd predictors = designMatrix(X);
+    const MatrixXd predictors = addInterceptToPredictors(X);
     fitDirectly(predictors, y);
 }
 
@@ -180,26 +177,20 @@ void LogisticRegression::fitDirectly(
 }
 
 
-MatrixXd LogisticRegression::designMatrix(const MatrixXd& X) const
-{
-    const MatrixXd X_design = eigenfunc::addOnesAsFirstColumn(X);
-#ifdef DEBUG_DESIGN_MATRIX
-    addInfo("Design matrix: " +
-            eigenfunc::qStringFromEigenMatrixOrArray(X_design));
-#endif
-    return X_design;
-}
-
-
 VectorXd LogisticRegression::predictProb() const
 {
     return predict();
 }
 
 
-VectorXd LogisticRegression::predictProb(const MatrixXd& X) const
+VectorXd LogisticRegression::predictProb(const MatrixXd& X,
+                                         bool add_intercept) const
 {
-    return predict(designMatrix(X));
+    if (add_intercept) {
+        return predict(addInterceptToPredictors(X));
+    } else {
+        return predict(X);
+    }
 }
 
 
@@ -221,9 +212,10 @@ VectorXi LogisticRegression::predictBinary(const double threshold) const
 
 
 VectorXi LogisticRegression::predictBinary(const MatrixXd& X,
-                                           const double threshold) const
+                                           const double threshold,
+                                           bool add_intercept) const
 {
-    return binaryFromP(predictProb(X), threshold);
+    return binaryFromP(predictProb(X, add_intercept), threshold);
 }
 
 
@@ -233,7 +225,12 @@ VectorXd LogisticRegression::predictLogit() const
 }
 
 
-VectorXd LogisticRegression::predictLogit(const MatrixXd& X) const
+VectorXd LogisticRegression::predictLogit(const MatrixXd& X,
+                                          bool add_intercept) const
 {
-    return predictEta(designMatrix(X)).matrix();
+    if (add_intercept) {
+        return predictEta(addInterceptToPredictors(X)).matrix();
+    } else {
+        return predictEta(X).matrix();
+    }
 }

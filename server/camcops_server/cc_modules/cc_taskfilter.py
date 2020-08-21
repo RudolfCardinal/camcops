@@ -523,7 +523,7 @@ class TaskFilter(Base):
                     # noinspection PyComparisonWithNone,PyPep8
                     q = q.filter(and_(
                         PatientIdNumIndexEntry.which_idnum == self.must_have_idnum_type,  # noqa
-                        PatientIdNumIndexEntry.idnum_value != None
+                        PatientIdNumIndexEntry.idnum_value != None  # noqa: E711
                     ))
             else:
                 # q = q.join(PatientIdNum) # fails

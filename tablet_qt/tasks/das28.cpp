@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -29,6 +29,7 @@
 #include "questionnairelib/qubutton.h"
 #include "questionnairelib/qugridcell.h"
 #include "questionnairelib/qugridcontainer.h"
+#include "questionnairelib/qulineeditdouble.h"
 #include "questionnairelib/qulineeditinteger.h"
 #include "questionnairelib/quslider.h"
 #include "questionnairelib/quspacer.h"
@@ -72,8 +73,8 @@ Das28::Das28(CamcopsApp& app, DatabaseManager& db, const int load_pk) :
     addFields(getJointFieldNames(), QVariant::Bool);
 
     addField(FN_VAS, QVariant::Int);
-    addField(FN_CRP, QVariant::Int);
-    addField(FN_ESR, QVariant::Int);
+    addField(FN_CRP, QVariant::Double);
+    addField(FN_ESR, QVariant::Double);
 
     load(load_pk);  // MUST ALWAYS CALL from derived Task constructor.
 }
@@ -199,7 +200,7 @@ QVariant Das28::das28Crp() const
 
     return 0.56 * std::sqrt(tenderJointCount()) +
         0.28 * std::sqrt(swollenJointCount()) +
-        0.36 * std::log(crp.toInt() + 1) +
+        0.36 * std::log(crp.toDouble() + 1) +
         0.014 * vas.toInt() +
         0.96;
 }
@@ -216,7 +217,7 @@ QVariant Das28::das28Esr() const
 
     return 0.56 * std::sqrt(tenderJointCount()) +
         0.28 * std::sqrt(swollenJointCount()) +
-        0.70 * std::log(esr.toInt()) +
+        0.70 * std::log(esr.toDouble()) +
         0.014 * vas.toInt();
 }
 
@@ -405,13 +406,13 @@ OpenableWidget* Das28::editor(const bool read_only)
     page->addElement(crp_esr_inst);
 
     page->addElement(new QuText(xstring("crp")));
-    const auto crp_field = new QuLineEditInteger(
-        fieldRef(FN_CRP), CRP_MIN, CRP_MAX);
+    const auto crp_field = new QuLineEditDouble(
+        fieldRef(FN_CRP), CRP_MIN, CRP_MAX, CRP_ESR_DP);
     page->addElement(crp_field);
 
     page->addElement(new QuText(xstring("esr")));
-    const auto esr_field = new QuLineEditInteger(
-        fieldRef(FN_ESR), ESR_MIN, ESR_MAX);
+    const auto esr_field = new QuLineEditDouble(
+        fieldRef(FN_ESR), ESR_MIN, ESR_MAX, CRP_ESR_DP);
     page->addElement(esr_field);
 
     connect(fieldRef(FN_CRP).data(), &FieldRef::valueChanged,

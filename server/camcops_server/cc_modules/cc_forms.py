@@ -167,6 +167,7 @@ from deform.widget import (
 # We use some delayed imports here (search for "delayed import")
 from camcops_server.cc_modules.cc_baseconstants import TEMPLATE_DIR
 from camcops_server.cc_modules.cc_constants import (
+    ConfigParamSite,
     DEFAULT_ROWS_PER_PAGE,
     MINIMUM_PASSWORD_LENGTH,
     SEX_OTHER_UNSPECIFIED,
@@ -278,6 +279,38 @@ def sex_choices(request: "CamcopsRequest") -> List[Tuple[str, str]]:
 
 
 # =============================================================================
+# Deform bug fix: SelectWidget "multiple" attribute
+# =============================================================================
+
+class BugfixSelectWidget(SelectWidget):
+    """
+    Fixes a bug where newer versions of Chameleon (e.g. 3.8.0) render Deform's
+    ``multiple = False`` (in ``SelectWidget``) as this, which is wrong:
+    
+    .. code-block:: none
+
+        <select name="which_idnum" id="deformField2" class=" form-control " multiple="False">
+                                                                            ^^^^^^^^^^^^^^^^
+            <option value="1">CPFT RiO number</option>
+            <option value="2">NHS number</option>
+            <option value="1000">MyHospital number</option>
+        </select>
+
+    ... whereas previous versions of Chameleon (e.g. 3.4) omitted the tag.
+    (I think it's a Chameleon change, anyway! And it's probably a bugfix in
+    Chameleon that exposed a bug in Deform.)
+
+    See :func:`camcops_server.cc_modules.webview.debug_form_rendering`.
+    """  # noqa
+    def __init__(self, multiple=False, **kwargs) -> None:
+        multiple = True if multiple else None  # None, not False
+        super().__init__(multiple=multiple, **kwargs)
+
+
+SelectWidget = BugfixSelectWidget
+
+
+# =============================================================================
 # Mixin for Schema/SchemaNode objects for translation
 # =============================================================================
 
@@ -318,6 +351,7 @@ class TranslatableValidateDangerousOperationNode(
     def after_bind(self, node: SchemaNode, kw: Dict[str, Any]) -> None:
         super().after_bind(node, kw)  # calls set_description()
         _ = self.gettext
+        node.title = _("Danger")
         user_entry = get_child_node(self, "user_entry")
         user_entry.title = _("Validate this dangerous operation")
 
@@ -582,6 +616,9 @@ def make_widget_horizontal(widget: Widget) -> None:
 def make_node_widget_horizontal(node: SchemaNode) -> None:
     """
     Applies Bootstrap "form-inline" styling to the schema node's widget.
+
+    **Note:** often better to use the ``inline=True`` option to the widget's
+    constructor.
     """
     make_widget_horizontal(node.widget)
 
@@ -778,8 +815,7 @@ class MultiTaskSelector(SchemaNode, RequestAwareMixin):
         if Binding.TRACKER_TASKS_ONLY in kw:
             self.tracker_tasks_only = kw[Binding.TRACKER_TASKS_ONLY]
         values, pv = get_values_and_permissible(self.get_task_choices())
-        self.widget = CheckboxChoiceWidget(values=values)
-        make_node_widget_horizontal(self)
+        self.widget = CheckboxChoiceWidget(values=values, inline=True)
         self.validator = Length(min=self.minimum_number)
 
     def get_task_choices(self) -> List[Tuple[str, str]]:
@@ -1007,9 +1043,8 @@ class OptionalSexSelector(OptionalStringNode, RequestAwareMixin):
         self.title = _("Sex")
         choices = sex_choices(self.request)
         values, pv = get_values_and_permissible(choices, True, _("Any"))
-        self.widget = RadioChoiceWidget(values=values)
+        self.widget = RadioChoiceWidget(values=values, inline=True)
         self.validator = OneOf(pv)
-        make_node_widget_horizontal(self)
 
 
 class MandatorySexSelector(MandatoryStringNode, RequestAwareMixin):
@@ -1028,9 +1063,8 @@ class MandatorySexSelector(MandatoryStringNode, RequestAwareMixin):
         self.title = _("Sex")
         choices = sex_choices(self.request)
         values, pv = get_values_and_permissible(choices)
-        self.widget = RadioChoiceWidget(values=values)
+        self.widget = RadioChoiceWidget(values=values, inline=True)
         self.validator = OneOf(pv)
-        make_node_widget_horizontal(self)
 
 
 # -----------------------------------------------------------------------------
@@ -1590,6 +1624,7 @@ class HardWorkConfirmationSchema(CSRFSchema):
     confirm_3_f = BooleanNode(default=True)
     confirm_4_t = BooleanNode(default=False)
 
+    # noinspection PyUnusedLocal
     def after_bind(self, node: SchemaNode, kw: Dict[str, Any]) -> None:
         _ = self.gettext
         confirm_1_t = get_child_node(self, "confirm_1_t")
@@ -2636,11 +2671,6 @@ class DeleteUserSchema(HardWorkConfirmationSchema):
     user_id = HiddenIntegerNode()  # name must match ViewParam.USER_ID
     danger = TranslatableValidateDangerousOperationNode()
 
-    def after_bind(self, node: SchemaNode, kw: Dict[str, Any]) -> None:
-        _ = self.gettext
-        danger = get_child_node(self, "danger")
-        danger.title = _("Danger")
-
 
 class DeleteUserForm(DeleteCancelForm):
     """
@@ -2896,7 +2926,11 @@ class DeliveryModeNode(SchemaNode, RequestAwareMixin):
         _ = request.gettext
         if value == ViewArg.IMMEDIATELY:
             if not request.config.permit_immediate_downloads:
-                raise Invalid(self, _("Disabled by the system administrator"))
+                raise Invalid(
+                    self,
+                    _("Disabled by the system administrator") +
+                    f" [{ConfigParamSite.PERMIT_IMMEDIATE_DOWNLOADS}]"
+                )
         elif value == ViewArg.EMAIL:
             if not request.user.email:
                 raise Invalid(
@@ -2904,7 +2938,11 @@ class DeliveryModeNode(SchemaNode, RequestAwareMixin):
         elif value == ViewArg.DOWNLOAD:
             if not request.user_download_dir:
                 raise Invalid(
-                    self, _("User downloads not configured by administrator"))
+                    self,
+                    _("User downloads not configured by administrator") +
+                    f" [{ConfigParamSite.USER_DOWNLOAD_DIR}, "
+                    f"{ConfigParamSite.USER_DOWNLOAD_MAX_SPACE_MB}]"
+                )
         else:
             raise Invalid(self, _("Bad value"))
 

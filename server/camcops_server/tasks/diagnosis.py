@@ -478,8 +478,8 @@ def get_diagnosis_report_query(req: CamcopsRequest,
             # Note: the following are part of the JOIN, not the WHERE:
             # (or failure to match a row will wipe out the Patient from the
             # OUTER JOIN):
-            aliased_table.c._current == True,
-            aliased_table.c.which_idnum == n,
+            aliased_table.c._current == True,  # noqa: E712
+            aliased_table.c.which_idnum == n,  # noqa: E712
         ))  # noqa: E712
     select_fields += [
         diagnosis_class.when_created.label("when_created"),
@@ -489,7 +489,7 @@ def get_diagnosis_report_query(req: CamcopsRequest,
     ]
     # WHERE...
     wheres = [
-        Patient._current == True,
+        Patient._current == True,  # noqa: E712
         diagnosis_class._current == True,
         item_class._current == True,
     ]  # noqa: E712

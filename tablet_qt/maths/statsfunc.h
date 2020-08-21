@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -70,6 +70,12 @@ double one(double x);
 // Returns an array of ones of the same size as x.
 Eigen::ArrayXXd oneArray(const Eigen::ArrayXXd& x);
 
+// Returns the natural log of x, where x is an array.
+Eigen::ArrayXXd logArray(const Eigen::ArrayXXd& x);
+
+// Returns e^x, where x is an array.
+Eigen::ArrayXXd expArray(const Eigen::ArrayXXd& x);
+
 // Returns the logistic function of x.
 // = 1 / (1 + exp(-x))
 // = exp(x) / (1 + exp(x))
@@ -108,29 +114,47 @@ double logit(double p);
 // Logit function, applied to an array.
 Eigen::ArrayXXd logitArray(const Eigen::ArrayXXd& p);
 
+// Returns true
+bool alwaysTrue(const Eigen::ArrayXd& x);
+
+// Are all of the array elements integer (or within threshold of an integer)?
+bool allInteger(const Eigen::ArrayXd& x, double threshold = 0.001);
+
+
+// ============================================================================
+// Functions for specific GLM families
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// binomial
+// ----------------------------------------------------------------------------
+
 // Binomial variance function.
 // - R: binomial()$variance
 // - https://en.wikipedia.org/wiki/Variance_function#Example_.E2.80.93_Bernoulli
 Eigen::ArrayXXd binomialVariance(const Eigen::ArrayXXd& x);
-
-// R: gaussian()$dev.resids
-Eigen::ArrayXd gaussianDevResids(const Eigen::ArrayXd& y,
-                                 const Eigen::ArrayXd& mu,
-                                 const Eigen::ArrayXd& wt);
 
 // R: binomial_dev_resids()
 Eigen::ArrayXd binomialDevResids(const Eigen::ArrayXd& y,
                                  const Eigen::ArrayXd& mu,
                                  const Eigen::ArrayXd& wt);
 
-#ifdef STATSFUNC_OFFER_AIC
+// R: binomial()$validmu
+bool binomialValidMu(const Eigen::ArrayXd& mu);
 
-// R: gaussian()$aic
-double gaussianAIC(const Eigen::ArrayXd& y,
-                   const Eigen::ArrayXd& n,
-                   const Eigen::ArrayXd& mu,
-                   const Eigen::ArrayXd& wt,
-                   double dev);
+// R: binomial()$initialize
+// Returns: OK?
+bool binomialInitialize(QStringList& errors,
+                        const LinkFunctionFamily& family,
+                        Eigen::ArrayXd& y,
+                        Eigen::ArrayXd& n,
+                        Eigen::ArrayXd& m,
+                        Eigen::ArrayXd& weights,
+                        Eigen::ArrayXd& start,
+                        Eigen::ArrayXd& etastart,
+                        Eigen::ArrayXd& mustart);
+
+#ifdef STATSFUNC_OFFER_AIC
 
 // As per R's dbinom()
 double dbinom(double x, int n, double p, bool log = false);
@@ -150,26 +174,14 @@ double binomialAIC(const Eigen::ArrayXd& y,
 
 #endif
 
-// Returns true
-bool alwaysTrue(const Eigen::ArrayXd& x);
+// ----------------------------------------------------------------------------
+// gaussian
+// ----------------------------------------------------------------------------
 
-// Are all of the array elements integer (or within threshold of an integer)?
-bool allInteger(const Eigen::ArrayXd& x, double threshold = 0.001);
-
-// R: binomial()$validmu
-bool binomialValidMu(const Eigen::ArrayXd& x);
-
-// R: binomial()$initialize
-// Returns: OK?
-bool binomialInitialize(QStringList& errors,
-                        const LinkFunctionFamily& family,
-                        Eigen::ArrayXd& y,
-                        Eigen::ArrayXd& n,
-                        Eigen::ArrayXd& m,
-                        Eigen::ArrayXd& weights,
-                        Eigen::ArrayXd& start,
-                        Eigen::ArrayXd& etastart,
-                        Eigen::ArrayXd& mustart);
+// R: gaussian()$dev.resids
+Eigen::ArrayXd gaussianDevResids(const Eigen::ArrayXd& y,
+                                 const Eigen::ArrayXd& mu,
+                                 const Eigen::ArrayXd& wt);
 
 // R: gaussian()$initialize
 // Returns: OK?
@@ -183,6 +195,55 @@ bool gaussianInitialize(QStringList& errors,
                         Eigen::ArrayXd& etastart,
                         Eigen::ArrayXd& mustart);
 
+#ifdef STATSFUNC_OFFER_AIC
+
+// R: gaussian()$aic
+double gaussianAIC(const Eigen::ArrayXd& y,
+                   const Eigen::ArrayXd& n,
+                   const Eigen::ArrayXd& mu,
+                   const Eigen::ArrayXd& wt,
+                   double dev);
+
+#endif
+
+// ----------------------------------------------------------------------------
+// poisson
+// ----------------------------------------------------------------------------
+
+// R: poisson()$validmu
+bool poissonValidMu(const Eigen::ArrayXd& mu);
+
+
+// R: poisson()$dev.resids
+Eigen::ArrayXd poissonDevResids(const Eigen::ArrayXd& y,
+                                const Eigen::ArrayXd& mu,
+                                const Eigen::ArrayXd& wt);
+
+
+// R: poisson()$initialize
+// Returns: OK?
+bool poissonInitialize(QStringList& errors,
+                       const LinkFunctionFamily& family,
+                       Eigen::ArrayXd& y,
+                       Eigen::ArrayXd& n,
+                       Eigen::ArrayXd& m,
+                       Eigen::ArrayXd& weights,
+                       Eigen::ArrayXd& start,
+                       Eigen::ArrayXd& etastart,
+                       Eigen::ArrayXd& mustart);
+
+
+#ifdef STATSFUNC_OFFER_AIC
+
+// R: poisson()$aic
+double poissonAIC(const Eigen::ArrayXd& y,
+                  const Eigen::ArrayXd& n,
+                  const Eigen::ArrayXd& mu,
+                  const Eigen::ArrayXd& wt,
+                  double dev);  // NOT YET IMPLEMENTED
+
+#endif
+
 
 // ============================================================================
 // Solving
@@ -193,6 +254,7 @@ bool gaussianInitialize(QStringList& errors,
 // sense).
 Eigen::VectorXd svdSolve(const Eigen::MatrixXd& A,
                          const Eigen::VectorXd& b);  // solves Ax = b [or b = Ax + e], for x, minimizing e
+
 
 // ============================================================================
 // GLM support

@@ -7,6 +7,10 @@ build-*/
 
 # Temporary
 *~
+
+# silver searcher
+.ignore
+
 *.tmp
 *.profile
 
@@ -28,4 +32,3 @@ server/camcops_server.egg-info
 working/*
 schema.plantuml
 schema.png
-

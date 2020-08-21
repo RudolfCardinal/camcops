@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -60,35 +60,54 @@ const QString LINK_FAMILY_NAME_POISSON("poisson");
 // - https://stackoverflow.com/questions/10111042/wrap-overloaded-function-via-stdfunction
 
 const LinkFunctionFamily LINK_FN_FAMILY_LOGIT(
-        LINK_FAMILY_NAME_BINOMIAL,  // family_name
-        statsfunc::logitArray,  // link
-        statsfunc::logisticArray,  // inverse link
-        statsfunc::derivativeOfLogisticArray,  // derivative of inverse link
-        statsfunc::binomialVariance,  // variance function
-        statsfunc::binomialDevResids,  // dev_resids_fn
-        statsfunc::alwaysTrue,  // valid_eta_fn
-        statsfunc::binomialValidMu,  // valid_mu_fn
-        statsfunc::binomialInitialize  // initialize_fn
+        // R: binomial(), or binomial(link = "logit") to be explicit.
+        LINK_FAMILY_NAME_BINOMIAL,  // family_name; binomial()$family
+        statsfunc::logitArray,  // link function; binomial()$linkfun; eta = logit(mu)
+        statsfunc::logisticArray,  // inverse link function; binomial()$linkinv; mu = logistic(eta)
+        statsfunc::derivativeOfLogisticArray,  // derivative of inverse link function; binomial()$mu.eta
+        statsfunc::binomialVariance,  // variance function; binomial()$variance; V(mu) = mu * (1 - mu)
+        statsfunc::binomialDevResids,  // dev_resids_fn; binomial()$dev.resids
+        statsfunc::alwaysTrue,  // valid_eta_fn; binomial()$valideta
+        statsfunc::binomialValidMu,  // valid_mu_fn; binomial()validmu
+        statsfunc::binomialInitialize  // initialize_fn; binomial()$initialize
 #ifdef LINK_FUNCTION_FAMILY_USE_AIC
-        , statsfunc::binomialAIC  // aic_fn
+        , statsfunc::binomialAIC  // aic_fn; binomial()$aic
 #endif
 );
 
 
 const LinkFunctionFamily LINK_FN_FAMILY_GAUSSIAN(
-        LINK_FAMILY_NAME_GAUSSIAN,  // family_name
-        statsfunc::identityArray,  // link
-        statsfunc::identityArray,  // inverse link
-        statsfunc::oneArray,  // derivative of inverse link (y = x => y' = 1)
-        statsfunc::oneArray,  // variance function
-            // ... ?assumes normality; variance is independent of the mean
+        // R: gaussian(), or gaussian(link = "identity").
+        LINK_FAMILY_NAME_GAUSSIAN,  // family_name; gaussian()$family
+        statsfunc::identityArray,  // link function; gaussian()$linkfun; eta = me
+        statsfunc::identityArray,  // inverse link function; gaussian()$linkinv; mu = eta
+        statsfunc::oneArray,  // derivative of inverse link function; gaussian()$mu.eta; y = x => dy/dx = y' = 1
+        statsfunc::oneArray,  // variance function; gaussian()$variance; V(mu) = 1
+            // ... variance is independent of the mean
             // ... https://en.wikipedia.org/wiki/Variance_function#Example_.E2.80.93_normal
-        statsfunc::gaussianDevResids,  // dev_resids_fn
-        statsfunc::alwaysTrue,  // valid_eta_fn
-        statsfunc::alwaysTrue,  // valid_mu_fn
-        statsfunc::gaussianInitialize  // initialize_fn
+        statsfunc::gaussianDevResids,  // dev_resids_fn; gaussian()$dev.resids
+        statsfunc::alwaysTrue,  // valid_eta_fn; gaussian()$valideta
+        statsfunc::alwaysTrue,  // valid_mu_fn; gaussian()validmu
+        statsfunc::gaussianInitialize  // initialize_fn; gaussian()$initialize
 #ifdef LINK_FUNCTION_FAMILY_USE_AIC
-        , statsfunc::gaussianAIC  // aic_fn
+        , statsfunc::gaussianAIC  // aic_fn; gaussian()$aic
+#endif
+);
+
+
+const LinkFunctionFamily LINK_FN_FAMILY_POISSON(
+        // R: poisson(), or poisson(link = "log").
+        LINK_FAMILY_NAME_POISSON,  // family_name; poisson()$family
+        statsfunc::logArray,  // link function; poisson()$linkfun; eta = log(mu)
+        statsfunc::expArray,  // inverse link function; poisson()$linkinv; mu = exp(eta)
+        statsfunc::expArray,  // derivative of inverse link function; poisson()$mu.eta; mu' = exp(eta)
+        statsfunc::identityArray,  // variance function; poisson()$variance; V(mu) = mu
+        statsfunc::poissonDevResids,  // dev_resids_fn; poisson()$dev.resids
+        statsfunc::alwaysTrue,  // valid_eta_fn; poisson()$valideta
+        statsfunc::poissonValidMu,  // valid_mu_fn; poisson()$validmu
+        statsfunc::poissonInitialize  // initialize_fn; poisson()$initialize
+#ifdef LINK_FUNCTION_FAMILY_USE_AIC
+        , statsfunc::poissonAIC  // aic_fn; poisson()$aic
 #endif
 );
 

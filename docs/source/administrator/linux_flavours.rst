@@ -47,30 +47,30 @@ Common administrative commands
      - Red Hat Enterprise Linux
 
    * - Package management
-     - `apt-get`, `dpkg`, and for convenience `gdebi`
-     - `yum`
+     - ``apt-get``, ``dpkg``, and for convenience ``gdebi``
+     - ``yum``
 
    * - General system update
-     - `sudo apt-get update && sudo apt-get dist-upgrade`
-     - `sudo yum update`
+     - ``sudo apt-get update && sudo apt-get dist-upgrade``
+     - ``sudo yum update``
 
    * - Package type
-     - `deb`
-     - `rpm`
+     - ``deb``
+     - ``rpm``
 
    * - Extra security
      - Nothing complex by default
-     - SELinux; file permissions must be set with `chcon`
+     - SELinux; file permissions must be set with ``chcon``
 
    * - Autostarting daemons at boot
      - Usually happens automatically
-     - Usually need to configure with `chkconfig`
+     - Usually need to configure with ``chkconfig``
 
    * - Which OS version am I running?
-     - | `lsb_release -a`
-       | `uname -a`
-     - | `cat /etc/centos-release`
-       | `uname -a`
+     - | ``lsb_release -a``
+       | ``uname -a``
+     - | ``cat /etc/centos-release``
+       | ``uname -a``
 
    * - **Python**
      -
@@ -85,80 +85,80 @@ Common administrative commands
      -
 
    * - Apache main configuration file
-     - Usually `/etc/apache2/apache2.conf`
-     - Usually `/etc/httpd/conf/httpd.conf`
+     - Usually ``/etc/apache2/apache2.conf``
+     - Usually ``/etc/httpd/conf/httpd.conf``
 
    * - Apache SSL configuration file
-     - Usually `/etc/apache2/sites-available/default-ssl`
-     - Usually `/etc/httpd/conf.d/ssl.conf`
+     - Usually ``/etc/apache2/sites-available/default-ssl``
+     - Usually ``/etc/httpd/conf.d/ssl.conf``
 
    * - Granting access in Apache config file
      - | **Apache 2.4:**
-       | `Require all granted`
+       | ``Require all granted``
      - | **Apache 2.2:**
-       | `Order allow,deny`
-       | `Allow from all`
+       | ``Order allow,deny``
+       | ``Allow from all``
 
    * - Default Apache system user
-     - `www-data`
-     - `apache`
+     - ``www-data``
+     - ``apache``
 
    * - Default SSL certificate location
-     - `/etc/ssl/`
-     - `/etc/pki/tls/`
+     - ``/etc/ssl/``
+     - ``/etc/pki/tls/``
 
    * - Default Apache log directory
-     - `/var/log/apache2/`
-     - `/var/log/httpd/`
+     - ``/var/log/apache2/``
+     - ``/var/log/httpd/``
 
    * - Restarting Apache
-     - - `sudo service apache2 [start|stop|restart]`
-       - `sudo apache2ctl [start|stop|restart]`
-       - `sudo apachectl [start|stop|restart]`
-     - - `sudo service httpd [start|stop|restart]`
-       - `sudo apachectl [start|stop|restart]`
+     - - ``sudo service apache2 [start|stop|restart]``
+       - ``sudo apache2ctl [start|stop|restart]``
+       - ``sudo apachectl [start|stop|restart]``
+     - - ``sudo service httpd [start|stop|restart]``
+       - ``sudo apachectl [start|stop|restart]``
 
    * - **supervisord**
      -
      -
 
    * - supervisord configuration file
-     - Usually `/etc/supervisor/supervisord.conf`
-     - Usually `/etc/supervisord.conf`
+     - Usually ``/etc/supervisor/supervisord.conf``
+     - Usually ``/etc/supervisord.conf``
 
    * - Restarting supervisord
-     - - `sudo service supervisor [start|stop|restart]`
-       - `sudo supervisorctl`
-     - - `sudo service supervisord [start|stop|restart]`
-       - `sudo supervisorctl`
+     - - ``sudo service supervisor [start|stop|restart]``
+       - ``sudo supervisorctl``
+     - - ``sudo service supervisord [start|stop|restart]``
+       - ``sudo supervisorctl``
 
    * - **MySQL**
      -
      -
 
    * - Default MySQL configuration file
-     - `/etc/mysql/my.cnf`
-     - `/etc/my.cnf`
+     - ``/etc/mysql/my.cnf``
+     - ``/etc/my.cnf``
 
    * - Restarting MySQL
-     - `sudo service mysql [start|stop|restart]`
-     - `sudo service mysqld [start|stop|restart]`
+     - ``sudo service mysql [start|stop|restart]``
+     - ``sudo service mysqld [start|stop|restart]``
 
    * - Default MySQL log
-     - `/var/log/mysql.log`
-     - `/var/log/mysqld.log`
+     - ``/var/log/mysql.log``
+     - ``/var/log/mysqld.log``
 
    * - **CamCOPS packages**
      -
      -
 
    * - Installation
-     - `sudo gdebi install camcops_VERSION_all.deb`
-     - `sudo yum install camcops_VERSION.noarch.rpm`
+     - ``sudo gdebi install camcops_VERSION_all.deb``
+     - ``sudo yum install camcops_VERSION.noarch.rpm``
 
    * - Removal
-     - `sudo dpkg --remove camcops`
-     - `sudo yum remove camcops`
+     - ``sudo dpkg --remove camcops``
+     - ``sudo yum remove camcops``
 
 
 .. _centos65_prerequisites:

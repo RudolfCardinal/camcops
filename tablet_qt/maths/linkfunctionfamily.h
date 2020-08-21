@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -81,27 +81,38 @@ public:
     // For nasty hacks, like R does ;)
     QString family_name;  // "family" in R
 
-    // Link function (e.g. logit):
+    // Link function, giving eta = link(mu):
     LinkFnType link_fn;
 
-    // Inverse link function (e.g. logistic):
+    // Inverse link function, giving mu = invlink(eta):
     InvLinkFnType inv_link_fn;
 
-    // Derivative of the inverse link function ("mu.eta" in R):
+    // Derivative of the inverse link function ("mu.eta" in R).
+    // This gives d(mu)/d(eta) as a function of eta.
     DerivativeInvLinkFnType derivative_inv_link_fn;
 
     // Variance function: gives the variance as a function of the mean; "the
-    // part of the variance that depends on" the mean.
+    // part of the variance that depends on" the mean; V(mu).
     // https://en.wikipedia.org/wiki/Variance_function
     // If the variance is independent of the mean, then this should return a
     // constant, probably 1.
     VarianceFnType variance_fn;
 
-    // Something related to the deviance of the residuals... ("dev.resids" in R)
+    // As per "dev.resids" in "?family" in R:
+    //      Function giving the deviance for each observation as a
+    //      function of ‘(y, mu, wt)’, used by the ‘residuals’ method
+    //      when computing deviance residuals.
+    // For example, the unit deviance for the normal distribution is given by
+    //      d(y, mu) = (y - mu)^2
+    // ... https://en.wikipedia.org/wiki/Deviance_(statistics)
+    // and so that is what statsfunc::gaussianDevResids() provides, as one of
+    // the functions that might be used here.
     DevResidsFnType dev_resids_fn;
 
-    // Validate inputs
+    // Validate the linear predictors
     ValidEtaFnType valid_eta_fn;
+
+    // Validate the means
     ValidMuFnType valid_mu_fn;
 
     // GLM initialization (ugly eval() code in R)
@@ -122,3 +133,4 @@ extern const QString LINK_FAMILY_NAME_POISSON;
 
 extern const LinkFunctionFamily LINK_FN_FAMILY_GAUSSIAN;  // default for glm() in R
 extern const LinkFunctionFamily LINK_FN_FAMILY_LOGIT;
+extern const LinkFunctionFamily LINK_FN_FAMILY_POISSON;

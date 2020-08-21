@@ -28,7 +28,7 @@ camcops_server/cc_modules/cc_email.py
 
 """
 
-import email
+import email.utils
 import logging
 from typing import List, Sequence, Tuple
 

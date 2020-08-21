@@ -23,8 +23,10 @@
 
 .. _windows_service:
 
-CamCOPS Windows service
-=======================
+(MANUAL) CamCOPS Windows service
+================================
+
+.. include:: include_this_is_manual_see_docker.rst
 
 The most convenient way of running a CamCOPS server under Windows is via a
 service.

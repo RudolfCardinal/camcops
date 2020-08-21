@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -18,16 +18,50 @@
 */
 
 // #define DEBUG_PAINTING
+// #define DEBUG_ACTIVE_CONTENTS_RECT
+// #define DEBUG_VERBOSE
 // #define DEBUG_VERY_VERBOSE
 // #define DEBUG_FULL_REPAINT
 // #define DEBUG_INTERACTION
 // #define DEBUG_SIZE_HINT
+// #define DEBUG_SHOW_BACKGROUND
+
+/*
+
+Old scaling/painting method, prior to 2020-02-28:
+
+    Scales each image separately. Stacks them. However, this causes a problem,
+    e.g. if the thermometer has 101 images of 30 pixels height each (ideally
+    3030 height in total), and the scale factor is (for example) 0.399895; each
+    image gets scaled to 11 pixels, for a total height of 1111 pixels, rather
+    than the 1211 you might expect.
+
+Tried but rubbish, 2020-02-28:
+
+    Calculate the entire image size as a rescaled version of the sum of all
+    the components, but then scale each image separately during plotting.
+    Looks dreadful because of tiny gaps.
+
+Also a poor idea, 2020-02-28:
+
+    Draw all images into an internal composite image; then scale that to the
+    screen.
+
+Finally, the right idea, 2020-03-01:
+
+    Use QPainter's built-in scaling and translation transformations and draw
+    everything to the primary painter.
+
+    Also optimized rowForPoint() and various other drawing functions.
+
+*/
 
 #include "thermometer.h"
 #include <QDebug>
 #include <QPainter>
 #include <QPaintEvent>
 #include <QRegion>
+#include <QtMath>
 #include "graphics/graphicsfunc.h"
 #include "lib/sizehelpers.h"
 #include "lib/uifunc.h"
@@ -39,53 +73,9 @@ const int UNSELECTED = -1;
 // Functions to increase legibility
 // ============================================================================
 
-inline int multiplyInt(const int& x, const double& factor)
+inline qreal divide(const int& x, const int& divisor)
 {
-    return static_cast<int>(
-        static_cast<double>(x) * factor
-    );
-}
-
-
-inline QSize multiplySize(const QSize& size, const double& factor)
-{
-    return QSize(
-        multiplyInt(size.width(), factor),
-        multiplyInt(size.height(), factor)
-    );
-}
-
-
-inline double divide(const int& x, const double& divisor)
-{
-    return static_cast<double>(x) / divisor;
-}
-
-
-inline int divideInt(const int& x, const double& divisor)
-{
-    return static_cast<int>(
-        static_cast<double>(x) / divisor
-    );
-}
-
-
-inline int divideInt(const int& x, const int& divisor)
-{
-    return static_cast<int>(
-        static_cast<double>(x) / static_cast<double>(divisor)
-    );
-}
-
-
-inline int scale(const int& x, const int& y, const int& z)
-{
-    // returns x * y / z, i.e. scales x by the factor y/z
-    return static_cast<int>(
-        static_cast<double>(x) *
-        static_cast<double>(y) /
-        static_cast<double>(z)
-    );
+    return static_cast<qreal>(x) / static_cast<qreal>(divisor);
 }
 
 
@@ -97,137 +87,257 @@ Thermometer::Thermometer(const QVector<QPixmap>& active_images,
                          const QVector<QPixmap>& inactive_images,
                          const QStringList* left_strings,
                          const QStringList* right_strings,
-                         int left_string_scale,
-                         int image_scale,
-                         int right_string_scale,
+                         int left_string_span,
+                         int image_span,
+                         int right_string_span,
                          bool allow_deselection,
                          bool read_only,
-                         bool rescale,
-                         double rescale_factor,
+                         bool rescale_images,
+                         double rescale_image_factor,
                          int text_gap_px,
                          QWidget* parent) :
     QWidget(parent),
     m_active_images(active_images),
     m_inactive_images(inactive_images),
-    m_left_string_scale(left_string_scale),
-    m_image_scale(image_scale),
-    m_right_string_scale(right_string_scale),
+    m_n_rows(active_images.length()),
+    m_use_left_strings(left_strings != nullptr),
+    m_use_right_strings(right_strings != nullptr),
+    m_left_string_span(left_string_span),
+    m_image_span(image_span),
+    m_right_string_span(right_string_span),
     m_allow_deselection(allow_deselection),
     m_read_only(read_only),
-    m_rescale(rescale),
-    m_rescale_factor(rescale_factor),
+    m_rescale_images(rescale_images),
+    m_rescale_image_factor(rescale_image_factor),
     m_text_gap_px(text_gap_px),
+    // m_unused_space_colour(QColor()),
     m_selected_index(UNSELECTED),
     m_touching_index(UNSELECTED),
     m_start_touch_index(UNSELECTED)
 {
+    // ------------------------------------------------------------------------
     // Set basic parameters.
-    m_n_rows = m_active_images.length();
+    // ------------------------------------------------------------------------
+
     if (m_n_rows == 0) {
         uifunc::stopApp("No rows to Thermometer");
     }
     if (m_inactive_images.length() != m_n_rows) {
         uifunc::stopApp("Wrong inactive_images length to Thermometer");
     }
-    m_use_left_strings = left_strings != nullptr;
     if (left_strings) {
         m_left_strings = *left_strings;
         if (m_left_strings.length() != m_n_rows) {
             uifunc::stopApp("Wrong left_strings length to Thermometer");
         }
-        if (m_left_string_scale <= 0) {
-            uifunc::stopApp("Thermometer: left_string_scale <= 0 "
+        if (m_left_string_span <= 0) {
+            uifunc::stopApp("Thermometer: left_string_span <= 0 "
                             "but there are left strings");
         }
+    } else {
+        m_left_string_span = 0;
     }
-    m_use_right_strings = right_strings != nullptr;
     if (right_strings) {
         m_right_strings = *right_strings;
         if (m_right_strings.length() != m_n_rows) {
             uifunc::stopApp("Wrong right_strings length to Thermometer");
         }
-        if (m_right_string_scale <= 0) {
-            uifunc::stopApp("Thermometer: right_string_scale <= 0 "
+        if (m_right_string_span <= 0) {
+            uifunc::stopApp("Thermometer: right_string_span <= 0 "
                             "but there are right strings");
         }
+    } else {
+        m_right_string_span = 0;
     }
-    if (m_image_scale <= 0) {
+    if (m_image_span <= 0) {
         uifunc::stopApp("Image scale values to Thermometer must be >0");
     }
-    if (m_left_string_scale < 0 ||
-            m_right_string_scale < 0) {
+    if (m_left_string_span < 0 ||
+            m_right_string_span < 0) {
         uifunc::stopApp("Negative string scale values to Thermometer");
     }
 
-    // Fetch image heights etc.
-    m_image_width = m_active_images.at(0).width();
-    m_unscaled_total_size.rheight() = 0;
-    const int total_scale =
-            m_left_string_scale + m_image_scale + m_right_string_scale;
-    // Total width is to image width as total_scale is to m_image_scale:
-    m_unscaled_total_size.rwidth() = scale(
-            m_image_width, total_scale, m_image_scale);
-    // Left string width is to left string scale as total width is to total
-    // scale:
-    m_unscaled_lstring_width = scale(
-            m_left_string_scale, m_unscaled_total_size.width(), total_scale);
+    // ------------------------------------------------------------------------
+    // Set up layout: horizontal
+    // ------------------------------------------------------------------------
+
+    auto imageScale = [this](int x) -> qreal {
+        return m_rescale_images
+                ? (x * m_rescale_image_factor)
+                : x;
+    };
+    auto spanScale = [this](int span) -> qreal {
+        return static_cast<qreal>(span) *
+                m_image_width /
+                static_cast<qreal>(m_image_span);
+    };
+
+    // The image size (scaled) is our starting point.
+    const int first_image_raw_width = m_active_images.at(0).width();
+    m_image_width = imageScale(first_image_raw_width);
+
+    // Then the other columns, by span allocation.
+    // Left string width is to left string span as image width is to image span:
+    m_lstring_width = spanScale(m_left_string_span);
     // Similarly on the right:
-    m_unscaled_rstring_width = scale(
-            m_right_string_scale, m_unscaled_total_size.width(), total_scale);
+    m_rstring_width = spanScale(m_right_string_span);
+
+    // Positions, left to right:
+    m_lstring_left = 0;
+    m_lstring_right = m_lstring_left + m_lstring_width;
+    m_image_left = m_lstring_right + m_text_gap_px;
+    m_image_right = m_image_left + m_image_width;
+    m_rstring_left = m_image_right + m_text_gap_px;
+    m_target_total_size.rwidth() = qCeil(m_rstring_left + m_rstring_width);
+
+    // ------------------------------------------------------------------------
+    // Set up layout: vertical.
+    // Also create "being touched" images.
+    // ------------------------------------------------------------------------
 
     const bool pressed_marker_behind = false;  // colour on top
     for (int i = 0; i < m_n_rows; ++i) {
         const QPixmap& active_image = m_active_images.at(i);
         const QPixmap& inactive_image = m_inactive_images.at(i);
-        const int active_image_height = active_image.height();
-        m_image_heights.append(active_image_height);
-        m_unscaled_total_size.rheight() += active_image_height;
-        if (inactive_image.height() != active_image_height) {
+        const int unscaled_height = active_image.height();
+        const qreal scaled_height = imageScale(unscaled_height);
+        if (i == 0) {
+            m_raw_image_tops.append(0);
+            m_image_top_bottom.append(QPair<qreal, qreal>(0, scaled_height));
+        } else {
+            m_raw_image_tops.append(
+                        m_raw_image_tops[i - 1] +
+                        m_active_images[i - 1].height());
+            const qreal prev_bottom = m_image_top_bottom[i - 1].second;
+            m_image_top_bottom.append(QPair<qreal, qreal>(
+                            prev_bottom, prev_bottom + scaled_height));
+        }
+
+        // Checks
+        if (inactive_image.height() != unscaled_height) {
                qWarning()
                     << Q_FUNC_INFO
                     << "image at index" << i
-                    << "has active image height" << active_image_height
+                    << "has active image height" << unscaled_height
                     << "but inactive image height" << inactive_image.height()
                     << "- may look strange!";
         }
-        if (active_image.width() != m_image_width) {
+        if (active_image.width() != first_image_raw_width) {
             qWarning()
                     << Q_FUNC_INFO
                     << "active image" << i
                     << "has discrepant width of" << active_image.width()
-                    << "versus initial one of" << m_image_width;
+                    << "versus initial one of" << first_image_raw_width;
         }
-        if (inactive_image.width() != m_image_width) {
+        if (inactive_image.width() != first_image_raw_width) {
             qWarning()
                     << Q_FUNC_INFO
                     << "inactive image" << i
                     << "has discrepant width of" << inactive_image.width()
-                    << "versus initial one of" << m_image_width;
+                    << "versus initial one of" << first_image_raw_width;
         }
+
+        // Create "being touched" images.
         m_active_touched_images.append(
             uifunc::addPressedBackground(active_image, pressed_marker_behind));
         m_inactive_touched_images.append(
             uifunc::addPressedBackground(inactive_image, pressed_marker_behind));
     }
-    if (m_rescale) {
-        m_target_total_size = multiplySize(m_unscaled_total_size,
-                                           m_rescale_factor);
-    } else {
-        m_target_total_size = m_unscaled_total_size;
-    }
-    m_total_aspect_ratio = divide(m_unscaled_total_size.width(),
-                                  m_unscaled_total_size.height());
-#ifdef DEBUG_VERY_VERBOSE
-    qDebug()
-            << "m_unscaled_total_size" << m_unscaled_total_size
-            << ", m_target_total_size" << m_target_total_size
-            << ", m_total_aspect_ratio" << m_total_aspect_ratio;
+    m_target_total_size.rheight() = qCeil(
+                m_image_top_bottom[m_n_rows - 1].second);
+
+    // ------------------------------------------------------------------------
+    // Final layout calculations
+    // ------------------------------------------------------------------------
+
+    m_aspect_ratio = divide(m_target_total_size.width(),
+                            m_target_total_size.height());
+
+    // ------------------------------------------------------------------------
+    // Debugging
+    // ------------------------------------------------------------------------
+
+#ifdef DEBUG_VERBOSE
+    qDebug().nospace()
+            << "m_n_rows " << m_n_rows
+            << ", m_use_left_strings " << m_use_left_strings
+            << ", m_use_right_strings " << m_use_right_strings
+            << ", m_left_string_span " << m_left_string_span
+            << ", m_image_span " << m_image_span
+            << ", m_right_string_span " << m_right_string_span
+            << ", m_rescale_images " << m_rescale_images
+            << ", m_rescale_image_factor " << m_rescale_image_factor
+            << ", m_text_gap_px " << m_text_gap_px;
+    qDebug().nospace()
+            << "m_lstring_width " << m_lstring_width
+            << ", m_image_width " << m_image_width
+            << ", m_rstring_width " << m_rstring_width
+            << ", m_lstring_left " << m_lstring_left
+            << ", m_image_left " << m_image_left
+            << ", m_image_right " << m_image_right
+            << ", m_rstring_left " << m_rstring_left
+            << ", m_image_top_bottom " << m_image_top_bottom
+            << ", m_target_total_size " << m_target_total_size
+            << ", m_aspect_ratio " << m_aspect_ratio;
 #endif
+
+#ifdef DEBUG_SHOW_BACKGROUND
+    QPalette palette = QPalette();
+    palette.setColor(QPalette::Background, Qt::yellow);
+    setAutoFillBackground(true);
+    setPalette(palette);
+#endif
+
+    // ------------------------------------------------------------------------
+    // Other
+    // ------------------------------------------------------------------------
 
     // Set Qt size policy
     setSizePolicy(sizehelpers::maximumMaximumHFWPolicy());
 }
 
+
+// ----------------------------------------------------------------------------
+// Standard Qt widget overrides
+// ----------------------------------------------------------------------------
+
+bool Thermometer::hasHeightForWidth() const
+{
+    return true;
+}
+
+
+int Thermometer::heightForWidth(const int width) const
+{
+    // We work this based on aspect ratio, which is width/height.
+
+    const int hfw = qMin(qCeil(static_cast<qreal>(width) / m_aspect_ratio),
+                         m_target_total_size.height());
+#ifdef DEBUG_PAINTING
+    qDebug() << Q_FUNC_INFO << "width" << width << "-> hfw" << hfw;
+#endif
+    return hfw;
+}
+
+
+QSize Thermometer::sizeHint() const
+{
+#ifdef DEBUG_SIZE_HINT
+    qDebug() << Q_FUNC_INFO << m_target_total_size;
+#endif
+    return m_target_total_size;
+}
+
+
+QSize Thermometer::minimumSizeHint() const
+{
+    return QSize(0, 0);
+}
+
+
+// ----------------------------------------------------------------------------
+// Picking an image
+// ----------------------------------------------------------------------------
 
 void Thermometer::setSelectedIndex(int selected_index)
 {
@@ -285,291 +395,9 @@ void Thermometer::setSelectedIndex(int selected_index)
 }
 
 
-void Thermometer::setTouchedIndex(int touched_index)
-{
-#ifdef DEBUG_INTERACTION
-    qDebug() << Q_FUNC_INFO << touched_index;
-#endif
-    const int old_touching_index = m_touching_index;
-    if (touched_index < 0) {
-        m_touching_index = UNSELECTED;
-    } else if (touched_index < m_n_rows) {
-        m_touching_index = touched_index;
-    } else {
-        qWarning()
-                 << Q_FUNC_INFO
-                << "Bad index:" << touched_index
-                << "but number of rows is" << m_n_rows;
-        m_touching_index = UNSELECTED;
-    }
-    if (m_touching_index == old_touching_index) {
-        // Nothing to do
-#ifdef DEBUG_INTERACTION
-        qDebug()
-            << Q_FUNC_INFO
-            << "Nothing to do; m_touching_index unchanged at"
-            << m_touching_index;
-#endif
-        return;
-    }
-
-    // Trigger refresh
-#ifdef DEBUG_INTERACTION
-    qDebug() << Q_FUNC_INFO
-             << "repainting for m_touching_index" << m_touching_index;
-#endif
-#ifdef DEBUG_FULL_REPAINT
-    repaint();
-#else
-    QRegion redraw_region;
-    if (old_touching_index != UNSELECTED) {
-        redraw_region += imageRect(old_touching_index);
-    }
-    if (m_touching_index != UNSELECTED) {
-        redraw_region += imageRect(m_touching_index);
-    }
-#ifdef DEBUG_PAINTING
-    qDebug() << Q_FUNC_INFO << "redraw_region" << redraw_region;
-#endif
-    if (!redraw_region.isEmpty()) {
-        repaint(redraw_region);
-    }
-#endif
-}
-
-
-bool Thermometer::hasHeightForWidth() const
-{
-    return true;
-}
-
-
-int Thermometer::heightForWidth(const int width) const
-{
-    // We work this based on aspect ratio, which is width/height.
-    const int hfw = divideInt(width, m_total_aspect_ratio);
-#ifdef DEBUG_PAINTING
-    qDebug() << Q_FUNC_INFO << "width" << width << "-> hfw" << hfw;
-#endif
-    return hfw;
-}
-
-
-QSize Thermometer::sizeHint() const
-{
-#ifdef DEBUG_SIZE_HINT
-    qDebug() << Q_FUNC_INFO << m_target_total_size;
-#endif
-    return m_target_total_size;
-}
-
-
-QSize Thermometer::minimumSizeHint() const
-{
-    return QSize(0, 0);
-}
-
-
-Thermometer::DisplayInfo Thermometer::getDisplayInfo() const
-{
-    DisplayInfo d;
-    // "How big are we being drawn?"
-    const QRect cr = contentsRect();
-    // "How does that compare to our notional size?"
-    d.scaling = cr.size() != m_unscaled_total_size;
-    const double scale_factor = d.scaling
-            ? divide(cr.width(), m_unscaled_total_size.width())
-            : 1.0;
-    d.scale_factor = scale_factor;
-    d.lstring_width = d.scaling
-            ? multiplyInt(m_unscaled_lstring_width, scale_factor)
-            : m_unscaled_lstring_width;
-    d.image_width = d.scaling
-            ? multiplyInt(m_image_width, scale_factor)
-            : m_image_width;
-    d.rstring_width = d.scaling
-            ? multiplyInt(m_unscaled_rstring_width, scale_factor)
-            : m_unscaled_rstring_width;
-
-    // Iterate through rows
-    d.lstring_left = cr.left();
-    d.image_left = d.lstring_left + d.lstring_width;
-    d.lstring_right = d.image_left - m_text_gap_px;
-    d.rstring_left = d.image_left + d.image_width + m_text_gap_px;
-    d.rstring_right = d.image_left + d.image_width + d.rstring_width;
-
-    d.row_left = d.lstring_left;
-    d.row_right = d.rstring_right;
-    d.row_width = d.rstring_right - d.lstring_left;
-
-    return d;
-}
-
-
-void Thermometer::getRowTopHeight(int row, int& top, int& height) const
-{
-    if (row == UNSELECTED || row >= m_n_rows) {
-        qWarning() << Q_FUNC_INFO << "Bad row parameter";
-        return;
-    }
-    DisplayInfo d = getDisplayInfo();
-    const QRect cr = contentsRect();
-    int t = cr.top();
-    for (int r = 0; r < m_n_rows; ++r) {
-        const int row_height = d.scaling
-                ? multiplyInt(m_image_heights.at(r), d.scale_factor)
-                : m_image_heights.at(r);
-        if (r == row) {
-            // Write back results
-            top = t;
-            height = row_height;
-            return;
-        }
-        // Ready for next row:
-        t += row_height;
-    }
-    qWarning() << Q_FUNC_INFO << "Should not get here!";
-}
-
-
-QRect Thermometer::rowRect(int row) const
-{
-    if (row == UNSELECTED || row >= m_n_rows) {
-        qWarning() << Q_FUNC_INFO << "Bad row parameter";
-        return QRect();
-    }
-    DisplayInfo d = getDisplayInfo();
-    int row_top;
-    int row_height;
-    getRowTopHeight(row, row_top, row_height);
-    return QRect(d.row_left, row_top, d.row_width, row_height);
-}
-
-
-QRect Thermometer::imageRect(int row) const
-{
-    if (row == UNSELECTED || row >= m_n_rows) {
-        qWarning() << Q_FUNC_INFO << "Bad row parameter";
-        return QRect();
-    }
-    DisplayInfo d = getDisplayInfo();
-    int row_top;
-    int row_height;
-    getRowTopHeight(row, row_top, row_height);
-    return QRect(d.image_left, row_top, d.image_width, row_height);
-}
-
-
-void Thermometer::paintEvent(QPaintEvent* event)
-{
-#ifdef DEBUG_PAINTING
-    qDebug() << Q_FUNC_INFO;
-#endif
-    QPainter painter(this);
-    DisplayInfo d = getDisplayInfo();
-    const QRect cr = contentsRect();
-    const QRegion redraw_region = event->region();
-    const Qt::Alignment leftstring_align = Qt::AlignRight | Qt::AlignVCenter;
-    const Qt::Alignment rightstring_align = Qt::AlignLeft | Qt::AlignVCenter;
-
-#ifdef DEBUG_PAINTING
-    qDebug()
-        << Q_FUNC_INFO
-        << "contentsRect()" << cr
-        << "scaling" << d.scaling
-        << "scale_factor" << d.scale_factor
-        << "lstring_width" << d.lstring_width
-        << "image_width" << d.image_width
-        << "lstring_left" << d.lstring_left
-        << "image_left" << d.image_left
-        << "lstring_right" << d.lstring_right
-        << "rstring_left" << d.rstring_left;
-#endif
-
-    int top = cr.top();
-    for (int row = 0; row < m_n_rows; ++row) {
-        const int row_height = d.scaling
-                ? multiplyInt(m_image_heights.at(row), d.scale_factor)
-                : m_image_heights.at(row);
-        // const int bottom = top + image_height;
-        const int vertical_midpoint = top + row_height / 2;
-
-#ifdef DEBUG_VERY_VERBOSE
-        qDebug()
-            << "row" << row
-            << "image_height" << row_height
-            << "vertical_midpoint" << vertical_midpoint;
-#endif
-
-        // Draw left string: vertically centred...
-        if (m_use_left_strings) {
-            const QRect leftstring_rect(d.lstring_left, top,
-                                        d.lstring_width, row_height);
-            if (redraw_region.contains(leftstring_rect)) {
-                graphicsfunc::drawText(
-                    painter,
-                    QPoint(d.lstring_right, vertical_midpoint),
-                    leftstring_align,
-                    m_left_strings.at(row)
-                    // bounding rectangle? Not sure. Probably OK without (text
-                    // will overlap when scaled very small)
-                );
-            }
-        }
-
-        // Draw image
-        const QSize displaysize(d.image_width, row_height);
-        const QRect dest_imagerect(QPoint(d.image_left, top), displaysize);
-        if (redraw_region.contains(dest_imagerect)) {
-            const bool touching = m_touching_index == row;
-            const bool selected = m_selected_index == row;
-            const QPixmap& image = selected
-                        ? (touching ? m_active_touched_images.at(row)
-                                    : m_active_images.at(row))
-                        : (touching ? m_inactive_touched_images.at(row)
-                                    : m_inactive_images.at(row));
-            if (d.scaling) {
-                const QRect source_all_image(QPoint(0, 0), image.size());
-                painter.drawPixmap(dest_imagerect, image, source_all_image);
-            } else {
-                painter.drawPixmap(d.image_left, top, image);
-            }
-        }
-
-        // Draw right string
-        if (m_use_right_strings) {
-            const QRect rightstring_rect(d.rstring_left, top,
-                                         d.rstring_width, row_height);
-            if (redraw_region.contains(rightstring_rect)) {
-                graphicsfunc::drawText(
-                    painter,
-                    QPoint(d.rstring_left, vertical_midpoint),
-                    rightstring_align,
-                    m_right_strings.at(row)
-                    // bounding rectangle? Not sure. Probably OK without (text
-                    // will overlap when scaled very small)
-                );
-            }
-        }
-
-        // Ready for next row:
-        top += row_height;
-    }
-}
-
-
-int Thermometer::rowForPoint(const QPoint& pt) const
-{
-    // Which row is this event in?
-    for (int r = 0; r < m_n_rows; ++r) {
-        const QRect row_rect = rowRect(r);
-        if (row_rect.contains(pt)) {
-            return r;
-        }
-    }
-    return UNSELECTED;
-}
-
+// ----------------------------------------------------------------------------
+// Event handling
+// ----------------------------------------------------------------------------
 
 void Thermometer::mousePressEvent(QMouseEvent* event)
 {
@@ -636,3 +464,312 @@ void Thermometer::mouseMoveEvent(QMouseEvent* event)
 
 // ignore QEvent::MouseButtonDblClick for now
 
+
+void Thermometer::paintEvent(QPaintEvent* event)
+{
+#ifdef DEBUG_PAINTING
+    qDebug() << Q_FUNC_INFO;
+#endif
+    QPainter painter(this);
+    const QRect acr = activeContentsRect();
+    const QRect external_redraw_rect = event->rect();
+    const QRectF internal_redraw_rect = internalRect(external_redraw_rect, acr);
+    const Qt::Alignment leftstring_align = Qt::AlignRight | Qt::AlignVCenter;
+    const Qt::Alignment rightstring_align = Qt::AlignLeft | Qt::AlignVCenter;
+    // Note that using AlignVCenter throughout looks better (despite some
+    // clipping) than switching to top alignment for the top string and bottom
+    // alignment for the bottom string. Ideally we'd get rid of the clipping
+    // too by rescaling the whole image part of the widget further, but not bad
+    // as it is.
+
+    // painter.save();
+
+    // Apply translations so we can draw using internal coordinates.
+    // The translations work in an "internal to external" direction; see
+    // https://doc.qt.io/qt-5/qtwidgets-painting-transformations-example.html.
+    // First, we scale:
+    QSize displaysize = acr.size();  // starting size
+    qreal scale = static_cast<qreal>(displaysize.height()) /
+            static_cast<qreal>(m_target_total_size.height());
+    painter.scale(scale, scale);
+    // Then we translate from internal (0,0) to the contentrect:
+    painter.translate(acr.topLeft());
+
+    // If we are scaling the images small, the text becomes tiny. Scale the
+    // text back:
+    QFont font = painter.font();
+    // qDebug() << "font before:" << font;
+    // Looks like: QFont( "Sans Serif,12,-1,5,50,0,0,0,0,0" )
+    // See qfont.cpp.
+    // family, pointsize, pixelsize, stylehint, ...
+    // Use points, not pixels.
+    font.setPointSizeF(font.pointSizeF() / scale);
+    // qDebug() << "font after:" << font;
+    painter.setFont(font);
+
+    // Draw text
+    for (int row = 0; row < m_n_rows; ++row) {
+        const qreal row_top = m_image_top_bottom[row].first;
+        const qreal row_bottom = m_image_top_bottom[row].second;
+        const qreal row_height = row_bottom - row_top;
+        const qreal vertical_midpoint = row_top + row_height / 2;
+#ifdef DEBUG_VERY_VERBOSE
+        qDebug().nospace()
+            << "row " << row
+            << ", row_height " << row_height
+            << ", top " << row_top
+            << ", vertical_midpoint " << vertical_midpoint;
+#endif
+
+        // Draw left string, vertically centred
+        if (m_use_left_strings) {
+            const QRectF leftstring_rect(m_lstring_left, row_top,
+                                         m_lstring_width, row_height);
+            // Now compensate for
+            const QString& text = m_left_strings.at(row);
+            if (!text.isEmpty() &&
+                    internal_redraw_rect.intersects(leftstring_rect)) {
+#ifdef DEBUG_PAINTING
+                qDebug() << "Drawing left string for row" << row;
+#endif
+                graphicsfunc::drawText(
+                    painter,
+                    QPointF(m_lstring_right, vertical_midpoint),
+                    leftstring_align,
+                    text
+                    // bounding rectangle? Not sure. Probably OK without (text
+                    // will overlap when scaled very small)
+                );
+            }
+        }
+
+        // Draw right string
+        if (m_use_right_strings) {
+            const QRectF rightstring_rect(m_rstring_left, row_top,
+                                          m_rstring_width, row_height);
+            const QString& text = m_right_strings.at(row);
+            if (!text.isEmpty() &&
+                    internal_redraw_rect.intersects(rightstring_rect)) {
+#ifdef DEBUG_PAINTING
+                qDebug() << "Drawing right string for row" << row;
+#endif
+                graphicsfunc::drawText(
+                    painter,
+                    QPointF(m_rstring_left, vertical_midpoint),
+                    rightstring_align,
+                    text
+                    // bounding rectangle? Not sure. Probably OK without (text
+                    // will overlap when scaled very small)
+                );
+            }
+        }
+    }
+
+    // Choose images to draw
+    QVector<const QPixmap*> chosen_images;
+    for (int row = 0; row < m_n_rows; ++row) {
+        const bool touching = m_touching_index == row;
+        const bool selected = m_selected_index == row;
+        const QPixmap* image = selected
+                    ? (touching ? &m_active_touched_images.at(row)
+                                : &m_active_images.at(row))
+                    : (touching ? &m_inactive_touched_images.at(row)
+                                : &m_inactive_images.at(row));
+        chosen_images.append(image);
+    }
+
+    // Draw images
+    painter.translate(m_image_left, 0.0);
+    if (m_rescale_images) {
+        painter.scale(m_rescale_image_factor, m_rescale_image_factor);
+    }
+    for (int row = 0; row < m_n_rows; ++row) {
+        const QRectF image_intcoords(
+            m_image_left,
+            m_image_top_bottom[row].first,
+            m_image_width,
+            m_image_top_bottom[row].second - m_image_top_bottom[row].first
+        );
+        if (internal_redraw_rect.intersects(image_intcoords)) {
+#ifdef DEBUG_PAINTING
+            qDebug() << "Drawing image for row" << row;
+#endif
+            const QPointF topleft_imagecoords(0, m_raw_image_tops[row]);
+            painter.drawPixmap(topleft_imagecoords, *chosen_images[row]);
+        }
+    }
+
+    // Paint unused region? Nope -- if you don't, it looks fine and just
+    // shows whatever's behind.
+    /*
+    painter.restore();
+    const QRect cr = contentsRect();
+    QRegion unused(cr);
+    unused -= QRegion(acr);
+    painter.setClipRegion(unused);
+    const QBrush brush_unused(m_unused_space_colour);
+    painter.fillRect(cr, brush_unused);
+    */
+}
+
+
+void Thermometer::setTouchedIndex(int touched_index)
+{
+#ifdef DEBUG_INTERACTION
+    qDebug() << Q_FUNC_INFO << touched_index;
+#endif
+    const int old_touching_index = m_touching_index;
+    if (touched_index < 0) {
+        m_touching_index = UNSELECTED;
+    } else if (touched_index < m_n_rows) {
+        m_touching_index = touched_index;
+    } else {
+        qWarning()
+                 << Q_FUNC_INFO
+                << "Bad index:" << touched_index
+                << "but number of rows is" << m_n_rows;
+        m_touching_index = UNSELECTED;
+    }
+    if (m_touching_index == old_touching_index) {
+        // Nothing to do
+#ifdef DEBUG_INTERACTION
+        qDebug()
+            << Q_FUNC_INFO
+            << "Nothing to do; m_touching_index unchanged at"
+            << m_touching_index;
+#endif
+        return;
+    }
+
+    // Trigger refresh
+#ifdef DEBUG_INTERACTION
+    qDebug() << Q_FUNC_INFO
+             << "repainting for m_touching_index" << m_touching_index;
+#endif
+#ifdef DEBUG_FULL_REPAINT
+    repaint();
+#else
+    QRegion redraw_region;
+    if (old_touching_index != UNSELECTED) {
+        redraw_region += imageRect(old_touching_index);
+    }
+    if (m_touching_index != UNSELECTED) {
+        redraw_region += imageRect(m_touching_index);
+    }
+#ifdef DEBUG_PAINTING
+    qDebug() << Q_FUNC_INFO << "redraw_region" << redraw_region;
+#endif
+    if (!redraw_region.isEmpty()) {
+        repaint(redraw_region);
+    }
+#endif
+}
+
+
+// ----------------------------------------------------------------------------
+// Coordinate calculations
+// ----------------------------------------------------------------------------
+
+QRect Thermometer::activeContentsRect() const
+{
+    const QRect cr = contentsRect();
+    QSize displaysize = m_target_total_size;
+    displaysize.scale(cr.size(), Qt::KeepAspectRatio);
+    const QRect acr(cr.topLeft(), displaysize);
+#ifdef DEBUG_ACTIVE_CONTENTS_RECT
+    qDebug() << Q_FUNC_INFO
+             << "contentsRect() = " << cr
+             << "-> activeContentsRect() = " << acr;
+#endif
+    return acr;
+}
+
+
+QRect Thermometer::imageRect(int row) const
+{
+    // Returns an image's rectangle in EXTERNAL (SCREEN) coordinates.
+    // Used to calculate regions for redrawing.
+    if (row == UNSELECTED || row >= m_n_rows) {
+        qWarning() << Q_FUNC_INFO << "Bad row parameter";
+        return QRect();
+    }
+    const QPointF internal_left_top(m_image_left, m_image_top_bottom[row].first);
+    const QPointF internal_right_bottom(m_image_right, m_image_top_bottom[row].second);
+    const QRect acr = activeContentsRect();
+    const QPoint external_left_top = externalPt(internal_left_top, acr);
+    const QPoint external_right_bottom = externalPt(internal_right_bottom, acr);
+    return QRect(external_left_top, external_right_bottom);
+}
+
+
+int Thermometer::rowForPoint(const QPoint& pt) const
+{
+    // Which row is this event in?
+    // Used to find rows corresponding to a mouse/touch event.
+
+    const QRect acr = activeContentsRect();
+    const QPointF ip = internalPt(pt, acr);
+
+    // Out of range horizontally?
+    if (ip.x() < m_image_left || ip.x() > m_image_right) {
+        return UNSELECTED;
+    }
+
+    // Within a row?
+    const qreal y = ip.y();
+    for (int r = 0; r < m_n_rows; ++r) {
+        const QPair<qreal, qreal>& tb = m_image_top_bottom[r];
+        if (y < tb.first) {
+            // Above our top (and we're proceeding top to bottom).
+            return UNSELECTED;
+        }
+        if (y <= tb.second) {
+            // Within this row.
+            return r;
+        }
+    }
+
+    // Below widget.
+    return UNSELECTED;
+}
+
+
+qreal Thermometer::widgetScaleFactor(const QRect& activecontentsrect) const
+{
+    return divide(activecontentsrect.width(), m_target_total_size.width());
+}
+
+
+QPoint Thermometer::externalPt(const QPointF& internal_pt,
+                               const QRect& activecontentsrect) const
+{
+    const qreal wsf = widgetScaleFactor(activecontentsrect);
+    return QPoint(
+        activecontentsrect.left() + internal_pt.x() * wsf,
+        activecontentsrect.top() + internal_pt.y() * wsf
+    );
+}
+
+
+QPointF Thermometer::internalPt(const QPoint& external_pt,
+                                const QRect& activecontentsrect) const
+{
+    const qreal wsf = widgetScaleFactor(activecontentsrect);
+    return QPointF(
+        (external_pt.x() - activecontentsrect.left()) / wsf,
+        (external_pt.y() - activecontentsrect.top()) / wsf
+    );
+}
+
+
+QRectF Thermometer::internalRect(const QRect& external_rect,
+                                 const QRect& activecontentsrect) const
+{
+    const qreal wsf = widgetScaleFactor(activecontentsrect);
+    return QRectF(  // left, top, width, height
+        (external_rect.left() - activecontentsrect.left()) / wsf,
+        (external_rect.top() - activecontentsrect.top()) / wsf,
+        external_rect.width() / wsf,
+        external_rect.height() / wsf
+    );
+}

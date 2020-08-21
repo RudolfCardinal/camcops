@@ -220,7 +220,7 @@ Z:
 <string name="F05.0">Delirium not superimposed on dementia, so described</string>
 <string name="F05.1">Delirium superimposed on dementia</string>
 <string name="F05.8">Other delirium</string>
-seq<string name="F05.9">Delirium, unspecified</string>
+<string name="F05.9">Delirium, unspecified</string>
 <string name="F06">Other mental disorders due to brain damage and dysfunction and to physical disease</string>
 <string name="F06.0">Organic hallucinosis</string>
 <string name="F06.1">Organic catatonic disorder</string>

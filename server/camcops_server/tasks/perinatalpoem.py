@@ -50,6 +50,13 @@ from camcops_server.cc_modules.cc_report import (
     Report,
 )
 from camcops_server.cc_modules.cc_request import CamcopsRequest
+from camcops_server.cc_modules.cc_sqla_coltypes import (
+    CamcopsColumn,
+    ZERO_TO_ONE_CHECKER,
+    ONE_TO_TWO_CHECKER,
+    ONE_TO_FIVE_CHECKER,
+    ONE_TO_FOUR_CHECKER,
+)
 from camcops_server.cc_modules.cc_task import (
     get_from_dict,
     Task,
@@ -133,15 +140,17 @@ class PerinatalPoem(Task):
     # -------------------------------------------------------------------------
     # Fields
     # -------------------------------------------------------------------------
-    qa = Column(
+    qa = CamcopsColumn(
         FN_QA_RESPONDENT, Integer,
+        permitted_value_checker=ONE_TO_TWO_CHECKER,
         comment=(
             f"Question A: Is the respondent the patient ({VAL_QA_PATIENT}) "
             f"or other ({VAL_QA_PARTNER_OTHER})?"
         )
     )
-    qb = Column(
+    qb = CamcopsColumn(
         FN_QB_SERVICE_TYPE, Integer,
+        permitted_value_checker=ONE_TO_TWO_CHECKER,
         comment=(
             f"Question B: Was the service type inpatient [mother-and-baby "
             f"unit, MBU] ({VAL_QB_INPATIENT}) or "
@@ -149,92 +158,112 @@ class PerinatalPoem(Task):
         )
     )
 
-    q1a = Column(
+    q1a = CamcopsColumn(
         FN_Q1A_MH_FIRST_CONTACT, Integer,
+        permitted_value_checker=ONE_TO_FIVE_CHECKER,
         comment=f"Q1A: mental health at first contact {_MH_KEY}"
     )
-    q1b = Column(
+    q1b = CamcopsColumn(
         FN_Q1B_MH_DISCHARGE, Integer,
+        permitted_value_checker=ONE_TO_FIVE_CHECKER,
         comment=f"Q1B: mental health at discharge {_MH_KEY}"
     )
 
-    q2a = Column(
+    q2a = CamcopsColumn(
         FN_Q2A_STAFF_DID_NOT_COMMUNICATE, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q2a: staff didn't communicate with others {_AGREE_KEY}"
     )
-    q2b = Column(
+    q2b = CamcopsColumn(
         FN_Q2B_STAFF_GAVE_RIGHT_SUPPORT, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q2b: Staff gave right amount of support {_AGREE_KEY}"
     )
-    q2c = Column(
+    q2c = CamcopsColumn(
         FN_Q2C_HELP_NOT_QUICK_ENOUGH, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q2c: Help not quick enough after referral {_AGREE_KEY}"
     )
-    q2d = Column(
+    q2d = CamcopsColumn(
         FN_Q2D_STAFF_LISTENED, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q2d: Staff listened/understood {_AGREE_KEY}"
     )
 
-    q2e = Column(
+    q2e = CamcopsColumn(
         FN_Q2E_STAFF_DID_NOT_INVOLVE_ME, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q2e: Staff didn't involve pt enough {_AGREE_KEY}"
     )
-    q2f = Column(
+    q2f = CamcopsColumn(
         FN_Q2F_SERVICE_PROVIDED_INFO, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q2f: Service provided information {_AGREE_KEY}"
     )
-    q2g = Column(
+    q2g = CamcopsColumn(
         FN_Q2G_STAFF_NOT_SENSITIVE_TO_ME, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q2g: Staff not very sensitive to pt {_AGREE_KEY}"
     )
-    q2h = Column(
+    q2h = CamcopsColumn(
         FN_Q2H_STAFF_HELPED_ME_UNDERSTAND, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q2h: Staff helped understanding of illness {_AGREE_KEY}"
     )
 
-    q2i = Column(
+    q2i = CamcopsColumn(
         FN_Q2I_STAFF_NOT_SENSITIVE_TO_BABY, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q2i: Staff not very sensitive to baby {_AGREE_KEY}"
     )
-    q2j = Column(
+    q2j = CamcopsColumn(
         FN_Q2J_STAFF_HELPED_MY_CONFIDENCE, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q2j: Staff helped confidence re baby {_AGREE_KEY}"
     )
-    q2k = Column(
+    q2k = CamcopsColumn(
         FN_Q2K_SERVICE_INVOLVED_OTHERS_HELPFULLY, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q2k: Service involved others helpfully {_AGREE_KEY}"
     )
-    q2l = Column(
+    q2l = CamcopsColumn(
         FN_Q2L_I_WOULD_RECOMMEND_SERVICE, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q2l: Would recommend service {_AGREE_KEY}"
     )
 
-    q3a = Column(
+    q3a = CamcopsColumn(
         FN_Q3A_UNIT_CLEAN, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q3a: MBU clean {_AGREE_KEY} {_INPATIENT_ONLY}"
     )
-    q3b = Column(
+    q3b = CamcopsColumn(
         FN_Q3B_UNIT_NOT_GOOD_PLACE_TO_RECOVER, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q3b: MBU not a good place to recover "
                 f"{_AGREE_KEY} {_INPATIENT_ONLY}"
     )
-    q3c = Column(
+    q3c = CamcopsColumn(
         FN_Q3C_UNIT_DID_NOT_PROVIDE_ACTIVITIES, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q3c: MBU did not provide helpful activities "
                 f"{_AGREE_KEY} {_INPATIENT_ONLY}"
     )
-    q3d = Column(
+    q3d = CamcopsColumn(
         FN_Q3D_UNIT_GOOD_PLACE_FOR_BABY, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q3d: MBU a good place for baby to be with pt "
                 f"{_AGREE_KEY} {_INPATIENT_ONLY}"
     )
-    q3e = Column(
+    q3e = CamcopsColumn(
         FN_Q3E_UNIT_SUPPORTED_FAMILY_FRIENDS_CONTACT, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q3e: MBU supported contact with family/friends "
                 f"{_AGREE_KEY} {_INPATIENT_ONLY}"
     )
-    q3f = Column(
+    q3f = CamcopsColumn(
         FN_Q3F_FOOD_NOT_ACCEPTABLE, Integer,
+        permitted_value_checker=ONE_TO_FOUR_CHECKER,
         comment=f"Q3f: Food not acceptable {_AGREE_KEY} {_INPATIENT_ONLY}"
     )
 
@@ -242,8 +271,9 @@ class PerinatalPoem(Task):
         FN_GENERAL_COMMENTS, UnicodeText,
         comment="General comments"
     )
-    future_participation = Column(
+    future_participation = CamcopsColumn(
         FN_FUTURE_PARTICIPATION, Integer,
+        permitted_value_checker=ZERO_TO_ONE_CHECKER,
         comment=f"Willing to participate in future studies "
                 f"({YES_INT} yes, {NO_INT} no)"
     )

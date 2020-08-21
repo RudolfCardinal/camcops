@@ -25,7 +25,7 @@ Clinical Global Impression – Schizophrenia (CGI-SCH)
 History and guide
 ~~~~~~~~~~~~~~~~~
 
-- Original: Haro JM et al. (2003), http://www.pubmed.com/12755850.
+- Original: Haro JM et al. (2003), http://www.pubmed.gov/12755850.
 
 - Derived directly from the :ref:`CGI <cgi>` (q.v.)
 

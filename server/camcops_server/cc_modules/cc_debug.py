@@ -29,6 +29,13 @@ camcops_server/cc_modules/cc_debug.py
 """
 
 import cProfile
+# import trace
+from types import FrameType
+from typing import Any, Callable, Set, Union
+
+TraceFuncType = Callable[[FrameType, str, Any], Union[Callable, None]]
+# ... returns a trace function (but we can't make the type definition
+# recursive) or None.
 
 
 # https://stackoverflow.com/questions/5375624/a-decorator-that-profiles-a-method-call-and-logs-the-profiling-result  # noqa
@@ -52,3 +59,55 @@ def profile(func):
         return retval
 
     return wrapper
+
+
+# noinspection PyUnusedLocal
+def trace_calls(frame: FrameType, event: str, arg: Any) \
+        -> Union[TraceFuncType, None]:
+    """
+    A function that can be used as an argument to ``sys.settrace``. It prints
+    details of every function called (filename, line number, function name).
+    """
+    # https://pymotw.com/2/sys/tracing.html
+    # https://docs.python.org/3/library/sys.html#sys.settrace
+
+    # Function calls only
+    if event != "call":
+        return
+    co = frame.f_code
+    filename = co.co_filename
+    func_name = co.co_name
+    line_no = frame.f_lineno
+    print(f"- Call to {filename}:{line_no}:{func_name}")
+
+
+def makefunc_trace_unique_calls(file_only: bool = False) -> TraceFuncType:
+    """
+    Creates a function that you can use as an argument to ``sys.settrace()``.
+    When you execute a trace, it shows only new call to each function.
+
+    Args:
+        file_only:
+            Shows files called only, not functions with line numbers.
+    """
+    called = set()  # type: Set[str]
+
+    # noinspection PyUnusedLocal
+    def _trace_calls(frame: FrameType, event: str, arg: Any) \
+            -> Union[TraceFuncType, None]:
+        nonlocal called
+        if event != "call":
+            return
+        co = frame.f_code
+        filename = co.co_filename
+        if file_only:
+            signature = filename
+        else:
+            func_name = co.co_name
+            line_no = frame.f_lineno
+            signature = f"{filename}:{line_no}:{func_name}"
+        if signature not in called:
+            print(f"- First call to {signature}")
+            called.add(signature)
+
+    return _trace_calls

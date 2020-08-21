@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -411,6 +411,57 @@ void drawText(QPainter& painter, const QPointF& point, Qt::Alignment flags,
     // http://stackoverflow.com/questions/24831484
     drawText(painter, point.x(), point.y(), flags, text, bounding_rect);
 }
+
+
+void paintPixmapKeepingAspectRatio(QPainter& painter,
+                                   const QPixmap& pixmap,
+                                   const QRect& destination,
+                                   QPaintEvent* paint_event)
+{
+
+    if (destination.size() != pixmap.size()) {
+        // Scale
+        QSize displaysize = pixmap.size();
+        displaysize.scale(destination.size(), Qt::KeepAspectRatio);
+        const QRect dest_active_rect = QRect(destination.topLeft(), displaysize);
+        const QRect source_all_image(QPoint(0, 0), pixmap.size());
+#ifdef DEBUG_COORDS
+        qDebug().nospace()
+                << Q_FUNC_INFO
+                << " - Asked to draw to rect of size " << destination.size()
+                << "; drawing to size " << displaysize;
+#endif
+        painter.drawPixmap(dest_active_rect, pixmap, source_all_image);
+    } else {
+        // No need to scale
+        painter.drawPixmap(destination.left(), destination.top(), pixmap);
+    }
+
+    Q_UNUSED(paint_event);
+    // Optimizations are possible: we don't have to draw all of it...
+    // http://blog.qt.io/blog/2006/05/13/fast-transformed-pixmapimage-drawing/
+    // ... but I haven't implemented those optimizations.
+    // One would read paint_event->rect(), and paint only the relevant part.
+    // See also CanvasWidget.
+}
+
+
+#if 0
+QRegion scaleRegion(const QRegion& region, qreal factor)
+{
+    QRegion result;
+    for (auto prect : region) {
+        QRect scaled_rect(  // left, top, width, height
+                    prect.left() * factor,
+                    prect.top() * factor,
+                    prect.width() * factor,
+                    prect.height() * factor
+        );
+        result += scaled_rect;
+    }
+    return result;
+}
+#endif
 
 
 // ============================================================================

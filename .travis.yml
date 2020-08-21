@@ -1,25 +1,33 @@
+os: linux
 dist: bionic
 language: python
 python:
     - "3.6"
 
-before_install:
-    # Install wkhtmltopdf on headless ubuntu 18 vps
-    # https://gist.github.com/lobermann/ca0e7bb2558b3b08923c6ae2c37a26ce
-    - wget https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb
-    - sudo apt-get -y install fontconfig libxrender1 xfonts-75dpi xfonts-base
-    - sudo dpkg -i wkhtmltox_0.12.5-1.bionic_amd64.deb
-    - cd server
+jobs:
+  include:
+    - stage: "building and installing debian package"
+      before_install:
+        # Travis installs pipenv by default. We don't need it
+        - pip3 uninstall --yes pipenv
+      before_script:
+        # For testing the "make packages" script
+        - sudo apt-get -y install alien fakeroot lintian gdebi
+        - wget http://downloads.sourceforge.net/project/rpmrebuild/rpmrebuild/2.11/rpmrebuild-2.11-1.noarch.rpm
+        - fakeroot alien --to-deb rpmrebuild-2.11-1.noarch.rpm
+        - sudo dpkg -i rpmrebuild_2.11-2_all.deb
 
-install:
-    - pip install -e .
-    # For checking vulnerabilities
-    - pip install safety
+      script: travis_scripts/build_and_install_package
 
-script:
-    - pip check
-    # Check packages for vulnerabilities
-    - safety check
-    # Check python for style and errors
-    - flake8 --config=../setup.cfg camcops_server
-    - camcops_server self_test
+    - stage: "installing pip packages and running tests"
+      before_install:
+        # Travis installs pipenv by default. We don't need it
+        - pip3 uninstall --yes pipenv
+      before_script:
+        # Install wkhtmltopdf on headless ubuntu 18 vps
+        # https://gist.github.com/lobermann/ca0e7bb2558b3b08923c6ae2c37a26ce
+        - wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.bionic_amd64.deb
+        - sudo apt-get -y install fontconfig libxrender1 xfonts-75dpi xfonts-base
+        - sudo dpkg -i wkhtmltox_0.12.6-1.bionic_amd64.deb
+
+      script: travis_scripts/pip_install_and_tests

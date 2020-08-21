@@ -1,4 +1,4 @@
-# requirements-rpm.txt
+# server/requirements-rpm.txt
 #
 # This file is hand-edited.
 # Comments will be stripped out.

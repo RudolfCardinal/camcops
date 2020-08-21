@@ -258,11 +258,6 @@ class DemoDatabaseTestCase(DemoRequestTestCase):
     """
     def setUp(self) -> None:
         super().setUp()
-        from cardinal_pythonlib.datetimefunc import (
-            convert_datetime_to_utc,
-            format_datetime,
-        )
-        from camcops_server.cc_modules.cc_constants import DateFormat
         from camcops_server.cc_modules.cc_device import Device
         from camcops_server.cc_modules.cc_group import Group
         from camcops_server.cc_modules.cc_user import User
@@ -271,9 +266,7 @@ class DemoDatabaseTestCase(DemoRequestTestCase):
         Base.metadata.create_all(self.engine)
         log.warning("... database structure created.")
 
-        self.era_time = pendulum.parse("2010-07-07T13:40+0100")
-        self.era_time_utc = convert_datetime_to_utc(self.era_time)
-        self.era = format_datetime(self.era_time, DateFormat.ISO8601)
+        self.set_era("2010-07-07T13:40+0100")
 
         # Set up groups, users, etc.
         # ... ID number definitions
@@ -317,6 +310,17 @@ class DemoDatabaseTestCase(DemoRequestTestCase):
         self.dbsession.flush()  # sets PK fields
 
         self.create_tasks()
+
+    def set_era(self, iso_datetime: str) -> None:
+        from cardinal_pythonlib.datetimefunc import (
+            convert_datetime_to_utc,
+            format_datetime,
+        )
+        from camcops_server.cc_modules.cc_constants import DateFormat
+
+        self.era_time = pendulum.parse(iso_datetime)
+        self.era_time_utc = convert_datetime_to_utc(self.era_time)
+        self.era = format_datetime(self.era_time, DateFormat.ISO8601)
 
     def create_patient_with_two_idnums(self) -> "Patient":
         from camcops_server.cc_modules.cc_patient import Patient

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -46,7 +46,8 @@ void dumpQObject(QObject* obj);
 // - Press <D> to dump information about the widget, including its layout and
 //   its children, and all their positional information.
 // - Press <A> to call QWidget::adjustSize().
-void debugWidget(QWidget* widget, bool set_background_by_name = false,
+void debugWidget(QWidget* widget,
+                 bool set_background_by_name = false,
                  bool set_background_by_stylesheet = true,
                  const layoutdumper::DumperConfig& config = layoutdumper::DumperConfig(),
                  bool use_hfw_layout = true,

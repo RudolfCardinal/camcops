@@ -115,11 +115,8 @@ Then:
     question Q4 has three options, scored 0, 2, and 4.
 
 The original paper prefers Method 2 [#hodgson2002]_.
-
 The FAST manual uses Method 2 [#fastmanual]_.
-
 The PHE scoring method is Method 2 [#phefast]_.
-
 So that's clear.
 
 *CamCOPS*
@@ -132,7 +129,7 @@ questions.
 
 Reviewed 2019-11-01. The scoring method was correct; see ``fast.cpp`` in the
 :ref:`source code <sourcecode>` and
-:meth:`camcops_server.tasks.fast.Fast.is_positive`. Explanatory text added
+:func:`camcops_server.tasks.fast.Fast.is_positive`. Explanatory text added
 here.
 
 

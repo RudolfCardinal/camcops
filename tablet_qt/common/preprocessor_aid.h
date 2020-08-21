@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -120,6 +120,7 @@
 // ============================================================================
 // QT_WORKAROUND_BUG_68889
 // ============================================================================
+// See https://bugreports.qt.io/browse/QTBUG-68889
 
 #ifdef Q_OS_ANDROID
     // #pragma message "QT_VERSION = " PREPROCESSOR_STRING(QT_VERSION)

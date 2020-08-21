@@ -1,14 +1,17 @@
-Usage: /home/rudolf/Documents/code/camcops/build-camcops-Linux_x86_64-Debug/camcops [options]
+Usage: /path/to/camcops/client/executable [options]
 
 Options:
-  -h, --help           Displays this help.
-  -v, --version        Displays version information.
-  --dbdir <DBDIR>      Specify the database directory, in which the databases
-                       "camcops_data.sqlite" and "camcops_sys.sqlite" are used
-                       or created. Order of precedence (highest to lowest) is
-                       (1) this argument, (2) the CAMCOPS_DATABASE_DIRECTORY
-                       environment variable, and (3) the default, on this
-                       particular system, of
-                       "/home/rudolf/.local/share/camcops".
-  --print_icd9_codes   Print ICD-9-CM (DSM-IV) codes used by CamCOPS, and quit.
-  --print_icd10_codes  Print ICD-10 codes used by CamCOPS, and quit.
+  -h, --help                Displays this help.
+  -v, --version             Displays version information.
+  --dbdir <DBDIR>           Specify the database directory, in which the
+                            databases "camcops_data.sqlite" and
+                            "camcops_sys.sqlite" are used or created. Order of
+                            precedence (highest to lowest) is (1) this argument,
+                            (2) the CAMCOPS_DATABASE_DIRECTORY environment
+                            variable, and (3) the default, on this particular
+                            system, of "/path/to/client/database/dir".
+  --print_icd9_codes        Print ICD-9-CM (DSM-IV) codes used by CamCOPS, and
+                            quit.
+  --print_icd10_codes       Print ICD-10 codes used by CamCOPS, and quit.
+  --print_terms_conditions  Print terms and conditions applicable to CamCOPS,
+                            and quit.

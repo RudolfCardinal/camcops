@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# server/docker/linux/camcops_server
+#
+# Launches the "camcops_server" command within a new Docker container
+# running the CamCOPS server image.
+
+set -e
+
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+WITHIN_DOCKER="${THIS_DIR}/within_docker"
+
+"${WITHIN_DOCKER}" camcops_server "$@"
+# ^                ^              ^
+# |                |              |
+# |                |              |
+# |                |              +- user arguments
+# |                +- the camcops_server command
+# +- execute within our Docker container...

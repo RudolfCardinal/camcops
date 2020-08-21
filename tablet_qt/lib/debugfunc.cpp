@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -113,6 +113,8 @@ void debugWidget(QWidget* widget,
         }
         // const Qt::Alignment align = Qt::AlignTop;
         const Qt::Alignment align = 0;
+        // We can't do what follows via the QLayout* pointer, which is why we
+        // have to maintain these two:
         if (use_hfw_layout) {
             hfwlayout->addWidget(widget, 0, align);
         } else {

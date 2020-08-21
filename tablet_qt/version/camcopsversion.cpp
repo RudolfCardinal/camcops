@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -26,8 +26,8 @@ namespace camcopsversion {  // http://semver.org/
 // ----------------------------------------------------------------------------
 // Increase this when the client is changed:
 
-const Version CAMCOPS_CLIENT_VERSION(2, 3, 6);
-const QDate CAMCOPS_CLIENT_CHANGEDATE(2019, 10, 22);
+const Version CAMCOPS_CLIENT_VERSION(2, 3, 7);
+const QDate CAMCOPS_CLIENT_CHANGEDATE(2020, 3, 3);
 
 // +++ NOW ALSO UPDATE: +++
 //

@@ -97,7 +97,7 @@ from camcops_server.cc_modules.cc_config import (
 from camcops_server.cc_modules.cc_constants import (
     CSS_PAGED_MEDIA,
     DateFormat,
-    DEFAULT_PLOT_DPI,
+    PlotDefaults,
     USE_SVG_IN_HTML,
 )
 from camcops_server.cc_modules.cc_idnumdef import (
@@ -217,7 +217,8 @@ class CamcopsRequest(Request):
 
         """  # noqa
         super().__init__(*args, **kwargs)
-        self.use_svg = False
+        self.use_svg = False  # use SVG (not just PNG) for graphics
+        self.provide_png_fallback_for_svg = True  # for SVG: provide PNG fallback image?  # noqa
         self.add_response_callback(complete_request_add_cookies)
         self._camcops_session = None  # type: Optional[CamcopsSession]
         self._debugging_db_session = None  # type: Optional[SqlASession]  # for unit testing only  # noqa
@@ -1046,7 +1047,8 @@ class CamcopsRequest(Request):
             # ... even weasyprint's SVG handling is inadequate
         else:
             # This is the main method -- we use wkhtmltopdf these days
-            self.switch_output_to_svg()  # wkhtmltopdf can cope
+            self.switch_output_to_svg(provide_png_fallback=False)
+            # ... wkhtmltopdf can cope with SVGs
 
     def prepare_for_html_figures(self) -> None:
         """
@@ -1061,11 +1063,16 @@ class CamcopsRequest(Request):
         """
         self.use_svg = False
 
-    def switch_output_to_svg(self) -> None:
+    def switch_output_to_svg(self, provide_png_fallback: bool = True) -> None:
         """
         Switch server (for this request) to producing figures in SVG format.
+
+        Args:
+            provide_png_fallback:
+                Offer a PNG fallback option/
         """
         self.use_svg = True
+        self.provide_png_fallback_for_svg = provide_png_fallback
 
     @staticmethod
     def create_figure(**kwargs) -> Figure:
@@ -1116,11 +1123,90 @@ class CamcopsRequest(Request):
     def fontdict(self) -> Dict[str, Any]:
         """
         Returns a font dictionary for use with Matplotlib plotting.
-        """
+
+        **matplotlib font handling and fontdict parameter**
+
+        - http://stackoverflow.com/questions/3899980
+        - http://matplotlib.org/users/customizing.html
+        - matplotlib/font_manager.py
+
+          - Note that the default TrueType font is "DejaVu Sans"; see
+            :class:`matplotlib.font_manager.FontManager`
+
+        - Example sequence:
+
+          - CamCOPS does e.g. ``ax.set_xlabel("Date/time",
+            fontdict=self.req.fontdict)``
+
+          - matplotlib.axes.Axes.set_xlabel:
+            https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_xlabel.html
+
+            - matplotlib.axes.Axes.text documentation, explaining the fontdict
+              parameter:
+              https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.text.html
+
+          - What's created is probably a :class:`matplotlib.text.Text` object,
+            whose ``update()`` function is called with the dictionary. Via its
+            superclass :class:`matplotlib.artist.Artist` and its ``update()``
+            function, this sets attributes on the Text object. Ultimately,
+            without having explored this in too much depth, it's probably the
+            ``self._fontproperties`` object of Text that holds this info.
+
+          - That is an instance of
+            :class:`matplotlib.font_manager.FontProperties`.
+
+        **Linux fonts**
+
+        Anyway, the main things are (1) that the relevant fonts need to be
+        installed, and (2) that the default is DejaVu Sans.
+
+        - Linux fonts are installed in ``/usr/share/fonts``, and TrueType fonts
+          within ``/usr/share/fonts/truetype``.
+
+        - Use ``fc-match`` to see the font mappings being used.
+
+        - Use ``fc-list`` to list available fonts.
+
+        - Use ``fc-cache`` to rebuild the font cache.
+
+        - Files in ``/etc/fonts/conf.avail/`` do some thinking.
+
+        **Problems with pixellated fonts in PDFs made via wkhtmltopdf**
+
+        - See also https://github.com/wkhtmltopdf/wkhtmltopdf/issues/2193,
+          about pixellated fonts via wkhtmltopdf (which was our problem for a
+          subset of the fonts in trackers, on 2020-06-28, using wkhtmltopd
+          0.12.5 with patched Qt).
+
+        - When you get pixellated fonts in a PDF, look also at the embedded
+          font list in the PDF (e.g. in Okular: File -> Properties -> Fonts).
+
+        - Matplotlib helpfully puts the text (rendered as lines in SVG) as
+          comments.
+
+        - As a debugging sequence, we can manually trim the "pdfhtml" output
+          down to just the SVG file. Still has problems. Yet there's no text
+          in it; the text is made of pure SVG lines. And Chrome renders it
+          perfectly. As does Firefox.
+
+        - The rendering bug goes away entirely if you delete the opacity
+          styling throughout the SVG:
+
+          .. code-block:: none
+
+            <g style="opacity:0.5;" transform=...>
+               ^^^^^^^^^^^^^^^^^^^^
+               this
+
+        - So, simple fix:
+
+          - rather than opacity (alpha) 0.5 and on top...
+
+          - 50% grey colour and on the bottom.
+
+        """  # noqa
         fontsize = self.config.plot_fontsize
         return dict(
-            # http://stackoverflow.com/questions/3899980
-            # http://matplotlib.org/users/customizing.html
             family='sans-serif',
             # ... serif, sans-serif, cursive, fantasy, monospace
             style='normal',  # normal (roman), italic, oblique
@@ -1174,16 +1260,17 @@ class CamcopsRequest(Request):
         :class:`matplotlib.figure.Figure`.
         """
         if USE_SVG_IN_HTML and self.use_svg:
-            return (
-                svg_html_from_pyplot_figure(fig) +
-                png_img_html_from_pyplot_figure(fig, DEFAULT_PLOT_DPI,
-                                                "pngfallback")
-            )
-            # return both an SVG and a PNG image, for browsers that can't deal
-            # with SVG; the Javascript header will sort this out
-            # http://www.voormedia.nl/blog/2012/10/displaying-and-detecting-support-for-svg-images  # noqa
+            result = svg_html_from_pyplot_figure(fig)
+            if self.provide_png_fallback_for_svg:
+                # return both an SVG and a PNG image, for browsers that can't
+                # deal with SVG; the Javascript header will sort this out
+                # http://www.voormedia.nl/blog/2012/10/displaying-and-detecting-support-for-svg-images  # noqa
+                result += png_img_html_from_pyplot_figure(
+                    fig, PlotDefaults.DEFAULT_PLOT_DPI, "pngfallback")
+            return result
         else:
-            return png_img_html_from_pyplot_figure(fig, DEFAULT_PLOT_DPI)
+            return png_img_html_from_pyplot_figure(
+                fig, PlotDefaults.DEFAULT_PLOT_DPI)
 
     # -------------------------------------------------------------------------
     # Convenience functions for user information

@@ -111,6 +111,7 @@ def is_longtext_and_unicode(inspected_type: TypeEngine,
             metadata_type.length == 4294967295)
 
 
+# noinspection PyShadowingNames,PyUnusedLocal
 def custom_compare_type(context: MigrationContext,
                         inspected_column: Column,
                         metadata_column: Column,

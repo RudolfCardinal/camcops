@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -27,6 +27,7 @@
 
 FixedAreaHfwTestWidget::FixedAreaHfwTestWidget(const int area,
                                                const int preferred_width,
+                                               const QSize& min_size,
                                                const QColor& background_colour,
                                                const int border_thickness,
                                                const QColor& border_colour,
@@ -35,6 +36,7 @@ FixedAreaHfwTestWidget::FixedAreaHfwTestWidget(const int area,
     QWidget(parent),
     m_area(area),
     m_preferred_width(preferred_width),
+    m_min_size(min_size),
     m_background_colour(background_colour),
     m_border_thickness(border_thickness),
     m_border_colour(border_colour),
@@ -49,6 +51,12 @@ FixedAreaHfwTestWidget::FixedAreaHfwTestWidget(const int area,
 QSize FixedAreaHfwTestWidget::sizeHint() const
 {
     return QSize(m_preferred_width, heightForWidth(m_preferred_width));
+}
+
+
+QSize FixedAreaHfwTestWidget::minimumSizeHint() const
+{
+    return m_min_size;
 }
 
 
@@ -85,14 +93,14 @@ void FixedAreaHfwTestWidget::paintEvent(QPaintEvent* event)
         : QString("MISMATCH to HFW %1").arg(hfw);
     m_min_area = qMin(m_min_area, a);
     m_max_area = qMax(m_max_area, a);
-    const QString description = QString("%1 w x %2 h (%3) = area %4 [range %5-%6]")
+    const QString description = QString(
+        "Fixed area; %1 w x %2 h (%3) = area %4 [range %5-%6]")
             .arg(w)
             .arg(h)
             .arg(hfw_description)
-            .arg(w * h)
+            .arg(a)
             .arg(m_min_area)
             .arg(m_max_area);
-    const QPointF textpos(10, 10);
 
     QPen border_pen(m_border_colour);
     border_pen.setWidth(m_border_thickness);
@@ -104,5 +112,9 @@ void FixedAreaHfwTestWidget::paintEvent(QPaintEvent* event)
     painter.setBrush(brush);
     painter.drawRect(rect);
     painter.setPen(text_pen);
-    painter.drawText(textpos, description);
+    painter.drawText(
+        rect,
+        Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap,
+        description
+    );
 }

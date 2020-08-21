@@ -906,7 +906,7 @@ class Task(GenericTabletRecordMixin, Base):
         diff = end - start
         return diff.total_seconds()
 
-    def get_adding_user_id(self) -> int:
+    def get_adding_user_id(self) -> Optional[int]:
         """
         Returns the user ID of the user who uploaded this task.
         """

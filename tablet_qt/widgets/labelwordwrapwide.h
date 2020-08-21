@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -77,8 +77,10 @@ protected:
     // text), how big would we be?
     QSize sizeOfTextWithoutWrap() const;
 
+#ifdef GUI_USE_RESIZE_FOR_HEIGHT
     // Set our height to an appropriate fixed value, given our width.
     void forceHeight();
+#endif
 
     // How much extra space do we need to allocate for CSS features like
     // borders?

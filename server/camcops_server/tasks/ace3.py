@@ -41,7 +41,7 @@ from camcops_server.cc_modules.cc_blob import (
 )
 from camcops_server.cc_modules.cc_constants import (
     CssClass,
-    FULLWIDTH_PLOT_WIDTH,
+    PlotDefaults,
     PV,
 )
 from camcops_server.cc_modules.cc_ctvinfo import CTV_INCOMPLETE, CtvInfo
@@ -532,7 +532,10 @@ class Ace3(TaskHasPatientMixin, TaskHasClinicianMixin, Task,
         v = self.vsp_score()
         t = a + m + f + lang + v
         if self.is_complete():
-            figsize = (FULLWIDTH_PLOT_WIDTH / 3, FULLWIDTH_PLOT_WIDTH / 4)
+            figsize = (
+                PlotDefaults.FULLWIDTH_PLOT_WIDTH / 3,
+                PlotDefaults.FULLWIDTH_PLOT_WIDTH / 4
+            )
             width = 0.9
             fig = req.create_figure(figsize=figsize)
             ax = fig.add_subplot(1, 1, 1)

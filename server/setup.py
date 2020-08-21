@@ -79,74 +79,110 @@ with open(os.path.join(THIS_DIR, 'README.rst'), encoding='utf-8') as f:
     LONG_DESCRIPTION = f.read()
 
 # Package dependencies
+# - See what's installed with: pip freeze | sort --ignore-case
 INSTALL_REQUIRES = [
-    'alembic==1.0.7',  # database migrations
 
-    'Babel==2.6.0',  # reads code, generates gettext files; dev only but was already installed  # noqa
+    # -------------------------------------------------------------------------
+    # Direct dependencies of CamCOPS
+    # -------------------------------------------------------------------------
+    'alembic==1.4.2',  # database migrations
+    'asteval==0.9.18',  # safe-ish alternative to eval
 
-    'celery==4.3.0',  # background tasks
-    'colorlog==3.1.4',  # colour in logs
-    'CherryPy==18.1.0',  # web server
+    'cardinal_pythonlib==1.0.92',  # RNC libraries
+    'celery==4.4.6',  # background tasks
+    'colander==1.7.0',  # serialization/deserialization from web forms
+    'CherryPy==18.6.0',  # web server
 
-    'deform==2.0.5',  # web forms
+    'deform==2.0.10',  # web forms
     # 'deform-bootstrap==0.2.9',  # deform with layout made easier
-    'distro==1.3.0',  # detecting Linux distribution
-    'dogpile.cache==0.6.6',  # web caching
+    'distro==1.3.0',  # detecting Linux distribution  # REMOVE ONCE DOCKER PREFERRED  # noqa
+    'dogpile.cache==0.9.2',  # web caching
 
     # TO COME: 'fhirclient==3.2.0',  # For FHIR export
-    'faker==3.0.0',  # for dummy database creation
-    'flake8>=3.7.8',  # for development;
-    'flower==0.9.2',  # monitor for Celery
+    'Faker==4.1.1',  # create fake data; for dummy database creation
+    'flower==0.9.4',  # monitor for Celery
 
-    'gunicorn==19.8.1',  # web server (Unix only)
-    # Alternative 'internal' web server. Installs fine under Windows, but won't run (ImportError: No module named 'fcntl').  # noqa
+    'gunicorn==20.0.4',  # web server (Unix only)
 
-    'hl7==0.3.4',  # For HL7 export
+    'hl7==0.3.5',  # For HL7 export
 
     'lockfile==0.12.2',  # File locking for background tasks
-    'lxml==4.4.1',  # Will speed up openpyxl export [NO LONGER CRITICAL]
+    'lxml==4.5.1',  # Will speed up openpyxl export [NO LONGER CRITICAL]
 
-    'matplotlib==3.1.1',  # Used for trackers and some tasks. SLOW INSTALLATION.  # noqa
-    # 'mysqlclient==1.3.13;platform_system=="Linux"',  # for mysql+mysqldb://...
-    # # ... but adds dependency on C and mysql.h
+    'matplotlib==3.2.2',  # Used for trackers and some tasks. SLOW INSTALLATION.  # noqa
 
-    'numpy==1.17.4',  # Used by some tasks. SLOW INSTALLATION.
-
-    # 'odswriter==0.4.0',  # Write OpenOffice ODS files [REPLACED BY pyexcel-ods3]  # noqa
+    'numpy==1.19.0',  # Used by some tasks. SLOW INSTALLATION.
 
     'paginate==0.5.6',  # pagination for web server
-    'pendulum==2.0.4',  # better than Arrow
-    'pexpect==4.6.0',  # for open_sqlcipher.py
+    'pendulum==2.1.0',  # better than Arrow
+    'pexpect==4.8.0',  # for open_sqlcipher.py
     'pdfkit==0.6.1',  # wkhtmltopdf interface, for PDF generation from HTML
-    'py-bcrypt==0.4',  # Used by rnc_crypto; for bcrypt; now works under Windows too  # noqa
-    'Pygments==2.3.1',  # Syntax highlighting for introspection/DDL
-    'PyMySQL==0.7.1',
+    # REDCap integration. Pip freeze reports as version 0.0.0?
+    'pycap @ git+https://github.com/redcap-tools/pycap@ff0e8c6916352a11e16976d5c7b4aaaed7e500ac#egg=pycap-1.0.2.3',  # noqa
+    'Pygments==2.6.1',  # Syntax highlighting for introspection/DDL
+    'pyexcel-ods3==0.5.3',  # ODS spreadsheet export
+    'pyexcel-xlsx==0.5.8',  # XLSX spreadsheet export
+    'pyramid==1.10.4',  # web framework
+    'pyramid_debugtoolbar==4.6.1',  # debugging for Pyramid
+
+    'sadisplay==0.4.9',  # SQL Alchemy schema display script
+    'scipy==1.5.0',  # used by some tasks. slow installation.
+    'semantic_version==2.8.5',  # semantic versioning; better than semver
+    'sqlalchemy==1.3.18',  # database access
+    'statsmodels==0.11.1',  # e.g. logistic regression
+
+    'Wand==0.6.1',  # ImageMagick binding
+
+    # -------------------------------------------------------------------------
+    # Not installed here
+    # -------------------------------------------------------------------------
+
+    # mysqlclient -- installed via Docker
+    # 'PyMySQL==0.7.1',
     # ... for mysql+pymysql://... BEWARE FURTHER UPGRADES (e.g. to 0.7.11); may
     # break Pendulum handling
     # todo: setup.py: fix PyMySQL upgrade problem
-    'pyexcel-ods3==0.5.3',  # ODS spreadsheet export
-    'pyexcel-xlsx==0.5.7',  # XLSX spreadsheet export
-    'PyPDF2==1.26.0',  # Used by rnc_pdf.py
-    'pyramid==1.9.2',  # web framework
-    'pyramid_debugtoolbar==4.4',  # debugging for Pyramid
-    'python-dateutil==2.7.3',  # date/time extensions.
-    'pytz==2018.5',  # timezone definitions, specifically utc.
 
-    'sadisplay==0.4.9',  # SQL Alchemy schema display script
-    'scipy==1.1.0',  # used by some tasks. slow installation.
-    'semantic_version==2.6.0',  # semantic versioning; better than semver
-    'sphinx==1.7.6',  # development only
-    # 'sphinx_rtd_theme==0.4.3',  # development only
-    'sqlalchemy==1.3.0',  # database access
-    'statsmodels==0.9.0',  # e.g. logistic regression
+    # -------------------------------------------------------------------------
+    # Direct requirements of CamCOPS development tools
+    # -------------------------------------------------------------------------
 
-    'tornado<6',  # used indirectly by Celery; v6+ breaks; see
-    # https://github.com/jupyter/notebook/issues/4311
+    'Babel==2.8.0',  # reads code, generates gettext files; dev only but was already installed  # noqa
+    'flake8==3.8.3',  # code checks
+    'sphinx==3.1.1',  # development only
+    'sphinx_rtd_theme==0.5.0',  # development only
 
-    'Wand==0.4.4',  # ImageMagick binding
+    # -------------------------------------------------------------------------
+    # Dependencies of cardinal_pythonlib, whose versions we pin
+    # -------------------------------------------------------------------------
 
-    # Moved to end to fix openpyxl mismatch
-    'cardinal_pythonlib==1.0.82',  # RNC libraries
+    # mandatory
+    'appdirs==1.4.4',
+    'beautifulsoup4==4.9.1',
+    'colorlog==4.1.0',
+    'isodate==0.6.0',
+    'openpyxl==3.0.4',  # also for pyexcel-xlsx
+    'pandas==1.0.5',
+    'prettytable==0.7.2',
+    'psutil==5.7.0',
+    'pyparsing==2.4.7',
+    'PyPDF2==1.26.0',  # Used by cardinal_pythonlib.pdf
+    'python-dateutil==2.8.1',  # date/time extensions.
+    'sqlparse==0.3.1',
+
+    # extra
+    'py-bcrypt==0.4',  # used by cardinal_pythonlib.crypto
+
+    # -------------------------------------------------------------------------
+    # Dependencies of other things above
+    # -------------------------------------------------------------------------
+
+    'alabaster==0.7.12',  # for sphinx
+    'amqp==2.6.0',  # for celery
+    'Chameleon==3.8.1',  # for Deform
+    'tornado==6.0.4',  # for celery
+    'webob==1.8.6',  # for pyramid
+
 ]
 
 
@@ -318,7 +354,7 @@ if getattr(our_args, EXTRAS_ARG):
     MANIFEST_LINES = ['include camcops_server/' + x for x in extra_files]
     with open(MANIFEST_FILE, 'wt') as manifest:
         manifest.writelines([
-            "# This is an AUTOCREATED file, MANIFEST.in; see "
+            "# This is an AUTOCREATED file, server/MANIFEST.in; see "
             "server/setup.py and DO NOT EDIT BY HAND"])
         manifest.write("\n\n" + "\n".join(MANIFEST_LINES) + "\n")
 
@@ -327,7 +363,7 @@ if getattr(our_args, EXTRAS_ARG):
     # -------------------------------------------------------------------------
     with open(PIP_REQ_FILE, "w") as req_file:
         req_file.writelines([
-            "# This is an AUTOCREATED file, requirements.txt; see "
+            "# This is an AUTOCREATED file, server/requirements.txt; see "
             "server/setup.py and DO NOT EDIT BY HAND"])
         req_file.write("\n\n" + "\n".join(INSTALL_REQUIRES) + "\n")
 

@@ -31,7 +31,7 @@ History and guide
 - Smith SC et al. (2005). Measurement of health-related quality of life for
   people with dementia: development of a new instrument (DEMQOL) and an
   evaluation of current methodology. Health Technology Assessment 9:1–93,
-  iii–iv. http://www.pubmed.com/15774233
+  iii–iv. http://www.pubmed.gov/15774233
 
 - http://www.bsms.ac.uk/research/our-researchers/sube-banerjee/demqol/
 

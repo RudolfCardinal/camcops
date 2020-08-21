@@ -1,0 +1,123 @@
+server/docker/dockerfiles/docker_notes.txt
+
+===============================================================================
+Docker Compose file for CamCOPS.
+Coordinates all the Docker containers required.
+===============================================================================
+
+- Start it by running "docker-compose up" from this directory, which uses
+  the default filename of "docker-compose.yml" or "docker-compose.yaml".
+
+- Don't miss the hidden file ".env". Unfortunate naming!
+
+
+===============================================================================
+Docker
+===============================================================================
+
+- Show your Docker version:
+
+  $ docker --version
+
+- Choosing a Docker base image:
+  https://pythonspeed.com/articles/base-image-python-docker-images/
+
+- Show running containers:
+
+  $ docker ps
+  $ docker container ls
+
+- Show details of a container:
+
+  $ docker container inspect CONTAINER
+
+- Remove a container (for a clean rebuild):
+
+  $ docker rm CONTAINER
+
+- Show volumes:
+
+  $ docker volume ls
+  $ docker volume inspect VOLUME  # see "Mountpoint" (on host)
+
+- Delete a volume:
+
+  $ docker volume rm VOLUME
+
+- Delete volumes created by docker-compose, when you "docker volume rm" says
+  no:
+
+  $ docker-compose down --volumes
+  ... see https://docs.docker.com/compose/reference/down/
+
+- Brutal removal:
+  https://stackoverflow.com/questions/34658836/docker-is-in-volume-in-use-but-there-arent-any-docker-containers
+
+- Build a Docker image:
+
+  $ docker image build --file DOCKERFILENAME CONTEXT_PATH
+
+- SSH into a running Docker container
+
+  $ docker exec -it CONTAINER /bin/bash
+
+  ... "-it" means "--interactive --tty".
+
+- Play with a base image, to solve package installation problems:
+
+  $ docker run -it python:3.6-slim-buster /bin/bash
+
+  ... e.g. then:
+
+    # apt-get update
+    # apt-get install gcc libmariadbclient-dev
+    # apt list --installed
+    # pip3 install mysqlclient
+
+
+===============================================================================
+Docker Compose
+===============================================================================
+
+- Show your Docker Compose version:
+
+  $ docker-compose version
+
+- Docker Compose reference:
+  https://docs.docker.com/compose/compose-file/
+
+- YAML reference:
+  https://camel.readthedocs.io/en/latest/yamlref.html
+
+- Volume sharing:
+  https://stackoverflow.com/questions/44284484/docker-compose-share-named-volume-between-multiple-containers
+
+- MySQL example:
+  https://medium.com/@chrischuck35/how-to-create-a-mysql-instance-with-docker-compose-1598f3cc1bee
+
+- Directory structure
+
+  - By default, the project name is taken from the basename of the directory
+    that you run compose commands from.
+  - If there is a file named ".env" in the working directory, it can set
+    default environment variables. See
+    https://docs.docker.com/compose/env-file/. This includes
+    COMPOSE_PROJECT_NAME.
+  - The project name is used as a prefix for containers and volumes, so is
+    helpful to set.
+
+- Start a specific service and run a command:
+
+  $ docker-compose run SERVICE COMMAND
+
+- Service versus container
+  https://stackoverflow.com/questions/35565770/difference-between-service-and-container-in-docker-compose
+pubm
+  ... a single service can be run by multiple containers
+
+
+===============================================================================
+Widget bugs
+===============================================================================
+
+pip freeze | sort --ignore-case

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# server/docker/linux/print_demo_camcops_config
+#
+# Prints a demo CamCOPS config file.
+# This is slightly tricky because we want to get rid of some stderr (which
+# otherwise blends into stdout once passed through Docker).
+
+set -e
+
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+CAMCOPS_SERVER="${THIS_DIR}/camcops_server"
+
+"${CAMCOPS_SERVER}" --no_log demo_camcops_config --docker

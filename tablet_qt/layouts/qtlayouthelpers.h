@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -160,17 +160,6 @@ struct QQLayoutStruct
 QDebug operator<<(QDebug debug, const QQLayoutStruct& ls);
 
 
-class WidgetItemHfw : public QWidgetItemV2
-{
-    // I thought this might be necessary but in fact it was only helpful
-    // as a debugging tool to hook into minimumSize().
-    // See createWidgetItem().
-public:
-    WidgetItemHfw(QWidget* widget) : QWidgetItemV2(widget) {}
-    QSize minimumSize() const override;
-};
-
-
 // ============================================================================
 // Helper functions
 // ... declared in qlayoutengine_p.h, implemented in qlayoutengine.cpp
@@ -195,7 +184,6 @@ int qSmartSpacing(const QLayout* layout, QStyle::PixelMetric pm);
 
 void qMaxExpCalc(int& max, bool& exp, bool &empty,
                  int boxmax, bool boxexp, bool boxempty);
-
 
 
 // ============================================================================

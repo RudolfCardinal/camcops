@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -59,8 +59,10 @@
 
 // #define DEBUG_LAYOUT_COMMS
 // #define DEBUG_LAYOUT_CALCS
-// #define DISABLE_CACHING
+// #define DISABLE_CACHING  // NOT FREE OF SIDE EFFECTS!
 // #define Q_OS_MAC  // for testing only, just to be sure it compiles OK...
+
+#define USE_WIDGETITEMHFW
 
 #include "boxlayouthfw.h"
 #include <QApplication>
@@ -91,13 +93,26 @@ using qtlayouthelpers::qSmartSpacing;
 
 
 // ============================================================================
+// Constants
+// ============================================================================
+
+#if defined BOXLAYOUTHFW_ALTER_FROM_QBOXLAYOUT && defined USE_WIDGETITEMHFW
+    const bool USE_HFW_CAPABLE_ITEM = true;
+#else
+    const bool USE_HFW_CAPABLE_ITEM = false;
+#endif
+
+
+// ============================================================================
 // Ancillary structs/classes
 // ============================================================================
 
 struct BoxLayoutHfwItem
 {
     BoxLayoutHfwItem(QLayoutItem* it, int stretch_ = 0) :
-        item(it), stretch(stretch_), magic(false)
+        item(it),
+        stretch(stretch_),
+        magic(false)
     {}
     ~BoxLayoutHfwItem() { delete item; }
 
@@ -109,6 +124,7 @@ struct BoxLayoutHfwItem
         }
         return item->sizeHint().height();
     }
+
     int minhfw(int w) const  // was mhfw
     {
         if (item->hasHeightForWidth()) {
@@ -117,6 +133,7 @@ struct BoxLayoutHfwItem
         }
         return item->minimumSize().height();
     }
+
     int maxhfw(int w) const  // RNC
     {
         if (item->hasHeightForWidth()) {
@@ -125,6 +142,7 @@ struct BoxLayoutHfwItem
         }
         return item->maximumSize().height();
     }
+
     int hStretch() const
     {
         if (stretch == 0 && item->widget()) {
@@ -132,6 +150,7 @@ struct BoxLayoutHfwItem
         }
         return stretch;
     }
+
     int vStretch() const
     {
         if (stretch == 0 && item->widget()) {
@@ -139,13 +158,14 @@ struct BoxLayoutHfwItem
         }
         return stretch;
     }
+
     int boundWidth(int w) const  // RNC
     {
         w = qBound(item->minimumSize().width(),
                    w,
                    item->maximumSize().width());
         if (QWidget* widget = item->widget()) {
-            QSizePolicy::Policy policy = widget->sizePolicy().horizontalPolicy();
+            const QSizePolicy::Policy policy = widget->sizePolicy().horizontalPolicy();
             if ((policy & QSizePolicy::PolicyFlag::ShrinkFlag) == 0) {
                 // Can't shrink, so don't let w go below sizeHint() width.
                 w = qMax(item->sizeHint().width(), w);
@@ -341,13 +361,13 @@ void BoxLayoutHfw::insertStretch(int index, const int stretch)
 }
 
 
-void BoxLayoutHfw::insertSpacerItem(int index, QSpacerItem* spacerItem)
+void BoxLayoutHfw::insertSpacerItem(int index, QSpacerItem* spacer_item)
 {
     if (index < 0) {  // append
         index = m_list.count();
     }
 
-    auto it = new BoxLayoutHfwItem(spacerItem);
+    auto it = new BoxLayoutHfwItem(spacer_item);
     it->magic = true;
     m_list.insert(index, it);
     invalidate();
@@ -383,12 +403,7 @@ void BoxLayoutHfw::insertWidget(int index, QWidget* widget,
     if (index < 0) {  // append
         index = m_list.count();
     }
-#if 0  // #ifdef BOXLAYOUTHFW_ALTER_FROM_QBOXLAYOUT
-    bool use_hfw_capable_item = true;
-#else
-    bool use_hfw_capable_item = false;
-#endif
-    QWidgetItem* b = createWidgetItem(this, widget, use_hfw_capable_item);
+    QWidgetItem* b = createWidgetItem(this, widget, USE_HFW_CAPABLE_ITEM);
     b->setAlignment(alignment);
 
     BoxLayoutHfwItem* it;
@@ -539,7 +554,7 @@ void BoxLayoutHfw::setDirection(const Direction direction)
                 if (sp) {
                     if (sp->expandingDirections() == Qt::Orientations(0) /*No Direction*/) {
                         //spacing or strut
-                        QSize s = sp->sizeHint();
+                        const QSize s = sp->sizeHint();
                         sp->changeSize(s.height(), s.width(),
                             horz(direction) ? QSizePolicy::Fixed:QSizePolicy::Minimum,
                             horz(direction) ? QSizePolicy::Minimum:QSizePolicy::Fixed);
@@ -634,7 +649,7 @@ BoxLayoutHfw::Direction BoxLayoutHfw::getVisualDir() const
 QSize BoxLayoutHfw::sizeHint() const
 {
 #ifdef BOXLAYOUTHFW_ALTER_FROM_QBOXLAYOUT
-    GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
+    const GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
     m_width_last_size_constraints_based_on = m_rect_for_next_size_constraints.width();
 #else
     GeomInfo gi = getGeomInfo();
@@ -654,7 +669,7 @@ QSize BoxLayoutHfw::sizeHint() const
 QSize BoxLayoutHfw::minimumSize() const
 {
 #ifdef BOXLAYOUTHFW_ALTER_FROM_QBOXLAYOUT
-    GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
+    const GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
     m_width_last_size_constraints_based_on = m_rect_for_next_size_constraints.width();
 #else
     GeomInfo gi = getGeomInfo();
@@ -674,7 +689,7 @@ QSize BoxLayoutHfw::minimumSize() const
 QSize BoxLayoutHfw::maximumSize() const
 {
 #ifdef BOXLAYOUTHFW_ALTER_FROM_QBOXLAYOUT
-    GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
+    const GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
     m_width_last_size_constraints_based_on = m_rect_for_next_size_constraints.width();
 #else
     GeomInfo gi = getGeomInfo();
@@ -701,7 +716,7 @@ QSize BoxLayoutHfw::maximumSize() const
 bool BoxLayoutHfw::hasHeightForWidth() const
 {
 #ifdef BOXLAYOUTHFW_ALTER_FROM_QBOXLAYOUT
-    GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
+    const GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
     // ... seems dumb to use geometry to ask that question, but we have to have
     // calculated at least one geometry to know that we've checked our contents
     // since last invalidate(), so we may as well use the m_has_hfw from one of
@@ -720,7 +735,7 @@ int BoxLayoutHfw::heightForWidth(const int w) const
     if (!hasHeightForWidth()) {
         return -1;
     }
-    HfwInfo hfw_info = getHfwInfo(w);
+    const HfwInfo hfw_info = getHfwInfo(w);
 #ifdef DEBUG_LAYOUT_COMMS
     qDebug() << Q_FUNC_INFO << ": width" << w
              << " -> height" << hfw_info.hfw_height;
@@ -734,7 +749,7 @@ int BoxLayoutHfw::minimumHeightForWidth(const int w) const
     if (!hasHeightForWidth()) {
         return -1;
     }
-    HfwInfo hfw_info = getHfwInfo(w);
+    const HfwInfo hfw_info = getHfwInfo(w);
 #ifdef DEBUG_LAYOUT_COMMS
     qDebug() << Q_FUNC_INFO << ": width" << w
              << " -> minimum height" << hfw_info.hfw_min_height;
@@ -746,7 +761,7 @@ int BoxLayoutHfw::minimumHeightForWidth(const int w) const
 Qt::Orientations BoxLayoutHfw::expandingDirections() const
 {
 #ifdef BOXLAYOUTHFW_ALTER_FROM_QBOXLAYOUT
-    GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
+    const GeomInfo gi = getGeomInfo(m_rect_for_next_size_constraints);
 #else
     GeomInfo gi = getGeomInfo();
 #endif
@@ -829,7 +844,7 @@ void BoxLayoutHfw::setGeometry(const QRect& initial_rect)
     // ------------------------------------------------------------------------
 #ifndef DISABLE_CACHING
 #ifdef BOXLAYOUTHFW_ALTER_FROM_QBOXLAYOUT
-    bool geometry_previously_calculated = m_geom_cache.contains(r);
+    const bool geometry_previously_calculated = m_geom_cache.contains(r);
     if (geometry_previously_calculated && r == geometry()) {
 #else
     if (!m_dirty && r == geometry()) {
@@ -851,7 +866,7 @@ void BoxLayoutHfw::setGeometry(const QRect& initial_rect)
     // in which we've had a chance to notify our parent widget.
 
 #ifdef BOXLAYOUTHFW_ALTER_FROM_QBOXLAYOUT
-    GeomInfo gi = getGeomInfo(r);
+    const GeomInfo gi = getGeomInfo(r);
 #else
     GeomInfo gi = getGeomInfo();
 #endif
@@ -891,11 +906,12 @@ void BoxLayoutHfw::setGeometry(const QRect& initial_rect)
         }
     }
     QWidget* parent = parentWidget();
-    Margins parent_margins = Margins::getContentsMargins(parent);
+    const Margins parent_margins = Margins::getContentsMargins(parent);
     if (!parent) {
         qWarning() << Q_FUNC_INFO << "Layout has no parent widget";
     }
-    int parent_new_height = getParentTargetHeight(parent, parent_margins, gi);
+    const int parent_new_height = getParentTargetHeight(
+                parent, parent_margins, gi);
     if (parent_new_height != -1) {
         // We will, under these circumstances, call
         // parent->updateGeometry().
@@ -920,7 +936,7 @@ void BoxLayoutHfw::setGeometry(const QRect& initial_rect)
     // ------------------------------------------------------------------------
     // Lay out children and call QLayout::setGeometry()
     // ------------------------------------------------------------------------
-    QRect old_rect = geometry();
+    const QRect old_rect = geometry();
     QLayout::setGeometry(r);
     distribute(gi, r, old_rect);
 
@@ -929,10 +945,20 @@ void BoxLayoutHfw::setGeometry(const QRect& initial_rect)
     // ------------------------------------------------------------------------
 #ifdef BOXLAYOUTHFW_ALTER_FROM_QBOXLAYOUT
     if (parent_new_height != -1) {
-        bool change = !sizehelpers::fixedHeightEquals(parent,
-                                                      parent_new_height);
+        const bool change = !sizehelpers::fixedHeightEquals(parent,
+                                                            parent_new_height);
+        // Don't resize if the parent is already trying its best.
         if (change) {
+#ifdef DEBUG_LAYOUT_COMMS
+            qDebug()
+                    << Q_FUNC_INFO
+                    << "Asking parent to change height from"
+                    << parent->geometry().height()
+                    << "to"
+                    << parent_new_height;
+#endif
             parent->setFixedHeight(parent_new_height);  // RISK OF INFINITE RECURSION
+            // ... hence the ReentryDepthGuard
             parent->updateGeometry();
         }
     }
@@ -959,7 +985,8 @@ int BoxLayoutHfw::getParentTargetHeight(QWidget* parent,
     target_min_height += parent_margins.totalHeight();
     target_max_height += parent_margins.totalHeight();
 
-    if (parent->geometry().height() < target_min_height) {
+    const int current_parent_height = parent->geometry().height();
+    if (current_parent_height < target_min_height) {
 #ifdef DEBUG_LAYOUT_CALCS
         qDebug().nospace()
                 << "... will set parent height to " << target_min_height
@@ -969,8 +996,8 @@ int BoxLayoutHfw::getParentTargetHeight(QWidget* parent,
                 << parent_margins.totalHeight() << "])";
 #endif
         parent_new_height = target_min_height;
-    }
-    if (parent->geometry().height() > target_max_height) {
+
+    } else if (current_parent_height > target_max_height) {
 #ifdef DEBUG_LAYOUT_CALCS
         qDebug().nospace()
                 << "... will set parent height to " << target_max_height
@@ -981,6 +1008,7 @@ int BoxLayoutHfw::getParentTargetHeight(QWidget* parent,
 #endif
         parent_new_height = target_max_height;
     }
+
     return parent_new_height;
 }
 
@@ -989,17 +1017,18 @@ void BoxLayoutHfw::distribute(const GeomInfo& gi,
                               const QRect& layout_rect, const QRect& old_rect)
 {
     const QRect& r = layout_rect;  // alias
-    QRect s = getContentsRect(layout_rect);
+    const QRect s = getContentsRect(layout_rect);
 
 #ifdef DEBUG_LAYOUT_COMMS
+    qDebug() << Q_FUNC_INFO;
     qDebug().nospace() << "... called with layout rect " << layout_rect
                        << ", giving final rect for children of " << s;
 #endif
 
     QVector<QLayoutStruct> a = gi.m_geom_array;
-    int pos = horz(m_dir) ? s.x() : s.y();  // RNC: starting coordinate (left or top)
-    int space = horz(m_dir) ? s.width() : s.height();  // RNC: extent (width or height)
-    int n = a.count();
+    const int pos = horz(m_dir) ? s.x() : s.y();  // RNC: starting coordinate (left or top)
+    const int space = horz(m_dir) ? s.width() : s.height();  // RNC: extent (width or height)
+    const int n = a.count();
 
     // The idea here is that when we were asked "how big do you want to be",
     // we returned information from getGeomInfo() that encompassed the range
@@ -1011,32 +1040,33 @@ void BoxLayoutHfw::distribute(const GeomInfo& gi,
     // height.
     if (gi.m_has_hfw && !horz(m_dir)) {
         for (int i = 0; i < n; i++) {
-            BoxLayoutHfwItem* box = m_list.at(i);
-            if (box->item->hasHeightForWidth()) {
-                int width = qBound(box->item->minimumSize().width(),
-                                   s.width(),
-                                   box->item->maximumSize().width());
+            const BoxLayoutHfwItem* box = m_list.at(i);
+            const QLayoutItem* item = box->item;
+            if (item->hasHeightForWidth()) {
+                const int width = qBound(item->minimumSize().width(),
+                                         s.width(),
+                                         item->maximumSize().width());
                 a[i].size_hint = a[i].minimum_size =
 #ifdef BOXLAYOUTHFW_ALTER_FROM_QBOXLAYOUT
                         a[i].maximum_size =
 #endif
-                        box->item->heightForWidth(width);
+                        item->heightForWidth(width);
             }
         }
     }
 
     qGeomCalc(a, 0, n, pos, space);
 
-    Direction visual_dir = getVisualDir();
-    bool reverse = (horz(visual_dir)
-                    ? ((r.right() > old_rect.right()) != (visual_dir == RightToLeft))
-                    : r.bottom() > old_rect.bottom());
+    const Direction visual_dir = getVisualDir();
+    const bool reverse = horz(visual_dir)
+            ? ((r.right() > old_rect.right()) != (visual_dir == RightToLeft))
+            : r.bottom() > old_rect.bottom();
     // ... RNC: this seems to be saying that for vertical layouts, at least,
     // then if the geometry is extending downwards (old_rect ending below
     // current), draw from the bottom up.
     QVector<QRect> childrects = getChildRects(s, a);
     for (int j = 0; j < n; j++) {
-        int i = reverse ? (n - j - 1) : j;
+        const int i = reverse ? (n - j - 1) : j;
         BoxLayoutHfwItem* box = m_list.at(i);
         const QRect& childrect = childrects.at(i);
         box->item->setGeometry(childrect);
@@ -1073,8 +1103,8 @@ BoxLayoutHfw::GeomInfo BoxLayoutHfw::getGeomInfo(const QRect& layout_rect) const
     }
 #endif
 
-    QRect s = getContentsRect(layout_rect);
-    int layout_available_width = s.width();
+    const QRect s = getContentsRect(layout_rect);
+    const int layout_available_width = s.width();
 
 #else
 BoxLayoutHfw::GeomInfo BoxLayoutHfw::getGeomInfo() const
@@ -1098,18 +1128,18 @@ BoxLayoutHfw::GeomInfo BoxLayoutHfw::getGeomInfo() const
     int hintw = 0;  // layout preferred width
     int hinth = 0;  // layout preferred height
 
-    bool horexp = false;
-    bool verexp = false;
+    bool horexp = false;  // horizontally expanding?
+    bool verexp = false;  // vertically expanding?
 
     gi.m_has_hfw = false;
 
-    int n = m_list.count();
+    const int n = m_list.count();
     gi.m_geom_array.clear();
     QVector<QLayoutStruct> a(n);  // RNC: extra Q
 
     QSizePolicy::ControlTypes control_types1;
     QSizePolicy::ControlTypes control_types2;
-    int fixed_spacing = spacing();
+    const int fixed_spacing = spacing();
     int previous_non_empty_index = -1;
 
     QStyle* style = nullptr;
@@ -1121,12 +1151,12 @@ BoxLayoutHfw::GeomInfo BoxLayoutHfw::getGeomInfo() const
 
     for (int i = 0; i < n; i++) {
         BoxLayoutHfwItem* box = m_list.at(i);
-        QSize item_min = box->item->minimumSize();
-        QSize item_hint = box->item->sizeHint();  // RNC: was just "hint"
-        QSize item_max = box->item->maximumSize();  // RNC: was just "max"
-        Qt::Orientations expdir = box->item->expandingDirections();  // RNC: was just "exp"
-        bool empty = box->item->isEmpty();
-        bool ignore = empty && box->item->widget(); // ignore hidden widgets
+        const QSize item_min = box->item->minimumSize();
+        const QSize item_hint = box->item->sizeHint();  // RNC: was just "hint"
+        const QSize item_max = box->item->maximumSize();  // RNC: was just "max"
+        const Qt::Orientations expdir = box->item->expandingDirections();  // RNC: was just "exp"
+        const bool empty = box->item->isEmpty();
+        const bool ignore = empty && box->item->widget(); // ignore hidden widgets
         int spacing = 0;
         bool dummy = true;
 
@@ -1184,7 +1214,7 @@ BoxLayoutHfw::GeomInfo BoxLayoutHfw::getGeomInfo() const
             // ----------------------------------------------------------------
             // HORIZONTAL
             // ----------------------------------------------------------------
-            bool expand = (expdir & Qt::Horizontal || box->stretch > 0);
+            const bool expand = (expdir & Qt::Horizontal || box->stretch > 0);
             horexp = horexp || expand;
 
             // Widths
@@ -1214,7 +1244,7 @@ BoxLayoutHfw::GeomInfo BoxLayoutHfw::getGeomInfo() const
             // ----------------------------------------------------------------
             // VERTICAL
             // ----------------------------------------------------------------
-            bool expand = (expdir & Qt::Vertical || box->stretch > 0);
+            const bool expand = (expdir & Qt::Vertical || box->stretch > 0);
             verexp = verexp || expand;
 
             // Widths
@@ -1232,13 +1262,13 @@ BoxLayoutHfw::GeomInfo BoxLayoutHfw::getGeomInfo() const
             // minimum/maximum height"? For a height-for-width item, all the
             // heights will be the same (see BoxLayoutHfwItem). For other
             // items, we will get the same results as the QBoxLayout code.
-            int item_width = qBound(item_min.width(),
-                                    layout_available_width,
-                                    item_max.width());
+            const int item_width = qBound(item_min.width(),
+                                          layout_available_width,
+                                          item_max.width());
 
-            int minhfw = box->minhfw(item_width);
-            int hfw = box->hfw(item_width);
-            int maxhfw = box->maxhfw(item_width);
+            const int minhfw = box->minhfw(item_width);
+            const int hfw = box->hfw(item_width);
+            const int maxhfw = box->maxhfw(item_width);
             minh += spacing + minhfw;
             hinth += spacing + hfw;
             maxh += spacing + maxhfw;
@@ -1273,25 +1303,25 @@ BoxLayoutHfw::GeomInfo BoxLayoutHfw::getGeomInfo() const
     // calculations now we can work out the widths of all items
     if (gi.m_has_hfw && horz(m_dir)) {
         // Create dummy layout using "a"
-        int pos = s.x();
-        int space = s.width();
+        const int pos = s.x();
+        const int space = s.width();
         qGeomCalc(a, 0, n, pos, space);
         minh = 0;
         maxh = QLAYOUTSIZE_MAX;
         hinth = 0;
         for (int i = 0; i < n; ++i) {
             BoxLayoutHfwItem* box = m_list.at(i);
-            Qt::Orientations expdir = box->item->expandingDirections();  // RNC: was just "exp"
-            bool empty = box->item->isEmpty();
+            const Qt::Orientations expdir = box->item->expandingDirections();  // RNC: was just "exp"
+            const bool empty = box->item->isEmpty();
             // for QWidgetItem: return (wid->isHidden() && !wid->sizePolicy().retainSizeWhenHidden()) || wid->isWindow();
-            bool ignore = empty && box->item->widget(); // ignore hidden widgets
+            const bool ignore = empty && box->item->widget(); // ignore hidden widgets
             //  ... as opposed to hidden layouts?
             bool dummy = true;
 
-            int item_width = a[i].size;  // already solved
-            int hfw = box->hfw(item_width);
-            int minhfw = box->minhfw(item_width);
-            int maxhfw = box->maxhfw(item_width);
+            const int item_width = a[i].size;  // already solved
+            const int hfw = box->hfw(item_width);
+            const int minhfw = box->minhfw(item_width);
+            const int maxhfw = box->maxhfw(item_width);
             // I'm not sure why QBoxLayout doesn't put the minh/hinth
             // calculations within the "if (!ignore)" test.
             minh = qMax(minh, minhfw);
@@ -1313,8 +1343,8 @@ BoxLayoutHfw::GeomInfo BoxLayoutHfw::getGeomInfo() const
     gi.m_max_size = QSize(maxw, maxh).expandedTo(gi.m_min_size);
     gi.m_size_hint = QSize(hintw, hinth).expandedTo(gi.m_min_size).boundedTo(gi.m_max_size);
 
-    Margins effmarg = effectiveMargins();  // caches content/effective margins
-    QSize extra = effmarg.totalSize();
+    const Margins effmarg = effectiveMargins();  // caches content/effective margins
+    const QSize extra = effmarg.totalSize();
 
     gi.m_min_size += extra;
     gi.m_max_size += extra;
@@ -1400,11 +1430,11 @@ BoxLayoutHfw::HfwInfo BoxLayoutHfw::getHfwInfo(const int layout_width) const
     // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     // Start of main thinking
 
-    Margins effmarg = effectiveMargins();
+    const Margins effmarg = effectiveMargins();
     w -= effmarg.totalWidth();  // RNC; see above for notes and below for compensation
 
     QVector<QLayoutStruct>& a = gi.m_geom_array;
-    int n = a.count();
+    const int n = a.count();
     int h = 0;  // height for given width
     int mh = 0;  // minimum height for given width
 
@@ -1431,7 +1461,7 @@ BoxLayoutHfw::HfwInfo BoxLayoutHfw::getHfwInfo(const int layout_width) const
         // RNC: VERTICAL: sum of value for each item, plus spacing, for each of hfw() and mhfw()
         for (int i = 0; i < n; ++i) {
             BoxLayoutHfwItem* box = m_list.at(i);
-            int spacing = a.at(i).spacing;
+            const int spacing = a.at(i).spacing;
             h += box->hfw(w);
             mh += box->minhfw(w);
             h += spacing;
@@ -1476,7 +1506,7 @@ QRect BoxLayoutHfw::getContentsRect(const QRect& layout_rect) const
 {
     // ... following code from QBoxLayout::setGeometry()
     const QRect& r = layout_rect;  // so variable names match QBoxLayout
-    QRect cr = alignment() ? alignmentRect(r) : r;
+    const QRect cr = alignment() ? alignmentRect(r) : r;
     // RNC: ... if there is no alignment, cr is the same as r (meaning that we
     // fill our entire space), but if there is an alignment,  we alter our
     // rectangle; see http://doc.qt.io/qt-5/qlayout.html#alignmentRect
@@ -1497,21 +1527,22 @@ QRect BoxLayoutHfw::getContentsRect(const QRect& layout_rect) const
 
 QVector<QRect> BoxLayoutHfw::getChildRects(
         const QRect& contents_rect,
-        const QVector<QLayoutStruct>& a) const
+        const QVector<QLayoutStruct>& items) const
 {
     // following code from QBoxLayout::setGeometry()
     const QRect& s = contents_rect;
-    int n = a.count();
+    const int n = items.count();
     QVector<QRect> rects(n);
-    Direction visual_dir = getVisualDir();
+    const Direction visual_dir = getVisualDir();
     for (int i = 0; i < n; ++i) {
+        const QLayoutStruct& item = items.at(i);
         switch (visual_dir) {
         case LeftToRight:
             {
                 rects[i] = QRect(
-                    a.at(i).pos,  // left
+                    item.pos,  // left
                     s.y(),  // top
-                    a.at(i).size,  // width
+                    item.size,  // width
                     s.height()  // height [NB widget may e.g. align top or bottom within this]
                 );
             }
@@ -1519,25 +1550,25 @@ QVector<QRect> BoxLayoutHfw::getChildRects(
         case RightToLeft:
             {
                 rects[i] = QRect(
-                    s.left() + s.right() - a.at(i).pos - a.at(i).size + 1,  // left
+                    s.left() + s.right() - item.pos - item.size + 1,  // left
                     s.y(),  // top
-                    a.at(i).size,  // width
+                    item.size,  // width
                     s.height()  // height [NB widget may e.g. align top or bottom within this]
                 );
             }
             break;
         case TopToBottom:
             rects[i] = QRect(s.x(),  // left
-                             a.at(i).pos,  // top
+                             item.pos,  // top
                              s.width(),  // width
-                             a.at(i).size);  // height
+                             item.size);  // height
             // the "size" solution should equal height-for-width if applicable
             break;
         case BottomToTop:
             rects[i] = QRect(s.x(),  // left
-                             s.top() + s.bottom() - a.at(i).pos - a.at(i).size + 1,  // top
+                             s.top() + s.bottom() - item.pos - item.size + 1,  // top
                              s.width(),  // width
-                             a.at(i).size);  // height
+                             item.size);  // height
             // the "size" solution should equal height-for-width if applicable
             break;
         }
@@ -1560,7 +1591,7 @@ Margins BoxLayoutHfw::effectiveMargins() const
     }
 #endif
     if (m_effective_margins.isZero()) {
-        Margins contents_margins = Margins::getContentsMargins(this);
+        const Margins contents_margins = Margins::getContentsMargins(this);
         m_effective_margins = effectiveMargins(contents_margins);
     }
     return m_effective_margins;
@@ -1580,7 +1611,7 @@ Margins BoxLayoutHfw::effectiveMargins(const Margins& contents_margins) const
     int b = contents_margins.bottom();
 
 #ifdef Q_OS_MAC
-    // RNC: in the original left/top/right/bottom were pointers to receive
+    // RNC: in the original, left/top/right/bottom were pointers to receive
     // values, and tested to make calculation more efficient.
     bool left = true;
     bool top  = true;
@@ -1720,8 +1751,3 @@ void BoxLayoutHfw::clearCaches() const
     m_dirty = false;
 }
 #endif
-
-
-// ============================================================================
-// Bits from QLayoutPrivate
-// ============================================================================

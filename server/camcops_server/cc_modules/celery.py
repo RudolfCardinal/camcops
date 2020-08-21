@@ -154,10 +154,6 @@ register("json", json_encode, json_decode,
 
 
 def get_celery_settings_dict() -> Dict[str, Any]:
-    """
-    This function is passed as a callable to Celery's ``add_defaults``, and
-    thus is called when needed (rather than immediately).
-    """  # noqa
     log.debug("Configuring Celery")
     from camcops_server.cc_modules.cc_config import (
         CrontabEntry,
@@ -200,6 +196,11 @@ def get_celery_settings_dict() -> Dict[str, Any]:
         "beat_schedule": schedule,
         "broker_url": config.celery_broker_url,
         "timezone": config.schedule_timezone,
+        "task_annotations": {
+            "camcops_server.cc_modules.celery.export_task_backend": {
+                "rate_limit": config.celery_export_task_rate_limit,
+            }
+        },
     }
 
 
@@ -208,7 +209,7 @@ def get_celery_settings_dict() -> Dict[str, Any]:
 # =============================================================================
 
 celery_app = Celery()
-celery_app.add_defaults(get_celery_settings_dict)
+celery_app.add_defaults(get_celery_settings_dict())
 # celery_app.autodiscover_tasks([CELERY_APP_NAME],
 #                               related_name=CELERY_TASKS_MODULE)
 
@@ -483,7 +484,7 @@ def delete_old_user_downloads(req: "CamcopsRequest") -> None:
     now = req.now
     lifetime = req.user_download_lifetime_duration
     oldest_allowed = now - lifetime
-    log.critical(f"Deleting files older than {oldest_allowed}")
+    log.info(f"Deleting any user download files older than {oldest_allowed}")
     for root, dirs, files in os.walk(req.config.user_download_dir):
         for f in files:
             udf = UserDownloadFile(filename=f, directory=root)

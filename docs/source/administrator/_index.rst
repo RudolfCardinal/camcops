@@ -26,10 +26,11 @@ Details for people running a CamCOPS server.
 ..  toctree::
     :maxdepth: 1
 
+    docker.rst
+    server_config_file.rst
     server_installation.rst
     third_party_installation.rst
     server_configuration.rst
-    server_config_file.rst
     server_front_end_admin.rst
     server_command_line.rst
     server_upgrading.rst
@@ -37,6 +38,8 @@ Details for people running a CamCOPS server.
     server_migrating_databases.rst
     windows_service.rst
     snomed.rst
+    redcap.rst
+    resource_usage.rst
     tcpip_ports.rst
     linux_flavours.rst
     local/local_info.rst

@@ -1,6 +1,6 @@
 
     # Demonstration Apache config file section for CamCOPS.
-    # Created by CamCOPS version 2.3.7 at 2020-02-07T11:33:32.894407+00:00.
+    # Created by CamCOPS version 2.3.7.
     #
     # Under Ubuntu, the Apache config will be somewhere in /etc/apache2/
     # Under CentOS, the Apache config will be somewhere in /etc/httpd/
@@ -197,9 +197,10 @@
 
         Require all granted
 
-        # ... for old Apache version (e.g. 2.2), use instead:
-        # Order allow,deny
-        # Allow from all
+            # ... for old Apache versions (e.g. 2.2), use instead:
+            #
+            #   Order allow,deny
+            #   Allow from all
 
             # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             # (d) Tell the proxied application that we are using HTTPS, and
@@ -207,40 +208,24 @@
             # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             #     ... https://stackoverflow.com/questions/16042647
             #
-            # EITHER enable mod_headers (e.g. "sudo a2enmod headers") and set:
+            # Enable mod_headers (e.g. "sudo a2enmod headers") and set:
 
         RequestHeader set X-Forwarded-Proto https
         RequestHeader set X-Script-Name /camcops
 
-            # and call CamCOPS like:
+            # ... then ensure the TRUSTED_PROXY_HEADERS setting in the CamCOPS
+            # config file includes:
             #
-            # camcops serve_gunicorn \
-            #       --config SOMECONFIG \
-            #       --trusted_proxy_headers \
-            #           HTTP_X_FORWARDED_HOST \
-            #           HTTP_X_FORWARDED_SERVER \
-            #           HTTP_X_FORWARDED_PORT \
-            #           HTTP_X_FORWARDED_PROTO \
+            #           HTTP_X_FORWARDED_HOST
+            #           HTTP_X_FORWARDED_SERVER
+            #           HTTP_X_FORWARDED_PORT
+            #           HTTP_X_FORWARDED_PROTO
             #           HTTP_X_SCRIPT_NAME
             #
             # (X-Forwarded-For, X-Forwarded-Host, and X-Forwarded-Server are
-            # supplied by Apache automatically)
-            #
-            # ... OR specify those options by hand in the CamCOPS command.
+            # supplied by Apache automatically.)
 
     </Location>
-
-        # ---------------------------------------------------------------------
-        # 3. For additional CamCOPS instances
-        # ---------------------------------------------------------------------
-        # (a) duplicate section 1 above, editing the base URL and CamCOPS
-        #     connection (socket/port);
-        # (b) you will also need to create an additional CamCOPS instance,
-        #     as above;
-        # (c) add additional static aliases (in section 2 above).
-        #
-        # HOWEVER, consider adding more CamCOPS groups, rather than creating
-        # additional instances; the former are *much* easier to administer!
 
     #==========================================================================
     # SSL security (for HTTPS)

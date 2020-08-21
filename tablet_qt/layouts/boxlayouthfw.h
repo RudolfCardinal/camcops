@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012-2019 Rudolf Cardinal (rudolf@pobox.com).
+    Copyright (C) 2012-2020 Rudolf Cardinal (rudolf@pobox.com).
 
     This file is part of CamCOPS.
 
@@ -94,21 +94,34 @@ class BoxLayoutHfw : public QLayout
     // layout only at step (3), but if the widget's height should be exactly
     // the height-for-width of the layout, it needed to know at step 1/2.
     //
-    // This class attempts to solve this by triggering a re-layout if the
-    // geometry at step (3) is not the one used by the widget previously at
-    // steps 1/2. Triggering a re-layout before painting is better than the
-    // alternative of using QWidget::resizeEvent() to call
-    // QWidget::updateGeometry(), because (a) widgets owning that widget have
-    // to repeat the process (so you have to modify a whole chain of widgets
-    // rather than a single layout class), and (b) that method is visually
-    // worse because (at least some) widgets are painted then repainted; with
-    // the layout method, all the thinking happens before any painting.
+    // This class attempts to solve this by triggering a re-layout (by forcing
+    // the parent widget's height) if the geometry at step (3) is incompatible
+    // with the one used by the widget previously at steps 1/2 (i.e. if the
+    // parent's height is outside the min/max range).
+    //
+    // Triggering a re-layout before painting is better than the alternative of
+    // using QWidget::resizeEvent() to call QWidget::updateGeometry(), because
+    // (a) widgets owning that widget have to repeat the process (so you have
+    //     to modify a whole chain of widgets rather than a single layout
+    //     class), and
+    // (b) that method is visually worse because (at least some) widgets are
+    //     painted then repainted; with the layout method, all the thinking
+    //     happens before any painting.
+    //
+    // WITHOUT THIS, whether or not the parent widget has height-for-width as
+    // part of its size policy, the parent widget does not resize. The main
+    // effect is that the layoutcan be cropped at the bottom (i.e. overspill at
+    // the bottom is not shown). You might think that this would be OK if it
+    // could scroll instead, but a scroll area needs to contain a widget, which
+    // must get its height right if it contains an HFW layout -- so the problem
+    // remains.
     //
     // UPSHOT:
     // - I have not been able to get this reliable and avoiding infinite loops.
+    //   There is therefore a depth limit.
     // - The trouble is in part that so many things trigger invalidate(), and
-    //   you don't know if they're important (e.g. a subwidget has changed size)
-    //   or unimportant (e.g. self-triggered).
+    //   you don't know if they're important (e.g. a subwidget has changed
+    //   size) or unimportant (e.g. self-triggered).
     //
     // Other notable modifications:
     // - the "private" (PIMPL) method is removed
@@ -120,18 +133,30 @@ public:
     enum Direction { LeftToRight, RightToLeft, TopToBottom, BottomToTop,
                      Down = TopToBottom, Up = BottomToTop };
     struct GeomInfo {  // RNC
-        QVector<QLayoutStruct> m_geom_array;  // set by setupGeom(), read by getHfwInfo() and setGeometry()
-        QSize m_size_hint;  // returned by sizeHint(), calculated by setupGeom()
-        QSize m_min_size;  // returned by minimumSize(), calculated by setupGeom()
-        QSize m_max_size;  // returned by maximumSize(), calculated by setupGeom()
-        int m_left_margin, m_top_margin, m_right_margin, m_bottom_margin;  // set by setupGeom(), read by effectiveMargins()
-        Qt::Orientations m_expanding;  // returned by expandingDirections(), calculated by setupGeom()
-        bool m_has_hfw;  // returned by hasHeightForWidth(), calculated by setupGeom()
+        // Describes the geometry of the whole layout.
+        // Created by getGeomInfo().
+
+        // QLayoutStruct (and QQLayoutStruct) are small objects containing
+        // measurements, used for layout calculations.
+        QVector<QLayoutStruct> m_geom_array;
+
+        // Then some things for the layout as a whole:
+        QSize m_size_hint;  // layout preferred size
+        QSize m_min_size;  // layout minimum size
+        QSize m_max_size;  // layout maximum size
+        int m_left_margin, m_top_margin, m_right_margin, m_bottom_margin;
+        // ... layout margins (content rect is smaller than layout rect by
+        // this amount)
+
+        Qt::Orientations m_expanding;  // can it expand horizontally? vertically?
+        bool m_has_hfw;  // layout has height-for-width property
     };
+
     struct HfwInfo {  // RNC
+        // Returned by getHfwInfo(width); provides height-for-width details.
         HfwInfo() : hfw_height(-1), hfw_min_height(-1) {}
-        int hfw_height;
-        int hfw_min_height;
+        int hfw_height;  // preferred height for the whole layout
+        int hfw_min_height;  // minimum height for the whole layout
     };
 
 public:
@@ -180,6 +205,8 @@ public:
     QLayoutItem* itemAt(int index) const override;
     QLayoutItem* takeAt(int index) override;
     int count() const override;
+
+    // Main function to lay out the widgets.
     void setGeometry(const QRect& rect) override;
 
 private:
@@ -188,39 +215,74 @@ private:
     void operator=(BoxLayoutHfw const& x) = delete;
 
 protected:
+    // Mark caches for clearing.
     void setDirty();
+
+    // Remove all widgets.
     void deleteAll();
+
 #ifdef BOXLAYOUTHFW_ALTER_FROM_QBOXLAYOUT
+    // What should our parent widget's height be, for a given GeomInfo?
+    // Returns -1 if no change required.
+    // Assumes that the parent comprises this layout plus parent_margins.
     int getParentTargetHeight(QWidget* parent, const Margins& parent_margins,
                               const GeomInfo& gi) const;  // RNC
+
+    // Gets geometry information for a given layout rectangle.
+    // The main calculation function.
     GeomInfo getGeomInfo(const QRect& layout_rect = QRect()) const;  // RNC
 #else
     GeomInfo getGeomInfo() const;  // RNC
 #endif
+
+    // Returns height-for-width details (preferred and minimum height) for a
+    // given layout width.
     HfwInfo getHfwInfo(int layout_width) const;  // RNC
+
+    // Returns the margins of this grid (the unusable bit).
     Margins effectiveMargins(const Margins& contents_margins) const;  // RNC
+
+    // Replace the widget at a particular index.
     QLayoutItem* replaceAt(int index, QLayoutItem* item);
+
+    // Gets the active contents rect from the overall layout rect (by
+    // subtracting margins).
     QRect getContentsRect(const QRect& layout_rect) const;  // RNC
+
+    // Returns the rectangles for each cell in the layout.
+    // Called by distribute().
+    // Uses the contents_rect for the "whole layout" info, and then
+    // items[index].pos and items[index].size for the "per item" info in the
+    // layout's direction of travel.
     QVector<QRect> getChildRects(const QRect& contents_rect,
-                                 const QVector<QLayoutStruct>& a) const;  // RNC
+                                 const QVector<QLayoutStruct>& items) const;  // RNC
+
+    // Gets the direction (left to right, or right to left), taking into
+    // account any direction reversal being applied by our parent.
     Direction getVisualDir() const;  // RNC
+
 #ifdef BOXLAYOUTHFW_ALTER_FROM_QBOXLAYOUT
+    // Clear all caches.
     void clearCaches() const;  // RNC
 #endif
+
+    // Returns the margins of this grid (the unusable bit).
     Margins effectiveMargins() const;  // RNC
+
+    // Lay out children by setting their geometry.
     void distribute(const GeomInfo& gi,
                     const QRect& layout_rect, const QRect& old_rect);  // RNC
 
 protected:
-    QVector<BoxLayoutHfwItem*> m_list;
-    Direction m_dir;
-    int m_spacing;
+    QVector<BoxLayoutHfwItem*> m_list;  // our widgets
+    Direction m_dir;  // visual direction
+    int m_spacing;  // spacing between each widget
 
 #ifdef BOXLAYOUTHFW_ALTER_FROM_QBOXLAYOUT
-    mutable int m_width_last_size_constraints_based_on;
-    mutable QRect m_rect_for_next_size_constraints;
-    mutable QHash<QRect, GeomInfo> m_geom_cache;  // RNC
-    mutable QHash<int, HfwInfo> m_hfw_cache;  // RNC; the int is width
+    mutable int m_width_last_size_constraints_based_on;  // the width we last based our size information on
+    mutable QRect m_rect_for_next_size_constraints;  // the layout_rect we will base our size information on
+    mutable QHash<QRect, GeomInfo> m_geom_cache;  // RNC; maps layout_rect to GeomInfo
+    mutable QHash<int, HfwInfo> m_hfw_cache;  // RNC; maps candidate width to HFW info
 #else
     mutable GeomInfo m_cached_geominfo;
     mutable int m_cached_hfw_width;

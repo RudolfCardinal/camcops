@@ -332,16 +332,16 @@ class PatientIdNumIndexEntry(Base):
         log.info("Checking all patient ID numbers have an index")
         # noinspection PyUnresolvedReferences,PyProtectedMember
         q_original_with_idx = session.query(PatientIdNum).filter(
-            PatientIdNum._current == True,  # nopep8
+            PatientIdNum._current == True,  # noqa: E712
             PatientIdNum.idnum_value.isnot(None),
             ~exists()
-                .select_from(
-                    PatientIdNumIndexEntry.__table__
-                ).where(and_(
-                    PatientIdNum._pk == PatientIdNumIndexEntry.idnum_pk,
-                    PatientIdNum.which_idnum == PatientIdNumIndexEntry.which_idnum,  # noqa
-                    PatientIdNum.idnum_value == PatientIdNumIndexEntry.idnum_value,  # noqa
-                ))
+            .select_from(
+                PatientIdNumIndexEntry.__table__
+            ).where(and_(
+                PatientIdNum._pk == PatientIdNumIndexEntry.idnum_pk,
+                PatientIdNum.which_idnum == PatientIdNumIndexEntry.which_idnum,  # noqa
+                PatientIdNum.idnum_value == PatientIdNumIndexEntry.idnum_value,  # noqa
+            ))
         )
         for orig in q_original_with_idx:
             log.error("ID number without index entry: {!r}", orig)
@@ -431,7 +431,7 @@ class PatientIdNumIndexEntry(Base):
                             )
                         )
                         .where(idnumcols._pk.in_(addition_pks))
-                        .where(patientcols._current == True)
+                        .where(patientcols._current == True)  # noqa: E712
                     )
                 )
             )
@@ -902,11 +902,11 @@ class TaskIndexEntry(Base):
             q_idx_without_original = session.query(TaskIndexEntry).filter(
                 TaskIndexEntry.task_table_name == tasktablename,
                 ~exists()
-                    .select_from(taskclass.__table__)
-                    .where(and_(
-                        TaskIndexEntry.task_pk == taskclass._pk,
-                        taskclass._current == True,  # noqa: E712
-                    ))
+                .select_from(taskclass.__table__)
+                .where(and_(
+                    TaskIndexEntry.task_pk == taskclass._pk,
+                    taskclass._current == True,  # noqa: E712
+                ))
             )
             # No check for a valid patient at this time.
             for index in q_idx_without_original:
