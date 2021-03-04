@@ -957,6 +957,14 @@ class Platform(object):
         return self.cpu in [Cpu.ARM_V8_64]
 
     # -------------------------------------------------------------------------
+    # Linkage method of Qt
+    # -------------------------------------------------------------------------
+    @property
+    def qt_linkage_static(self) -> bool:
+        # NOT Android; dynamic linkage then bundling into single-file APK.
+        return self.desktop or self.ios
+
+    # -------------------------------------------------------------------------
     # Library (e.g. .so, DLL) verification
     # -------------------------------------------------------------------------
 
@@ -3106,12 +3114,8 @@ def build_qt(cfg: Config, target_platform: Platform) -> str:
     # Qt: Setup
     # -------------------------------------------------------------------------
 
-    # Linkage method of Qt itself?
-    qt_linkage_static = target_platform.desktop
-    # NOT Android; dynamic linkage then bundling into single-file APK.
-
     # Means by which Qt links to OpenSSL?
-    qt_openssl_linkage_static = cfg.qt_openssl_static and qt_linkage_static
+    qt_openssl_linkage_static = cfg.qt_openssl_static and target_platform.qt_linkage_static
     # If Qt is linked dynamically, we do not let it link to OpenSSL
     # statically (it won't work).
 
@@ -3197,7 +3201,7 @@ def build_qt(cfg: Config, target_platform: Platform) -> str:
         # "-sysroot": not required; Qt's configure should handle this
         # "-gcc-sysroot": not required
     ]
-    if qt_linkage_static:
+    if target_platform.qt_linkage_static:
         qt_config_args.append("-static")
         # makes a static Qt library (cf. default of "-shared")
         # ... NB ALSO NEEDS "CONFIG += static" in the .pro file
@@ -3598,7 +3602,7 @@ def build_sqlcipher(cfg: Config, target_platform: Platform) -> None:
         # Linker:
         ldflags = [f"-L{openssl_workdir}"]
 
-        link_openssl_statically = target_platform.desktop
+        link_openssl_statically = target_platform.qt_linkage_static
         # ... try for dynamic linking on Android
         if link_openssl_statically:
             log.info("Linking OpenSSL into SQLCipher STATICALLY")
