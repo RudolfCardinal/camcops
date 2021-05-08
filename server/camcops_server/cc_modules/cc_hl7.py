@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+# noinspection HttpUrlsUsage
 """
 camcops_server/cc_modules/cc_hl7.py
 
@@ -20,7 +21,7 @@ camcops_server/cc_modules/cc_hl7.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -28,31 +29,31 @@ camcops_server/cc_modules/cc_hl7.py
 
 General HL7 sources:
 
-- http://python-hl7.readthedocs.org/en/latest/
+- https://python-hl7.readthedocs.org/en/latest/
 - http://www.interfaceware.com/manual/v3gen_python_library_details.html
 - http://www.interfaceware.com/hl7_video_vault.html#how
 - http://www.interfaceware.com/hl7-standard/hl7-segments.html
-- http://www.hl7.org/special/committees/vocab/v26_appendix_a.pdf
-- http://www.ncbi.nlm.nih.gov/pmc/articles/PMC130066/
+- https://www.hl7.org/special/committees/vocab/v26_appendix_a.pdf
+- https://www.ncbi.nlm.nih.gov/pmc/articles/PMC130066/
 
 To consider
 
 - batched messages (HL7 batching protocol);
-  http://docs.oracle.com/cd/E23943_01/user.1111/e23486/app_hl7batching.htm
+  https://docs.oracle.com/cd/E23943_01/user.1111/e23486/app_hl7batching.htm
 - note: DG1 segment = diagnosis
 
 Basic HL7 message structure:
 
 - can package into HL7 2.X message as encapsulated PDF;
-  http://www.hl7standards.com/blog/2007/11/27/pdf-attachment-in-hl7-message/
+  https://www.hl7standards.com/blog/2007/11/27/pdf-attachment-in-hl7-message/
 - message ORU^R01
-  http://www.corepointhealth.com/resource-center/hl7-resources/hl7-messages
+  https://www.corepointhealth.com/resource-center/hl7-resources/hl7-messages
 - MESSAGES: http://www.interfaceware.com/hl7-standard/hl7-messages.html
 - OBX segment = observation/result segment;
-  http://www.corepointhealth.com/resource-center/hl7-resources/hl7-obx-segment;
+  https://www.corepointhealth.com/resource-center/hl7-resources/hl7-obx-segment;
   http://www.interfaceware.com/hl7-standard/hl7-segment-OBX.html
 - SEGMENTS:
-  http://www.corepointhealth.com/resource-center/hl7-resources/hl7-segments
+  https://www.corepointhealth.com/resource-center/hl7-resources/hl7-segments
 - ED field (= encapsulated data);
   http://www.interfaceware.com/hl7-standard/hl7-fields.html
 - base-64 encoding
@@ -113,13 +114,14 @@ ESCAPE_CHARACTER = "\\"
 # =============================================================================
 
 def get_mod11_checkdigit(strnum: str) -> str:
+    # noinspection HttpUrlsUsage
     """
     Input: string containing integer. Output: MOD11 check digit (string).
 
     See:
 
     - http://www.mexi.be/documents/hl7/ch200025.htm
-    - http://stackoverflow.com/questions/7006109
+    - https://stackoverflow.com/questions/7006109
     - http://www.pgrocer.net/Cis51/mod11.html
     """
     total = 0
@@ -146,14 +148,14 @@ def make_msh_segment(message_datetime: Pendulum,
     """
     Creates an HL7 message header (MSH) segment.
 
-    - MSH: http://www.hl7.org/documentcenter/public/wg/conf/HL7MSH.htm
+    - MSH: https://www.hl7.org/documentcenter/public/wg/conf/HL7MSH.htm
 
     - We're making an ORU^R01 message = unsolicited result.
 
       - ORU = Observational Report - Unsolicited
       - ORU^R01 = Unsolicited transmission of an observation message
-      - http://www.corepointhealth.com/resource-center/hl7-resources/hl7-oru-message
-      - http://www.hl7kit.com/joomla/index.php/hl7resources/examples/107-orur01
+      - https://www.corepointhealth.com/resource-center/hl7-resources/hl7-oru-message
+      - https://www.hl7kit.com/joomla/index.php/hl7resources/examples/107-orur01
     """  # noqa
 
     segment_id = "MSH"
@@ -219,11 +221,11 @@ def make_pid_segment(
     """
     Creates an HL7 patient identification (PID) segment.
 
-    - http://www.corepointhealth.com/resource-center/hl7-resources/hl7-pid-segment
-    - http://www.hl7.org/documentcenter/public/wg/conf/Msgadt.pdf (s5.4.8)
+    - https://www.corepointhealth.com/resource-center/hl7-resources/hl7-pid-segment
+    - https://www.hl7.org/documentcenter/public/wg/conf/Msgadt.pdf (s5.4.8)
 
     - ID numbers...
-      http://www.cdc.gov/vaccines/programs/iis/technical-guidance/downloads/hl7guide-1-4-2012-08.pdf
+      https://www.cdc.gov/vaccines/programs/iis/technical-guidance/downloads/hl7guide-1-4-2012-08.pdf
     """  # noqa
 
     patient_id_list = patient_id_list or []  # type: List[HL7PatientIdentifier]
@@ -328,14 +330,15 @@ def make_pid_segment(
 
 # noinspection PyUnusedLocal
 def make_obr_segment(task: "Task") -> hl7.Segment:
+    # noinspection HttpUrlsUsage
     """
     Creates an HL7 observation request (OBR) segment.
 
     - http://hl7reference.com/HL7%20Specifications%20ORM-ORU.PDF
     - Required in ORU^R01 message:
 
-      - http://www.corepointhealth.com/resource-center/hl7-resources/hl7-oru-message
-      - http://www.corepointhealth.com/resource-center/hl7-resources/hl7-obr-segment
+      - https://www.corepointhealth.com/resource-center/hl7-resources/hl7-oru-message
+      - https://www.corepointhealth.com/resource-center/hl7-resources/hl7-obr-segment
     """  # noqa
 
     segment_id = "OBR"
@@ -442,17 +445,18 @@ def make_obx_segment(req: "CamcopsRequest",
                      observation_datetime: Pendulum,
                      responsible_observer: str,
                      export_options: "TaskExportOptions") -> hl7.Segment:
+    # noinspection HttpUrlsUsage
     """
     Creates an HL7 observation result (OBX) segment.
 
     - http://www.hl7standards.com/blog/2006/10/18/how-do-i-send-a-binary-file-inside-of-an-hl7-message
     - http://www.hl7standards.com/blog/2007/11/27/pdf-attachment-in-hl7-message/
     - http://www.hl7standards.com/blog/2006/12/01/sending-images-or-formatted-documents-via-hl7-messaging/
-    - www.hl7.org/documentcenter/public/wg/ca/HL7ClmAttIG.PDF
+    - https://www.hl7.org/documentcenter/public/wg/ca/HL7ClmAttIG.PDF
     - type of data:
-      http://www.hl7.org/implement/standards/fhir/v2/0191/index.html
+      https://www.hl7.org/implement/standards/fhir/v2/0191/index.html
     - subtype of data:
-      http://www.hl7.org/implement/standards/fhir/v2/0291/index.html
+      https://www.hl7.org/implement/standards/fhir/v2/0291/index.html
     """  # noqa
 
     segment_id = "OBX"
@@ -562,6 +566,7 @@ def make_dg1_segment(set_id: int,
                      clinician_assigning_facility: str = "",
                      attestation_datetime: Pendulum = None) \
         -> hl7.Segment:
+    # noinspection HttpUrlsUsage
     """
     Creates an HL7 diagnosis (DG1) segment.
 
@@ -706,6 +711,7 @@ def make_dg1_segment(set_id: int,
 
 
 def escape_hl7_text(s: str) -> str:
+    # noinspection HttpUrlsUsage
     """
     Escapes HL7 special characters.
 

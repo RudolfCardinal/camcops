@@ -20,7 +20,7 @@ camcops_server/templates/menu/report_offer.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -34,11 +34,12 @@ from camcops_server.cc_modules.cc_pyramid import Routes
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Configure report:")} ${ report.title(request) | h }</h1>
+<h1>${ _("Configure report:") } ${ report.title(request) }</h1>
 
-${ form }
+${ form | n }
 
 <div>
-    <a href="${request.route_url(Routes.REPORTS_MENU)}">${_("Return to reports menu")}</a>
+    <a href="${ request.route_url(Routes.REPORTS_MENU) | n }">
+        ${ _("Return to reports menu") }</a>
 </div>
 <%include file="to_main_menu.mako"/>

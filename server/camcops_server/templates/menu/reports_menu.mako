@@ -20,7 +20,7 @@ camcops_server/templates/menu/reports_menu.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -37,12 +37,15 @@ from camcops_server.cc_modules.cc_report import get_all_report_classes
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Available reports")}</h1>
+<h1>${ _("Available reports") }</h1>
 
 <ul>
     %for cls in get_all_report_classes(request):
         %if request.user.superuser or not cls.superuser_only:
-            <li><a href="${ request.route_url(Routes.OFFER_REPORT, _query={ViewParam.REPORT_ID: cls.report_id}) }">${ cls.title(request) | h }</a></li>
+            <li><a href="${ request.route_url(
+                                Routes.OFFER_REPORT,
+                                _query={ViewParam.REPORT_ID: cls.report_id}
+                            ) | n }">${ cls.title(request) }</a></li>
         %endif
     %endfor
 </ul>

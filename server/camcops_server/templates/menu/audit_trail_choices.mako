@@ -20,7 +20,7 @@ camcops_server/templates/menu/audit_trail_choices.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,10 +30,10 @@ camcops_server/templates/menu/audit_trail_choices.mako
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("View audit trail (starting with most recent)")}</h1>
+<h1>${ _("View audit trail (starting with most recent)") }</h1>
 
-<p>${_("Values below are optional.")}</p>
+<p>${ _("Values below are optional.") }</p>
 
-${form}
+${form | n}
 
 <%include file="to_main_menu.mako"/>

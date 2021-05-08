@@ -20,7 +20,7 @@ tools/create_database_migration.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 

@@ -20,14 +20,14 @@ camcops_server/cc_modules/cc_sqla_coltypes.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
 **SQLAlchemy column types used by CamCOPS.**
 
 Note these built-in SQLAlchemy types
-(http://docs.sqlalchemy.org/en/latest/core/type_basics.html#generic-types):
+(https://docs.sqlalchemy.org/en/latest/core/type_basics.html#generic-types):
 
     =============== ===========================================================
     SQLAlchemy type Comment
@@ -352,7 +352,7 @@ def isotzdatetime_to_utcdatetime_mysql(
     Note the use of "%i" for minutes.
 
     Things after ``func.`` get passed to the database engine as literal SQL
-    functions; http://docs.sqlalchemy.org/en/latest/core/tutorial.html
+    functions; https://docs.sqlalchemy.org/en/latest/core/tutorial.html
     """  # noqa
     x = fetch_processed_single_clause(element, compiler)
 
@@ -383,7 +383,7 @@ def isotzdatetime_to_utcdatetime_sqlite(
 
     - https://sqlite.org/lang_corefunc.html#substr
     - https://sqlite.org/lang_datefunc.html
-    - http://www.sqlite.org/lang_expr.html
+    - https://www.sqlite.org/lang_expr.html
 
     Get an SQL expression for the timezone adjustment in hours.
     Note that if a time is 12:00+01:00, that means e.g. midday BST, which

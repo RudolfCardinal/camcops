@@ -20,7 +20,7 @@ camcops_server/tasks/wemwbs.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -172,7 +172,9 @@ class Wemwbs(TaskHasPatientMixin, Task,
             </table>
             <div class="{css_copyright}">
                 WEMWBS: from Tennant et al. (2007), <i>Health and Quality of
-                Life Outcomes</i> 5:63, http://www.hqlo.com/content/5/1/63;
+                Life Outcomes</i> 5:63,
+                <a href="http://www.hqlo.com/content/5/1/63">
+                    http://www.hqlo.com/content/5/1/63</a>;
                 © 2007 Tennant et al.; distributed under the terms of the
                 Creative Commons Attribution License.
             </div>

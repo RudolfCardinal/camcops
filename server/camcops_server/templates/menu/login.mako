@@ -20,7 +20,7 @@ camcops_server/templates/menu/login.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -31,10 +31,10 @@ camcops_server/templates/menu/login.mako
 <%include file="db_user_info.mako"/>
 
 <div>
-    <b>${_("Unauthorized access prohibited.")}</b>
-    ${_("All use is recorded and monitored.")}
+    <b>${ _("Unauthorized access prohibited.") }</b>
+    ${ _("All use is recorded and monitored.") }
 </div>
 
-<h1>${_("Please log in to CamCOPS")}</h1>
+<h1>${ _("Please log in to CamCOPS") }</h1>
 
-${form}
+${form | n}

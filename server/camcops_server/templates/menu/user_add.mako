@@ -20,7 +20,7 @@ camcops_server/templates/menu/user_add.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,10 +30,10 @@ camcops_server/templates/menu/user_add.mako
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Add user")}</h1>
+<h1>${ _("Add user") }</h1>
 
-<div class="important">${_("Once created, you can set permissions.")}</div>
+<div class="important">${ _("Once created, you can set permissions.") }</div>
 
-${ form }
+${ form | n }
 
 <%include file="to_main_menu.mako"/>

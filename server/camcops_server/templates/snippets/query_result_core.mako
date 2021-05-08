@@ -20,7 +20,7 @@ camcops_server/templates/snippets/query_result_core.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -34,11 +34,6 @@ Creates an HTML table from a query result (from SQLAlchemy Core).
 
 from mako.filters import html_escape
 
-def filter_description(desc):
-    if not desc:  # None or ""
-        return ""
-    return html_escape(desc)
-
 def filter_value(value, null_html):
     if value is None:
         return null_html
@@ -49,13 +44,13 @@ def filter_value(value, null_html):
 <table>
     <tr>
         %for desc in descriptions:
-            <th>${filter_description(desc)}</th>
+            <th>${ desc or "" }</th>
         %endfor
     </tr>
     %for row in rows:
         <tr>
             %for value in row:
-                <td>${filter_value(value, null_html)}</td>
+                <td>${ filter_value(value, null_html) | n }</td>
             %endfor
         </tr>
     %endfor

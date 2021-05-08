@@ -3358,3 +3358,10 @@ Current C++/SQLite client, Python/SQLAlchemy server
   hidden but it appeared in some circumstances.
 
 **Client and server v2.4.7, IN PROGRESS**
+
+- Default filters in Mako templates, via the ``default_filters`` argument, as
+  this is a safer method. As a result, anything with ``| h`` filtering now has
+  none, and anything that had none now has ``| n`` (no filtering). The system
+  is described at https://docs.makotemplates.org/en/latest/filtering.html (and
+  some clarity about permitted filter names is added by
+  http://b.93z.org/notes/automatic-html-escaping-in-mako/).

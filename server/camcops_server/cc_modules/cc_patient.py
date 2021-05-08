@@ -20,7 +20,7 @@ camcops_server/cc_modules/cc_patient.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -136,13 +136,13 @@ class Patient(GenericTabletRecordMixin, Base):
         index=True,
         identifies_patient=True, include_in_anon_staging_db=True,
         comment="Forename"
-    )
+    )  # type: Optional[str]
     surname = CamcopsColumn(
         "surname", PatientNameColType,
         index=True,
         identifies_patient=True, include_in_anon_staging_db=True,
         comment="Surname"
-    )
+    )  # type: Optional[str]
     dob = CamcopsColumn(
         "dob", sqltypes.Date,  # verified: merge_db handles this correctly
         index=True,
@@ -628,12 +628,11 @@ class Patient(GenericTabletRecordMixin, Base):
 
     def get_surname_forename_upper(self) -> str:
         """
-        Get "SURNAME, FORENAME" in HTML-safe format, using "(UNKNOWN)" for
-        missing details.
+        Get "SURNAME, FORENAME", using "(UNKNOWN)" for missing details.
         """
         s = self.surname.upper() if self.surname else "(UNKNOWN)"
         f = self.forename.upper() if self.forename else "(UNKNOWN)"
-        return ws.webify(s + ", " + f)
+        return f"{s}, {f}"
 
     def get_dob_html(self, req: "CamcopsRequest", longform: bool) -> str:
         """

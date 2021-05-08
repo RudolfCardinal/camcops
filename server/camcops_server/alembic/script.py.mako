@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-camcops_server/alembic/versions/${up_revision}.py
+camcops_server/alembic/versions/${ up_revision }.py
 
 ===============================================================================
 
@@ -20,17 +20,17 @@ camcops_server/alembic/versions/${up_revision}.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
 DATABASE REVISION SCRIPT
 
-${message}
+${ message }
 
-Revision ID: ${up_revision}
-Revises: ${down_revision | comma,n}
-Creation date: ${create_date}
+Revision ID: ${ up_revision }
+Revises: ${ down_revision | comma,n }
+Creation date: ${ create_date }
 
 """
 
@@ -48,10 +48,10 @@ import camcops_server.cc_modules.cc_sqla_coltypes
 # Revision identifiers, used by Alembic.
 # =============================================================================
 
-revision = ${repr(up_revision)}
-down_revision = ${repr(down_revision)}
-branch_labels = ${repr(branch_labels)}
-depends_on = ${repr(depends_on)}
+revision = ${ repr(up_revision) }
+down_revision = ${ repr(down_revision) }
+branch_labels = ${ repr(branch_labels) }
+depends_on = ${ repr(depends_on) }
 
 
 # =============================================================================
@@ -60,9 +60,9 @@ depends_on = ${repr(depends_on)}
 
 # noinspection PyPep8,PyTypeChecker
 def upgrade():
-    ${upgrades if upgrades else "pass"}
+    ${ upgrades if upgrades else "pass" }
 
 
 # noinspection PyPep8,PyTypeChecker
 def downgrade():
-    ${downgrades if downgrades else "pass"}
+    ${ downgrades if downgrades else "pass" }

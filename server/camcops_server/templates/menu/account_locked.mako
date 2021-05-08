@@ -20,7 +20,7 @@ camcops_server/templates/menu/account_locked.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,5 +30,6 @@ camcops_server/templates/menu/account_locked.mako
 <%inherit file="generic_failure.mako"/>
 
 <div class="error">
-    ${_("Account locked until {} due to multiple login failures. Try again later or contact your administrator.").format(locked_until)}
+    ${ _("Account locked until {} due to multiple login failures. "
+         "Try again later or contact your administrator.").format(locked_until) }
 </div>

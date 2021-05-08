@@ -20,7 +20,7 @@ camcops_server/templates/menu/view_tasks_table.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -43,13 +43,13 @@ OFFER_PDF_ANON_VERSION = False
 
 <table>
     <tr>
-        <th>${_("Patient")}</th>
-        <th>${_("Identifiers")}</th>
-        <th>${_("Task type")}</th>
-        <th>${_("Added by")}</th>
-        <th>${_("Created")}</th>
-        <th>${_("View")}</th>
-        <th>${_("Print/save")}</th>
+        <th>${ _("Patient") }</th>
+        <th>${ _("Identifiers") }</th>
+        <th>${ _("Task type") }</th>
+        <th>${ _("Added by") }</th>
+        <th>${ _("Created") }</th>
+        <th>${ _("View") }</th>
+        <th>${ _("Print/save") }</th>
     </tr>
 
     %for task in tasks:
@@ -69,7 +69,6 @@ OFFER_PDF_ANON_VERSION = False
             is_complete = task.is_complete()
             any_patient_idnums_invalid = task.any_patient_idnums_invalid(req)
         %>
-        ## ${ repr(task) | h }
         <tr>
             ## ------------------------------------------------------------
             ## Surname, forename (sex, DOB, age)
@@ -108,7 +107,7 @@ OFFER_PDF_ANON_VERSION = False
                 %else:
                     %if patient:
                         %for idobj in patient.idnums:
-                            ${ idobj.short_description(request) | h }: ${ idobj.idnum_value }.
+                            ${ idobj.short_description(request) }: ${ idobj.idnum_value }.
                         %endfor
                     %else:
                         ?
@@ -124,13 +123,13 @@ OFFER_PDF_ANON_VERSION = False
                     class="warning"
                 %endif
                 >
-                <b> ${ task_shortname | h }</b>
+                <b> ${ task_shortname }</b>
             </td>
             ## ------------------------------------------------------------
             ## Adding user
             ## ------------------------------------------------------------
             <td>
-                ${ adding_user.username | h }
+                ${ adding_user.username }
             </td>
             ## ------------------------------------------------------------
             ## When created
@@ -151,21 +150,21 @@ OFFER_PDF_ANON_VERSION = False
                 %endif
                 >
                 <a href="${ req.route_url(
-                        Routes.TASK,
-                        _query={
-                            ViewParam.TABLE_NAME: task_tablename,
-                            ViewParam.SERVER_PK: task_pk,
-                            ViewParam.VIEWTYPE: ViewArg.HTML,
-                        }) }">HTML</a>
+                                Routes.TASK,
+                                _query={
+                                    ViewParam.TABLE_NAME: task_tablename,
+                                    ViewParam.SERVER_PK: task_pk,
+                                    ViewParam.VIEWTYPE: ViewArg.HTML,
+                                }) | n }">HTML</a>
                 %if OFFER_HTML_ANON_VERSION:
                     [<a href="${ req.route_url(
-                            Routes.TASK,
-                            _query={
-                                ViewParam.TABLE_NAME: task_tablename,
-                                ViewParam.SERVER_PK: task_pk,
-                                ViewParam.VIEWTYPE: ViewArg.HTML,
-                                ViewParam.ANONYMISE: True,
-                            }) }">anon</a>]
+                                    Routes.TASK,
+                                    _query={
+                                        ViewParam.TABLE_NAME: task_tablename,
+                                        ViewParam.SERVER_PK: task_pk,
+                                        ViewParam.VIEWTYPE: ViewArg.HTML,
+                                        ViewParam.ANONYMISE: True,
+                                    }) | n }">anon</a>]
                 %endif
             </td>
             ## ------------------------------------------------------------
@@ -177,21 +176,21 @@ OFFER_PDF_ANON_VERSION = False
                 %endif
                 >
                 <a href="${ req.route_url(
-                    Routes.TASK,
-                    _query={
-                        ViewParam.TABLE_NAME: task_tablename,
-                        ViewParam.SERVER_PK: task_pk,
-                        ViewParam.VIEWTYPE: ViewArg.PDF,
-                    }) }">PDF</a>
+                                Routes.TASK,
+                                _query={
+                                    ViewParam.TABLE_NAME: task_tablename,
+                                    ViewParam.SERVER_PK: task_pk,
+                                    ViewParam.VIEWTYPE: ViewArg.PDF,
+                                }) | n }">PDF</a>
                 %if OFFER_PDF_ANON_VERSION:
                     [<a href="${ req.route_url(
-                            Routes.TASK,
-                            _query={
-                                ViewParam.TABLE_NAME: task_tablename,
-                                ViewParam.SERVER_PK: task_pk,
-                                ViewParam.VIEWTYPE: ViewArg.PDF,
-                                ViewParam.ANONYMISE: True,
-                            }) }">anon</a>]
+                                    Routes.TASK,
+                                    _query={
+                                        ViewParam.TABLE_NAME: task_tablename,
+                                        ViewParam.SERVER_PK: task_pk,
+                                        ViewParam.VIEWTYPE: ViewArg.PDF,
+                                        ViewParam.ANONYMISE: True,
+                                    }) | n }">anon</a>]
                 %endif
             </td>
             ## We used to use target="_blank", but probably that is not the

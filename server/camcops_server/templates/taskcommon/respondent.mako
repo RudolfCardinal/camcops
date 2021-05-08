@@ -20,7 +20,7 @@ camcops_server/templates/taskcommon/respondent.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -31,12 +31,12 @@ camcops_server/templates/taskcommon/respondent.mako
 <div class="respondent">
     <table class="taskdetail">
         <tr>
-            <td style="width:50%">${_("Respondent’s name:")}</td>
-            <td style="width:50%"><b>${ task.respondent_name | h }</b></td>
+            <td style="width:50%">${ _("Respondent’s name:") }</td>
+            <td style="width:50%"><b>${ task.respondent_name }</b></td>
         </tr>
         <tr>
-            <td>${_("Respondent’s relationship to patient:")}</td>
-            <td><b>${ task.respondent_relationship | h }</b></td>
+            <td>${ _("Respondent’s relationship to patient:") }</td>
+            <td><b>${ task.respondent_relationship }</b></td>
         </tr>
     </table>
 </div>

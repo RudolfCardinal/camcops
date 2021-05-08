@@ -20,7 +20,7 @@ camcops_server/templates/menu/exported_task_email.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -34,7 +34,7 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Exported task e-mail")}</h1>
+<h1>${ _("Exported task e-mail") }</h1>
 
 <table>
     <tr>
@@ -43,11 +43,17 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     </tr>
     <tr>
         <th>Exported task ID</th>
-        <td><a href="${ req.route_url(Routes.VIEW_EXPORTED_TASK, _query={ViewParam.ID: ete.exported_task_id}) }">ExportedTask ${ ete.exported_task_id }</a></td>
+        <td><a href="${ req.route_url(
+                            Routes.VIEW_EXPORTED_TASK,
+                            _query={ViewParam.ID: ete.exported_task_id
+                        }) | n }">ExportedTask ${ ete.exported_task_id }</a></td>
     </tr>
     <tr>
         <th>E-mail ID</th>
-        <td><a href="${ req.route_url(Routes.VIEW_EMAIL, _query={ViewParam.ID: ete.email_id}) }">Email ${ ete.email_id } </a></td>
+        <td><a href="${ req.route_url(
+                            Routes.VIEW_EMAIL,
+                            _query={ViewParam.ID: ete.email_id}
+                        ) | n }">Email ${ ete.email_id } </a></td>
     </tr>
 </table>
 

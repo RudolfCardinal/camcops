@@ -20,7 +20,7 @@ camcops_server/cc_modules/cc_forms.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -530,8 +530,8 @@ class CSRFToken(SchemaNode, RequestAwareMixin):
     Node to embed a cross-site request forgery (CSRF) prevention token in a
     form.
 
-    As per http://deformdemo.repoze.org/pyramid_csrf_demo/, modified for a more
-    recent Colander API.
+    As per https://deformdemo.repoze.org/pyramid_csrf_demo/, modified for a
+    more recent Colander API.
 
     NOTE that this makes use of colander.SchemaNode.bind; this CLONES the
     Schema, and resolves any deferred values by means of the keywords passed to
@@ -540,7 +540,7 @@ class CSRFToken(SchemaNode, RequestAwareMixin):
     mechanism
     (https://docs.pylonsproject.org/projects/colander/en/latest/api.html#colander.SchemaNode.bind).
 
-    From http://deform2000.readthedocs.io/en/latest/basics.html:
+    From https://deform2000.readthedocs.io/en/latest/basics.html:
 
     "The default of a schema node indicates the value to be serialized if a
     value for the schema node is not found in the input data during

@@ -20,7 +20,7 @@ camcops_server/cc_modules/cc_plot.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -28,10 +28,10 @@ camcops_server/cc_modules/cc_plot.py
 
 PROPER WAY TO USE MATPLOTLIB:
 
-- http://jbarillari.blogspot.co.uk/2009/09/threadsafety-and-matplotlibpylab.html?m=1  # noqa
-- https://sjohannes.wordpress.com/2010/06/11/using-matplotlib-in-a-web-application/amp/  # noqa
-- http://matplotlib.org/faq/howto_faq.html#howto-webapp
-- http://matplotlib.org/examples/api/agg_oo.html#api-agg-oo
+- https://jbarillari.blogspot.co.uk/2009/09/threadsafety-and-matplotlibpylab.html?m=1
+- https://sjohannes.wordpress.com/2010/06/11/using-matplotlib-in-a-web-application/amp/
+- https://matplotlib.org/faq/howto_faq.html#howto-webapp
+- https://matplotlib.org/examples/api/agg_oo.html#api-agg-oo
 
 In summary: matplotlib is easy to use in a way that has global state, but that
 will break in a threading application. Using the Figure() API is safe. Thus:
@@ -51,7 +51,7 @@ will break in a threading application. Using the Figure() API is safe. Thus:
     ax.set_ylabel('volts')
     canvas.print_figure('test')
 
-"""
+"""  # noqa
 
 # =============================================================================
 # Basic imports

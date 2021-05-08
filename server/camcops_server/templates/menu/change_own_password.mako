@@ -20,7 +20,7 @@ camcops_server/templates/menu/change_own_password.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -32,19 +32,20 @@ camcops_server/templates/menu/change_own_password.mako
 
 %if expired:
     <div class="important">
-        ${_("Your password has expired and must be changed.")}
+        ${ _("Your password has expired and must be changed.") }
     </div>
 %endif
 
-<h1>${_("Change your password")}</h1>
+<h1>${ _("Change your password") }</h1>
 
-${form}
+${form | n}
 
 <div>
-    ${_("Choose strong passphrases.")}
-    ${_("See")}
-    <a href="https://www.ncsc.gov.uk/blog-post/three-random-words-or-thinkrandom-0">https://www.ncsc.gov.uk/blog-post/three-random-words-or-thinkrandom-0</a>.
+    ${ _("Choose strong passphrases.") }
+    ${ _("See") }
+    <a href="https://www.ncsc.gov.uk/blog-post/three-random-words-or-thinkrandom-0">
+        https://www.ncsc.gov.uk/blog-post/three-random-words-or-thinkrandom-0</a>.
 </div>
 <div>
-    ${_("Minimum password length is {} characters.").format(min_pw_length)}
+    ${ _("Minimum password length is {} characters.").format(min_pw_length) }
 </div>

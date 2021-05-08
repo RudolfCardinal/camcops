@@ -20,7 +20,7 @@ camcops_server/templates/snippets/to_view_all_groups.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -31,5 +31,5 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 %>
 
 <div>
-    <a href="${ req.route_url(Routes.VIEW_GROUPS)}">${_("View all groups")}</a>
+    <a href="${ req.route_url(Routes.VIEW_GROUPS) | n }">${ _("View all groups") }</a>
 </div>

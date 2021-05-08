@@ -20,7 +20,7 @@ camcops_server/templates/base/base.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -35,16 +35,16 @@ camcops_server/templates/base/base.mako
             </%block>
             <meta charset="utf-8">
             <%block name="extra_head_start"></%block>
-            <link rel="icon" type="image/png" href="${request.url_camcops_favicon}">
-            <script nonce="${request.nonce}">
+            <link rel="icon" type="image/png" href="${ request.url_camcops_favicon | n }">
+            <script nonce="${ request.nonce | n }">
                 /* set "html.svg" if our browser supports SVG */
                 // noinspection JSDeprecatedSymbols
                 if (document.implementation.hasFeature(
-                        "http://www.w3.org/TR/SVG11/feature#Image", "1.1")) {
+                        "https://www.w3.org/TR/SVG11/feature#Image", "1.1")) {
                     document.documentElement.className = "svg";
                 }
             </script>
-            <style nonce="${request.nonce}">
+            <style nonce="${ request.nonce | n }">
                 <%block name="css"></%block>
             </style>
             <%block name="extra_head_end"></%block>
@@ -56,7 +56,7 @@ camcops_server/templates/base/base.mako
         ## ... for CSS paged media
         <%block name="logo"></%block>
 
-        ${next.body()}
+        ${ next.body() | n }
 
         <%block name="body_end"></%block>
     </body>

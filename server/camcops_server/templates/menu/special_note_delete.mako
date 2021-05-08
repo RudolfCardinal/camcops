@@ -20,7 +20,7 @@ camcops_server/templates/menu/special_note_delete.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,23 +30,26 @@ camcops_server/templates/menu/special_note_delete.mako
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Delete special note?")}</h1>
+<h1>${ _("Delete special note?") }</h1>
 
-${_("You are about to delete this note:")}
+<div>
+    ${ _("You are about to delete this note:") }
+</div>
 
 <table>
     <tr><th>note_id</th><td>${ sn.note_id }</td></tr>
-    <tr><th>basetable</th><td>${ sn.basetable | h }</td></tr>
+    <tr><th>basetable</th><td>${ sn.basetable }</td></tr>
     <tr><th>task_id</th><td>${ sn.task_id }</td></tr>
     <tr><th>device_id</th><td>${ sn.device_id }</td></tr>
     <tr><th>era</th><td>${ sn.era }</td></tr>
     <tr><th>note_at</th><td>${ sn.note_at }</td></tr>
     <tr><th>user_id</th><td>${ sn.user_id }</td></tr>
-    <tr><th>note</th><td>${ sn.note | h }</td></tr>
+    <tr><th>note</th><td>${ sn.note }</td></tr>
 </table>
 
-<p><i>${_("The special note will vanish (though preserved in the database for auditing).")}</i></p>
+<p><i>${ _("The special note will vanish (though preserved in the database "
+           "for auditing).") }</i></p>
 
-${ form }
+${ form | n }
 
 <%include file="to_main_menu.mako"/>

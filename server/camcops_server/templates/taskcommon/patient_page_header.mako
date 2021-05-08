@@ -20,7 +20,7 @@ camcops_server/templates/taskcommon/patient_page_header.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -29,7 +29,7 @@ camcops_server/templates/taskcommon/patient_page_header.mako
 <%page args="patient: Patient"/>
 
 <b>${ patient.get_surname_forename_upper() }</b> (${ patient.get_sex_verbose() }).
-${ patient.get_dob_html(req, longform=False) }
+${ patient.get_dob_html(req, longform=False) | n }
 %for idobj in patient.idnums:
-    ${ idobj.short_description(request) | h }: ${ idobj.idnum_value }
+    ${ idobj.short_description(request) }: ${ idobj.idnum_value }
 %endfor

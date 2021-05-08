@@ -20,7 +20,7 @@ camcops_server/templates/snippets/user_info_detail.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -37,165 +37,165 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 
 <%namespace file="displayfunc.mako" import="one_per_line"/>
 
-<h2>${_("Core information")}</h2>
+<h2>${ _("Core information") }</h2>
 
 <table>
     <tr>
-        <th>${_("Username")}</th>
-        <td>${ user.username | h }</td>
+        <th>${ _("Username") }</th>
+        <td>${ user.username }</td>
     </tr>
     <tr>
-        <th>${_("User ID")}</th>
+        <th>${ _("User ID") }</th>
         <td>${ user.id }</td>
     </tr>
     <tr>
-        <th>${_("Full name")}</th>
-        <td>${ (user.fullname or "") | h }</td>
+        <th>${ _("Full name") }</th>
+        <td>${ user.fullname or "" }</td>
     </tr>
     <tr>
-        <th>${_("E-mail address")}</th>
-        <td>${ (user.email or "") | h }</td>
+        <th>${ _("E-mail address") }</th>
+        <td>${ user.email or "" }</td>
     </tr>
     <tr>
-        <th>${_("Last login at (UTC)")}</th>
+        <th>${ _("Last login at (UTC)") }</th>
         <td>${ user.last_login_at_utc }</td>
     </tr>
     <tr>
-        <th>${_("Locked out?")}</th>
+        <th>${ _("Locked out?") }</th>
         <td>${ get_yes_no(request, user.is_locked_out(request)) }</td>
     </tr>
     <tr>
-        <th>${_("Last password change (UTC)")}</th>
+        <th>${ _("Last password change (UTC)") }</th>
         <td>${ user.last_password_change_utc }</td>
     </tr>
     <tr>
-        <th>${_("Must change password at next login?")}</th>
+        <th>${ _("Must change password at next login?") }</th>
         <td>${ get_yes_no(request, user.must_change_password) }</td>
     </tr>
     <tr>
-        <th>${_("Agreed to terms of use at:")}</th>
+        <th>${ _("Agreed to terms of use at:") }</th>
         <td>${ user.when_agreed_terms_of_use }</td>
     </tr>
     <tr>
-        <th>${_("Language")}</th>
-        <td>${ user.language | h }</td>
+        <th>${ _("Language") }</th>
+        <td>${ user.language }</td>
     </tr>
     <tr>
-        <th>${_("Superuser?")}</th>
-        <td ${ ('class="important"' if user.superuser else "") }>
+        <th>${ _("Superuser?") }</th>
+        <td ${ ('class="important"' if user.superuser else "") | n }>
             ${ get_yes_no(request, user.superuser) }
         </td>
     </tr>
 </table>
 
-<h2>${_("Summary of group membership information")}</h2>
+<h2>${ _("Summary of group membership information") }</h2>
 
 <table>
     <tr>
-        <th>${_("May log in to web viewer?")}</th>
+        <th>${ _("May log in to web viewer?") }</th>
         <td>${ get_yes_no(request, user.may_use_webviewer) }</td>
     </tr>
     <tr>
-        <th>${_("May register new tablet devices?")}</th>
+        <th>${ _("May register new tablet devices?") }</th>
         <td>${ get_yes_no(request, user.may_register_devices) }</td>
     </tr>
     <tr>
-        <th>${_("Groups this user is a member of:")}</th>
+        <th>${ _("Groups this user is a member of:") }</th>
         <td>
             <%
                 groups = list(user.groups)
                 groups.sort(key=lambda g: g.name)
             %>
-            ${ one_per_line(g.name for g in groups) }
+            ${ one_per_line(g.name for g in groups) | n }
         </td>
     </tr>
     <tr>
-        <th>${_("Groups this user is an administrator for:")}</th>
+        <th>${ _("Groups this user is an administrator for:") }</th>
         <td class="important">
-            ${ one_per_line(g.name for g in user.groups_user_is_admin_for) }
+            ${ one_per_line(g.name for g in user.groups_user_is_admin_for) | n }
         </td>
     </tr>
     <tr>
-        <th>${_("Groups this user can see data from:")}</th>
+        <th>${ _("Groups this user can see data from:") }</th>
         <td>
-            ${ one_per_line(g.name for g in user.groups_user_may_see) }
+            ${ one_per_line(g.name for g in user.groups_user_may_see) | n }
         </td>
     </tr>
     <tr>
-        <th>${_("Groups this user can see all patients from, when no task filters are applied? (For other groups, only anonymous tasks will be shown if no patient filters are applied.)")}</th>
+        <th>${ _("Groups this user can see all patients from, when no task filters are applied? (For other groups, only anonymous tasks will be shown if no patient filters are applied.)") }</th>
         <td>
-            ${ one_per_line(g.name for g in user.groups_user_may_see_all_pts_when_unfiltered) }
+            ${ one_per_line(g.name for g in user.groups_user_may_see_all_pts_when_unfiltered) | n }
         </td>
     </tr>
     <tr>
-        <th>${_("Groups this user can upload into:")}</th>
+        <th>${ _("Groups this user can upload into:") }</th>
         <td>
-            ${ one_per_line(g.name for g in user.groups_user_may_upload_into) }
+            ${ one_per_line(g.name for g in user.groups_user_may_upload_into) | n }
         </td>
     </tr>
     <tr>
-        <th>${_("Groups this user may add special notes to tasks for:")}</th>
+        <th>${ _("Groups this user may add special notes to tasks for:") }</th>
         <td>
-            ${ one_per_line(g.name for g in user.groups_user_may_add_special_notes) }
+            ${ one_per_line(g.name for g in user.groups_user_may_add_special_notes) | n }
         </td>
     </tr>
     <tr>
-        <th>${_("Groups this user can dump data from:")}</th>
+        <th>${ _("Groups this user can dump data from:") }</th>
         <td>
-            ${ one_per_line(g.name for g in user.groups_user_may_dump) }
+            ${ one_per_line(g.name for g in user.groups_user_may_dump) | n }
         </td>
     </tr>
     <tr>
-        <th>${_("Groups this user can run reports on:")}</th>
+        <th>${ _("Groups this user can run reports on:") }</th>
         <td>
-            ${ one_per_line(g.name for g in user.groups_user_may_report_on) }
+            ${ one_per_line(g.name for g in user.groups_user_may_report_on) | n }
         </td>
     </tr>
     <tr>
-        <th>${_("Group this user is currently set to upload into:")}</th>
+        <th>${ _("Group this user is currently set to upload into:") }</th>
         <td>
             %if user.upload_group:
-                ${ user.upload_group.name | h }
+                ${ user.upload_group.name }
             %else:
-                <i>${_("(None)")}</i>
+                <i>${ _("(None)") }</i>
             %endif
         </td>
     </tr>
 </table>
 
-<h2>${_("Detailed group membership information")}</h2>
+<h2>${ _("Detailed group membership information") }</h2>
 
 <table>
     <tr>
         ## TRANSLATOR: keep short; table heading in user_info_detail.mako
-        <th>${_("Group name")}</th>
+        <th>${ _("Group name") }</th>
         ## TRANSLATOR: keep short; table heading in user_info_detail.mako
-        <th>${_("Group ID")}</th>
+        <th>${ _("Group ID") }</th>
         ## TRANSLATOR: keep short; table heading in user_info_detail.mako
-        <th>${_("Group administrator?")}</th>
+        <th>${ _("Group administrator?") }</th>
         ## TRANSLATOR: keep short; table heading in user_info_detail.mako
-        <th>${_("May upload?")}</th>
+        <th>${ _("May upload?") }</th>
         ## TRANSLATOR: keep short; table heading in user_info_detail.mako
-        <th>${_("May register devices?")}</th>
+        <th>${ _("May register devices?") }</th>
         ## TRANSLATOR: keep short; table heading in user_info_detail.mako
-        <th>${_("May use webviewer?")}</th>
+        <th>${ _("May use webviewer?") }</th>
         ## TRANSLATOR: keep short; table heading in user_info_detail.mako
-        <th>${_("View all pts when unfiltered?")}</th>
+        <th>${ _("View all pts when unfiltered?") }</th>
         ## TRANSLATOR: keep short; table heading in user_info_detail.mako
-        <th>${_("May dump?")}</th>
+        <th>${ _("May dump?") }</th>
         ## TRANSLATOR: keep short; table heading in user_info_detail.mako
-        <th>${_("May run reports?")}</th>
+        <th>${ _("May run reports?") }</th>
         ## TRANSLATOR: keep short; table heading in user_info_detail.mako
-        <th>${_("May add notes?")}</th>
+        <th>${ _("May add notes?") }</th>
         %if req.user.superuser or req.user.authorized_as_groupadmin:
-            <th>${_("Edit")}</th>
+            <th>${ _("Edit") }</th>
         %endif
     </tr>
     %for ugm in sorted(list(user.user_group_memberships), key=lambda ugm: ugm.group.name):
         <tr>
-            <td>${ ugm.group.name | h }</td>
+            <td>${ ugm.group.name }</td>
             <td>${ ugm.group_id }</td>
-            <td ${ ('class="important"' if ugm.groupadmin else "") }>
+            <td ${ ('class="important"' if ugm.groupadmin else "") | n }>
                 ${ get_yes_no(request, ugm.groupadmin) }
             </td>
             <td>${ get_yes_no(request, ugm.may_upload) }</td>
@@ -206,7 +206,10 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
             <td>${ get_yes_no(request, ugm.may_run_reports) }</td>
             <td>${ get_yes_no(request, ugm.may_add_notes) }</td>
             %if req.user.superuser or ugm.group_id in req.user.ids_of_groups_user_is_admin_for:
-                <td><a href="${ req.route_url(Routes.EDIT_USER_GROUP_MEMBERSHIP, _query={ViewParam.USER_GROUP_MEMBERSHIP_ID: ugm.id}) }">${_("Edit")}</a></td>
+                <td><a href="${ req.route_url(
+                                    Routes.EDIT_USER_GROUP_MEMBERSHIP,
+                                    _query={ViewParam.USER_GROUP_MEMBERSHIP_ID: ugm.id}
+                                ) | n }">${ _("Edit") }</a></td>
             %endif
         </tr>
     %endfor

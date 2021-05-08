@@ -20,7 +20,7 @@ camcops_server/templates/menu/user_edit.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,9 +30,9 @@ camcops_server/templates/menu/user_edit.mako
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Edit user")} ${ user.username | h }</h1>
+<h1>${ _("Edit user") } ${ user.username }</h1>
 
-${ form }
+${ form | n }
 
 <%include file="to_view_all_users.mako"/>
 <%include file="to_main_menu.mako"/>

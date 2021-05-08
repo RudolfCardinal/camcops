@@ -18,7 +18,7 @@
     GNU General Public License for more details.
     .
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 
 server/camcops_server
@@ -565,6 +565,7 @@ server/camcops_server
     templates/tasks/perinatal_poem_report.mako.rst
     templates/test/inherit_cache_test_child.mako.rst
     templates/test/inherit_cache_test_parent.mako.rst
+    templates/test/test_template_filters.mako.rst
     templates/test/testpage.mako.rst
     tools/fetch_snomed_codes.py.rst
     tools/print_latest_github_version.py.rst

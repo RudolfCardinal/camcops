@@ -20,7 +20,7 @@ camcops_server/templates/base/base_pdf.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -45,7 +45,7 @@ from camcops_server.cc_modules.cc_constants import PDF_ENGINE
 ## For CSS paged media:
 <%block name="footer_block">
     <div id="footerContent">
-        ${_("Page")} <pdf:pagenumber/> ${_("of")} <pdf:pagecount/>.
+        ${ _("Page") } <pdf:pagenumber/> ${ _("of") } <pdf:pagecount/>.
         <%block name="extra_footer_content"/>
     </div>
 </%block>
@@ -64,41 +64,34 @@ from camcops_server.cc_modules.cc_constants import PDF_ENGINE
                 <tr>
                     <td class="image_td">
                         <img class="logo_left"
-                             src="file://${ request.config.camcops_logo_file_absolute }"
+                             src="file://${ request.config.camcops_logo_file_absolute | n }"
                              alt="CamCOPS logo" />
                     </td>
                     <td class="centregap_td"></td>
                     <td class="image_td">
                         <img class="logo_right"
-                             src="file://${ request.config.local_logo_file_absolute }"
+                             src="file://${ request.config.local_logo_file_absolute | n }"
                              alt="Local institutional logo" />
                     </td>
                 </tr>
             </table>
         </div>
-        <%doc>
-        <div class="pdf_logo_header">
-            <img class="logo_left" src="file://${ request.config.camcops_logo_file_absolute }" />
-            <img class="logo_right" src="file://${ request.config.local_logo_file_absolute }" />
-        </div>
-        </%doc>
 
     %elif PDF_ENGINE in ["xhtml2pdf"]:
-        ## xhtml2pdf
-        ## hard to get logos positioned any other way than within a table
+        ## xhtml2pdf: hard to get logos positioned any other way than within a table
         <div class="header">
             <table class="noborder">
                 <tr class="noborder">
                     <td class="noborderphoto" style="width:45%">
-                        <img src="file://${ request.config.camcops_logo_file_absolute }"
-                             height="${ va.PDF_LOGO_HEIGHT }"
+                        <img src="file://${ request.config.camcops_logo_file_absolute | n }"
+                             height="${ va.PDF_LOGO_HEIGHT | n }"
                              style="float:left"
                              alt="CamCOPS logo" />
                     </td>
                     <td class="noborderphoto" style="width:10%"></td>
                     <td class="noborderphoto" style="width:45%">
-                        <img src="file://${ request.config.local_logo_file_absolute }"
-                             height="${ va.PDF_LOGO_HEIGHT }"
+                        <img src="file://${ request.config.local_logo_file_absolute | n }"
+                             height="${ va.PDF_LOGO_HEIGHT | n }"
                              style="float:right"
                              alt="Local institutional logo" />
                     </td>
@@ -111,4 +104,4 @@ from camcops_server.cc_modules.cc_constants import PDF_ENGINE
 
 </%block>
 
-${next.body()}
+${ next.body() | n }

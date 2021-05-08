@@ -20,7 +20,7 @@ camcops_server/templates/menu/report.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -35,14 +35,14 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 
 <%include file="db_user_info.mako"/>
 
-<h1>${ title | h }</h1>
+<h1>${ title }</h1>
 
 <%block name="results">
 
     <%block name="additional_report_above_results"></%block>
 
     <%block name="pager_above_results">
-        <div>${page.pager()}</div>
+        <div>${ page.pager() | n }</div>
     </%block>
 
     <%block name="table">
@@ -50,7 +50,7 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     </%block>
 
     <%block name="pager_below_results">
-        <div>${page.pager()}</div>
+        <div>${ page.pager() | n }</div>
     </%block>
 
     <%block name="additional_report_below_results"></%block>
@@ -58,10 +58,14 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 </%block>
 
 <div>
-    <a href="${ request.route_url(Routes.OFFER_REPORT, _query={ViewParam.REPORT_ID: report_id}) }">${_("Re-configure report")}</a>
+    <a href="${ request.route_url(
+                    Routes.OFFER_REPORT,
+                    _query={ViewParam.REPORT_ID: report_id}
+                ) | n }">${ _("Re-configure report") }</a>
 </div>
 <div>
-    <a href="${request.route_url(Routes.REPORTS_MENU)}">${_("Return to reports menu")}</a>
+    <a href="${ request.route_url(Routes.REPORTS_MENU) | n }">
+        ${ _("Return to reports menu") }</a>
 </div>
 <%include file="to_main_menu.mako"/>
 

@@ -20,7 +20,7 @@ camcops_server/templates/menu/generic_failure.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -35,18 +35,18 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 <%include file="db_user_info.mako"/>
 
 %if msg:
-    <h2 class="error">${msg | h}</h2>
+    <h2 class="error">${ msg }</h2>
 %endif
 
 %if extra_html:
-    ${extra_html}
+    ${ extra_html | n }
 %endif
 
-${next.body()}
+${ next.body() | n }
 
 %if request.exception:
 <div class="error">
-    ${ request.exception.message | h }
+    ${ request.exception.message }
 </div>
 %endif
 
@@ -54,7 +54,9 @@ ${next.body()}
     %if request.user_id is None:
         <%block go_to_login>
             <div>
-                ${_("Click")} <a href="${request.route_url(Routes.LOGIN)}">${_("here")}</a> ${_("to log in")}.
+                ${ _("Click") }
+                <a href="${ request.route_url(Routes.LOGIN) | n }">
+                    ${ _("here") }</a> ${ _("to log in") }.
             </div>
         </%block>
     %else:

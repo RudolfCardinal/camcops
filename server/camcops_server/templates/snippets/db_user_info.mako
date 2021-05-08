@@ -20,7 +20,7 @@ camcops_server/templates/snippets/db_user_info.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -35,13 +35,13 @@ from camcops_server.cc_modules.cc_pyramid import Routes
 <% _ = request.gettext %>
 
 <div>
-    ${_("Database")}: <b>${ request.database_title | h }</b>.
+    ${ _("Database") }: <b>${ request.database_title }</b>.
     %if request.camcops_session.username:
-        ${_("Logged in as")} <b>${request.camcops_session.username | h}</b>.
+        ${ _("Logged in as") } <b>${ request.camcops_session.username }</b>.
         [
-            <a href="${request.route_url(Routes.LOGOUT)}">${_("Log out")}</a>
+            <a href="${ request.route_url(Routes.LOGOUT) | n }">${ _("Log out") }</a>
         %if offer_main_menu:
-            | <a href="${request.route_url(Routes.HOME)}">${_("Main menu")}</a>
+            | <a href="${ request.route_url(Routes.HOME) | n }">${ _("Main menu") }</a>
         %endif
         ]
     %endif

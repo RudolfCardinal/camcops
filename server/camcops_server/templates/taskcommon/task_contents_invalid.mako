@@ -20,7 +20,7 @@ camcops_server/templates/taskcommon/task_contents_invalid.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -29,11 +29,11 @@ camcops_server/templates/taskcommon/task_contents_invalid.mako
 <%page args="task: Task"/>
 
 <div class="warning">
-    <b>${_("WARNING. Invalid values.")}</b>
+    <b>${ _("WARNING. Invalid values.") }</b>
     %for idx, explanation in enumerate(task.field_contents_invalid_because()):
         %if idx > 0:
             <br>
         %endif
-        ${ explanation | h }
+        ${ explanation }
     %endfor
 </div>

@@ -20,7 +20,7 @@ camcops_server/templates/menu/group_add.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,11 +30,13 @@ camcops_server/templates/menu/group_add.mako
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Add group")}</h1>
+<h1>${ _("Add group") }</h1>
 
-<div class="important">${_("Once created, you can set the group’s description/permissions.")}</div>
+<div class="important">
+    ${ _("Once created, you can set the group’s description/permissions.") }
+</div>
 
-${ form }
+${ form | n }
 
 <%include file="to_view_all_groups.mako"/>
 <%include file="to_main_menu.mako"/>

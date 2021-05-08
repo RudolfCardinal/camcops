@@ -20,7 +20,7 @@ camcops_server/cc_modules/cc_exportmodels.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -666,7 +666,7 @@ class ExportedTaskHL7Message(Base):
 
         See
 
-        - http://python-hl7.readthedocs.org/en/latest/index.html
+        - https://python-hl7.readthedocs.org/en/latest/index.html
         """
         task = self.exported_task.task
         recipient = self.exported_task.recipient
@@ -696,12 +696,12 @@ class ExportedTaskHL7Message(Base):
         - Default MLLP/HL7 port is 2575
         - MLLP = minimum lower layer protocol
 
-          - http://www.cleo.com/support/byproduct/lexicom/usersguide/mllp_configuration.htm
-          - http://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=hl7
+          - https://www.cleo.com/support/byproduct/lexicom/usersguide/mllp_configuration.htm
+          - https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=hl7
           - Essentially just a TCP socket with a minimal wrapper:
-            http://stackoverflow.com/questions/11126918
+            https://stackoverflow.com/questions/11126918
 
-        - http://python-hl7.readthedocs.org/en/latest/api.html; however,
+        - https://python-hl7.readthedocs.org/en/latest/api.html; however,
           we've modified that
         """  # noqa
         recipient = self.exported_task.recipient
@@ -748,6 +748,7 @@ class ExportedTaskHL7Message(Base):
 
     @staticmethod
     def ping_hl7_server(recipient: ExportRecipient) -> bool:
+        # noinspection HttpUrlsUsage
         """
         Performs a TCP/IP ping on our HL7 server; returns success. If we've
         already pinged successfully during this run, don't bother doing it

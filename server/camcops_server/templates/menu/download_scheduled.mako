@@ -20,7 +20,7 @@ camcops_server/templates/menu/download_scheduled.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -32,10 +32,13 @@ camcops_server/templates/menu/download_scheduled.mako
 from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 %>
 
-<div>${_("A file containing your data will be built. If your e-mail address is configured, CamCOPS will e-mail you when it is ready.")}</div>
+<div>${ _(
+    "A file containing your data will be built. If your e-mail address is "
+    "configured, CamCOPS will e-mail you when it is ready.") }</div>
 
 <div>
-    <a href="${request.route_url(Routes.DOWNLOAD_AREA)}">${_("Download area")}</a>
+    <a href="${ request.route_url(Routes.DOWNLOAD_AREA) | n }">
+        ${ _("Download area") }</a>
 </div>
 
 <%include file="to_main_menu.mako"/>

@@ -20,7 +20,7 @@ camcops_server/templates/menu/user_edit_group_membership.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,14 +30,14 @@ camcops_server/templates/menu/user_edit_group_membership.mako
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Edit group permissions")}</h1>
+<h1>${ _("Edit group permissions") }</h1>
 
 <div>
-    ${_("User:")} <b>${ ugm.user.username | h }</b><br>
-    ${_("Group:")} <b>${ ugm.group.name | h }</b>
+    ${ _("User:") } <b>${ ugm.user.username }</b><br>
+    ${ _("Group:") } <b>${ ugm.group.name }</b>
 </div>
 
-${ form }
+${ form | n }
 
 <%include file="to_view_all_users.mako"/>
 <%include file="to_main_menu.mako"/>

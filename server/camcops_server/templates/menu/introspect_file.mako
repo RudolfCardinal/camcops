@@ -20,7 +20,7 @@ camcops_server/templates/menu/introspect_file.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -29,9 +29,9 @@ camcops_server/templates/menu/introspect_file.mako
 <%inherit file="base_web.mako"/>
 
 <%block name="extra_head_end">
-    <style nonce="${request.nonce}">
-        ${css}
+    <style nonce="${ request.nonce | n }">
+        ${ css | n }
     </style>
 </%block>
 
-${code_html}
+${ code_html | n }

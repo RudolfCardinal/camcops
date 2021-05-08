@@ -20,7 +20,7 @@ camcops_server/templates/taskcommon/task_page_footer.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -35,4 +35,5 @@ from camcops_server.cc_modules.cc_constants import DateFormat
 
 %>
 
-${ task.shortname | h } ${_("created")} ${ format_datetime(task.when_created, DateFormat.LONG_DATETIME) }.
+${ task.shortname } ${ _("created") }
+${ format_datetime(task.when_created, DateFormat.LONG_DATETIME) }.

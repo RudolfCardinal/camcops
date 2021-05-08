@@ -20,7 +20,7 @@ camcops_server/templates/menu/view_other_user_info.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -31,7 +31,7 @@ camcops_server/templates/menu/view_other_user_info.mako
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Information about user")} ${ user.username | h }</h1>
+<h1>${ _("Information about user") } ${ user.username }</h1>
 
 <%include file="user_info_detail.mako" args="user=user"/>
 

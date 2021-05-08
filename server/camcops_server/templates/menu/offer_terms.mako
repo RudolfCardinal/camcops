@@ -20,7 +20,7 @@ camcops_server/templates/menu/offer_terms.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,10 +30,10 @@ camcops_server/templates/menu/offer_terms.mako
 
 <%include file="db_user_info.mako"/>
 
-<h1>${title}</h1>
+<h1>${ title | n }</h1>
 
-<h2>${subtitle}</h2>
+<h2>${ subtitle | n }</h2>
 
-<p>${content}</p>
+<p>${ content | n }</p>
 
-${form}
+${form | n}

@@ -20,7 +20,7 @@ tools/multiline_replace_camcops.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -85,7 +85,7 @@ FROM_STRING_SOURCE = """
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 """
 
 TO_STRING_SOURCE = """
@@ -105,7 +105,7 @@ TO_STRING_SOURCE = """
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 """
 
 FROM_STRING_DOCS = """
@@ -124,7 +124,7 @@ FROM_STRING_DOCS = """
     GNU General Public License for more details.
     .
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 """
 
 TO_STRING_DOCS = """
@@ -144,7 +144,7 @@ TO_STRING_DOCS = """
     GNU General Public License for more details.
     .
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 """
 
 ENCODING = "utf-8"

@@ -20,7 +20,7 @@ camcops_server/templates/menu/view_task_schedule_items.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -37,22 +37,22 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Task schedule items for {schedule_name}").format(schedule_name=schedule_name) | h}</h1>
+<h1>${ _("Task schedule items for {schedule_name}").format(schedule_name=schedule_name) }</h1>
 
-<div>${page.pager()}</div>
+<div>${ page.pager() | n }</div>
 
 <table>
     <tr>
-        <th>${_("Task")}</th>
-        <th>${_("Due from (days)")}</th>
-        <th>${_("Due within (days)")}</th>
-        <th>${_("Edit")}</th>
-        <th>${_("Delete")}</th>
+        <th>${ _("Task") }</th>
+        <th>${ _("Due from (days)") }</th>
+        <th>${ _("Due within (days)") }</th>
+        <th>${ _("Edit") }</th>
+        <th>${ _("Delete") }</th>
     </tr>
 %for item in page:
     <tr>
         <td>
-            ${ item.task_shortname | h }
+            ${ item.task_shortname }
         </td>
         <td>
             ${ item.due_from.in_days() }
@@ -62,34 +62,32 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
         </td>
         <td>
             <a href="${ req.route_url(
-    Routes.EDIT_TASK_SCHEDULE_ITEM,
-    _query={
-        ViewParam.SCHEDULE_ITEM_ID: item.id
-    }
-) }">${_("Edit")}</a>
+                            Routes.EDIT_TASK_SCHEDULE_ITEM,
+                            _query={ViewParam.SCHEDULE_ITEM_ID: item.id}
+                        ) | n }">${ _("Edit") }</a>
         </td>
         <td>
             <a href="${ req.route_url(
-    Routes.DELETE_TASK_SCHEDULE_ITEM,
-    _query={
-        ViewParam.SCHEDULE_ITEM_ID: item.id
-    }
-) }">${_("Delete")}</a>
+                            Routes.DELETE_TASK_SCHEDULE_ITEM,
+                            _query={ViewParam.SCHEDULE_ITEM_ID: item.id}
+                        ) | n }">${ _("Delete") }</a>
         </td>
     </tr>
 %endfor
 </table>
 
-<div>${page.pager()}</div>
+<div>${ page.pager() | n }</div>
 
 <div>
-<a href="${ req.route_url(Routes.ADD_TASK_SCHEDULE_ITEM,
-    _query={
-        ViewParam.SCHEDULE_ID: req.get_int_param(ViewParam.SCHEDULE_ID),
-    }
-
-) }">${_("Add a task schedule item")}</a>
+    <a href="${ req.route_url(
+                    Routes.ADD_TASK_SCHEDULE_ITEM,
+                    _query={
+                        ViewParam.SCHEDULE_ID: req.get_int_param(ViewParam.SCHEDULE_ID),
+                    }
+                ) | n }">${ _("Add a task schedule item") }</a>
 </div>
-<a href="${ req.route_url(Routes.VIEW_TASK_SCHEDULES)}">${_("Task schedule management")}</a>
+<div>
+    <a href="${ req.route_url(Routes.VIEW_TASK_SCHEDULES) | n }">
+        ${ _("Task schedule management") }</a>
+</div>
 <%include file="to_main_menu.mako"/>
-</div>

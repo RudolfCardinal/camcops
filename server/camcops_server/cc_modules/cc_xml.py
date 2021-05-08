@@ -20,7 +20,7 @@ camcops_server/cc_modules/cc_xml.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -60,12 +60,12 @@ log = BraceStyleAdapter(logging.getLogger(__name__))
 XML_NAME_SNOMED_CODES = "snomed_ct_codes"
 
 XML_NAMESPACES = [
-    ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
-    # ' xmlns:dt="http://www.w3.org/2001/XMLSchema-datatypes"'
+    ' xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"'
+    # ' xmlns:dt="https://www.w3.org/2001/XMLSchema-datatypes"'
 ]
 XML_IGNORE_NAMESPACES = [
-    'xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"',
-    'xmlns:ignore="http://www.camcops.org/ignore"',
+    'xmlns:mc="https://schemas.openxmlformats.org/markup-compatibility/2006"',
+    'xmlns:ignore="https://camcops.readthedocs.org/ignore"',
     # ... actual URL unimportant
     'mc:Ignorable="ignore"'
 ]
@@ -343,6 +343,7 @@ def get_xml_tree(element: Union[XmlElement, XmlSimpleValue,
                  indent_spaces: int = 4,
                  eol: str = '\n',
                  include_comments: bool = False) -> str:
+    # noinspection HttpUrlsUsage
     """
     Returns an :class:`camcops_server.cc_modules.cc_xml.XmlElement` as text.
 
@@ -356,20 +357,20 @@ def get_xml_tree(element: Union[XmlElement, XmlSimpleValue,
     We will represent NULL values with ``xsi:nil``, but this requires a
     namespace:
 
-    - http://stackoverflow.com/questions/774192
+    - https://stackoverflow.com/questions/774192
     - http://books.xmlschemata.org/relaxng/relax-CHP-11-SECT-1.html
 
     Comments:
 
     - http://blog.galasoft.ch/posts/2010/02/quick-tip-commenting-out-properties-in-xaml/
-    - http://stackoverflow.com/questions/2073140/
+    - https://stackoverflow.com/questions/2073140/
 
     Regarding newlines:
 
     - We do nothing special, i.e. newlines are provided in raw format.
     - However, some browsers may fail to display them correctly (i.e. they look
       like they're missing) -- e.g. Firefox, Chrome -- see
-      http://stackoverflow.com/questions/2004386. Just try saving and
+      https://stackoverflow.com/questions/2004386. Just try saving and
       inspecting the results with a text editor, or use the browser's "View
       Source" function (which, for Chrome, shows both newlines and line numbers
       too).

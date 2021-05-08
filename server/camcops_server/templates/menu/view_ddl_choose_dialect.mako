@@ -20,7 +20,7 @@ camcops_server/templates/menu/view_ddl_choose_dialect.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,13 +30,13 @@ camcops_server/templates/menu/view_ddl_choose_dialect.mako
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("View data definition language (DDL), in SQL")}</h1>
+<h1>${ _("View data definition language (DDL), in SQL") }</h1>
 
 <div>
-    ${_("The server’s database is using dialect")}
-    <code>${ current_dialect }</code> (${ current_dialect_description | h }).
+    ${ _("The server’s database is using dialect") }
+    <code>${ current_dialect | n }</code> (${ current_dialect_description }).
 </div>
 
-${ form }
+${ form | n }
 
 <%include file="to_main_menu.mako"/>

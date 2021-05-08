@@ -20,7 +20,7 @@ camcops_server/cc_modules/cc_dummy_database.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -128,6 +128,7 @@ class DummyDataFactory(object):
             Faker.seed()
             self.add_tasks(patient_id)
 
+    # noinspection PyMethodMayBeStatic
     def get_device(self, dbsession: "SqlASession") -> "Device":
         dummy_device_name = "dummy_device"
 

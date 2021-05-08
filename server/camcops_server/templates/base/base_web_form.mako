@@ -20,7 +20,7 @@ camcops_server/templates/base/base_web_form.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,24 +30,24 @@ camcops_server/templates/base/base_web_form.mako
 <%inherit file="base_web.mako"/>
 
 <%block name="extra_head_start">
-    ${parent.extra_head_start()}
+    ${ parent.extra_head_start() | n }
     ## Extra for Deform; see
     ## https://docs.pylonsproject.org/projects/pyramid/en/latest/quick_tutorial/forms.html
     ## https://docs.pylonsproject.org/projects/deform/en/latest/widget.html#widget-requirements
 
     ## These aren't provided by the form's automatic resource detection:
     <link rel="stylesheet"
-          href="${request.static_url('deform:static/css/form.css')}"/>
+          href="${ request.static_url('deform:static/css/form.css') | n }"/>
 
     ## Automatic things come here:
-    ${head_form_html}
+    ${ head_form_html | n }
 
-    ## For "${parent.BLOCKNAME()}" see http://docs.makotemplates.org/en/latest/inheritance.html#parent-namespace
+    ## For "${ parent.BLOCKNAME() }" see http://docs.makotemplates.org/en/latest/inheritance.html#parent-namespace
 
-    <script nonce="${request.nonce}">
+    <script nonce="${ request.nonce | n }">
         // Required by Deform:
         document.addEventListener("DOMContentLoaded", deform.load, false);
     </script>
 </%block>
 
-${next.body()}
+${ next.body() | n }

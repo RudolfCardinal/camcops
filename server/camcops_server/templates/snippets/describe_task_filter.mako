@@ -20,7 +20,7 @@ camcops_server/templates/snippets/current_session_filters.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -43,65 +43,69 @@ from camcops_server.cc_modules.cc_constants import DateFormat
 <div class="filters">
     ## Task types
     %if task_filter.task_types:
-        ${_("Task is one of:")} <b>${ ", ".join(task_filter.task_types) | h }</b>.
+        ${ _("Task is one of:") } <b>${ ", ".join(task_filter.task_types) }</b>.
         <% some_filter = True %>
     %endif
     ## Patient
     %if task_filter.surname:
-        ${_("Surname")} = <b>${ task_filter.surname | h }</b>.
+        ${ _("Surname") } = <b>${ task_filter.surnameh }</b>.
         <% some_filter = True %>
     %endif
     %if task_filter.forename:
-        ${_("Forename")} = <b>${ task_filter.forename | h }</b>.
+        ${ _("Forename") } = <b>${ task_filter.forename }</b>.
         <% some_filter = True %>
     %endif
     %if task_filter.dob:
-        ${_("DOB")} = <b>${ format_datetime(task_filter.dob, DateFormat.SHORT_DATE) }</b>.
+        ${ _("DOB") } = <b>${ format_datetime(task_filter.dob, DateFormat.SHORT_DATE) }</b>.
         <% some_filter = True %>
     %endif
     %if task_filter.sex:
-        ${_("Sex")} = <b>${ task_filter.sex | h }</b>.
+        ${ _("Sex") } = <b>${ task_filter.sex }</b>.
         <% some_filter = True %>
     %endif
     %if task_filter.idnum_criteria:
-        ${_("ID numbers match one of:")}
+        ${ _("ID numbers match one of:") }
         ${ ("; ".join("{which} = <b>{value}</b>".format(
-                which=request.get_id_shortdesc(iddef.which_idnum),
-                value=iddef.idnum_value,
-            ) for iddef in task_filter.idnum_criteria) + ".") | h }
+                which=escape(request.get_id_shortdesc(iddef.which_idnum)),
+                value=escape(iddef.idnum_value),
+            ) for iddef in task_filter.idnum_criteria) + ".") | n }
         <% some_filter = True %>
     %endif
     ## Other
     %if task_filter.device_ids:
-        ${_("Uploading device is one of:")} <b>${ ", ".join(escape(d) for d in task_filter.get_device_names(request)) }</b>.
+        ${ _("Uploading device is one of:") }
+        <b>${ ", ".join(task_filter.get_device_names(request)) }</b>.
         <% some_filter = True %>
     %endif
     %if task_filter.adding_user_ids:
-        ${_("Adding user is one of:")} <b>${ ", ".join(escape(u) for u in task_filter.get_user_names(request)) }</b>.
+        ${ _("Adding user is one of:") }
+        <b>${ ", ".join(task_filter.get_user_names(request)) }</b>.
         <% some_filter = True %>
     %endif
     %if task_filter.group_ids:
-        ${_("Group is one of:")} <b>${ ", ".join(escape(g) for g in task_filter.get_group_names(request)) }</b>.
+        ${ _("Group is one of:") }
+        <b>${ ", ".join(task_filter.get_group_names(request)) }</b>.
         <% some_filter = True %>
     %endif
     %if task_filter.start_datetime:
-        ${_("Created")} <b>&ge; ${ task_filter.start_datetime }</b>.
+        ${ _("Created") } <b>&ge; ${ task_filter.start_datetime }</b>.
         <% some_filter = True %>
     %endif
     %if task_filter.end_datetime:
-        ${_("Created")} <b>&le; ${ task_filter.end_datetime }</b>.
+        ${ _("Created") } <b>&le; ${ task_filter.end_datetime }</b>.
         <% some_filter = True %>
     %endif
     %if task_filter.text_contents:
-        ${_("Text contains one of:")} <b>${ ", ".join(escape(repr(t)) for t in task_filter.text_contents) }</b>.
+        ${ _("Text contains one of:") }
+        <b>${ ", ".join(repr(t) for t in task_filter.text_contents) }</b>.
         <% some_filter = True %>
     %endif
     %if task_filter.complete_only:
-        <b>${_("Restricted to “complete” tasks only.")}</b>
+        <b>${ _("Restricted to “complete” tasks only.") }</b>
         <% some_filter = True %>
     %endif
 
     %if not some_filter:
-        ${_("[No filters.]")}
+        ${ _("[No filters.]") }
     %endif
 </div>

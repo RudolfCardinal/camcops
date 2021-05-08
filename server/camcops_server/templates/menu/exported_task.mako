@@ -20,7 +20,7 @@ camcops_server/templates/menu/exported_task.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -44,7 +44,7 @@ def listview(req, objects, route_name, description):
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Individual task export attempt")}</h1>
+<h1>${ _("Individual task export attempt") }</h1>
 
 <table>
     <tr>
@@ -53,15 +53,30 @@ def listview(req, objects, route_name, description):
     </tr>
     <tr>
         <th>Export recipient ID</th>
-        <td><a href="${ req.route_url(Routes.VIEW_EXPORT_RECIPIENT, _query={ViewParam.ID: et.recipient_id}) }">ExportRecipient ${ et.recipient_id }</a></td>
+        <td>
+            <a href="${ req.route_url(
+                            Routes.VIEW_EXPORT_RECIPIENT,
+                            _query={ViewParam.ID: et.recipient_id}
+                        ) | n }">ExportRecipient ${ et.recipient_id }</a>
+        </td>
     </tr>
     <tr>
         <th>Base table</th>
-        <td>${ et.basetable | h }</td>
+        <td>${ et.basetable }</td>
     </tr>
     <tr>
         <th>Task server PK</th>
-        <td>${ et.task_server_pk } (<a href="${ req.route_url(Routes.TASK, _query={ViewParam.TABLE_NAME: et.basetable, ViewParam.SERVER_PK: et.task_server_pk, ViewParam.VIEWTYPE: ViewArg.HTML}) }">View task</a>)</td>
+        <td>
+            ${ et.task_server_pk }
+            (<a href="${ req.route_url(
+                            Routes.TASK,
+                            _query={
+                                ViewParam.TABLE_NAME: et.basetable,
+                                ViewParam.SERVER_PK: et.task_server_pk,
+                                ViewParam.VIEWTYPE: ViewArg.HTML
+                            }
+                        ) | n }">${ _("View task") }</a>)
+        </td>
     </tr>
     <tr>
         <th>Start at (UTC)</th>
@@ -89,15 +104,18 @@ def listview(req, objects, route_name, description):
     </tr>
     <tr>
         <th>E-mails</th>
-        <td>${ listview(req, et.emails, Routes.VIEW_EXPORTED_TASK_EMAIL, "ExportedTaskEmail") }</td>
+        <td>${ listview(req, et.emails, Routes.VIEW_EXPORTED_TASK_EMAIL,
+                        "ExportedTaskEmail") | n }</td>
     </tr>
     <tr>
         <th>Files</th>
-        <td>${ listview(req, et.filegroups, Routes.VIEW_EXPORTED_TASK_FILE_GROUP, "ExportedTaskFileGroup") }</td>
+        <td>${ listview(req, et.filegroups, Routes.VIEW_EXPORTED_TASK_FILE_GROUP,
+                        "ExportedTaskFileGroup") | n }</td>
     </tr>
     <tr>
         <th>HL7 messages</th>
-        <td>${ listview(req, et.hl7_messages, Routes.VIEW_EXPORTED_TASK_HL7_MESSAGE, "ExportedTaskHL7Message") }</td>
+        <td>${ listview(req, et.hl7_messages, Routes.VIEW_EXPORTED_TASK_HL7_MESSAGE,
+                        "ExportedTaskHL7Message") | n }</td>
     </tr>
 </table>
 

@@ -20,7 +20,7 @@ camcops_server/tasks/rand36.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -499,7 +499,8 @@ class Rand36(TaskHasPatientMixin, Task,
             <div class="{CssClass.COPYRIGHT}">
                 The RAND 36-Item Short Form Health Survey was developed at RAND
                 as part of the Medical Outcomes Study. See
-            http://www.rand.org/health/surveys_tools/mos/mos_core_36item.html
+                <a href="https://www.rand.org/health/surveys_tools/mos/mos_core_36item.html">
+                https://www.rand.org/health/surveys_tools/mos/mos_core_36item.html</a>
             </div>
             <div class="{CssClass.FOOTNOTES}">
                 All questions are first transformed to a score in the range
@@ -514,5 +515,5 @@ class Rand36(TaskHasPatientMixin, Task,
                 [8] Q21, 22.
                 [9] Q1, 33–36.
             </div>
-        """
+        """  # noqa
         return h

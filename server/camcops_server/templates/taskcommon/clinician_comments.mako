@@ -20,7 +20,7 @@ camcops_server/templates/taskcommon/clinician_comments.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -31,12 +31,12 @@ camcops_server/templates/taskcommon/clinician_comments.mako
 <div class="clinician">
     <table class="taskdetail">
         <tr>
-            <td style="width:20%">${_("Clinician’s comments:")}</td>
+            <td style="width:20%">${ _("Clinician’s comments:") }</td>
             <td style="width:80%">
                 %if comment is None:
-                    <i>${_("None")}</i>
+                    <i>${ _("None") }</i>
                 %else:
-                    <b>${ comment | h }</b>
+                    <b>${ comment }</b>
                 %endif
             </td>
         </tr>

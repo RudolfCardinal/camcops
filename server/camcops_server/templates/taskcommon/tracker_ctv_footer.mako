@@ -20,7 +20,7 @@ camcops_server/templates/taskcommon/tracker_ctv_footer.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -36,4 +36,4 @@ from camcops_server.cc_modules.cc_constants import DateFormat
 %>
 
 ${ ("CTV" if tracker.as_ctv else "Tracker") }
-${_("accessed")} ${ format_datetime(request.now, DateFormat.LONG_DATETIME) }.
+${ _("accessed") } ${ format_datetime(request.now, DateFormat.LONG_DATETIME) }.

@@ -20,7 +20,7 @@ camcops_server/templates/menu/task_erase_entirely.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,16 +30,16 @@ camcops_server/templates/menu/task_erase_entirely.mako
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Erase task entirely?")}</h1>
+<h1>${ _("Erase task entirely?") }</h1>
 
 <%include file="task_descriptive_header.mako" args="task=object, anonymise=False"/>
 
 <div class="warning">
-    <b>${_("ARE YOU REALLY SURE YOU WANT TO ERASE THIS TASK ENTIRELY?")}</b>
+    <b>${ _("ARE YOU REALLY SURE YOU WANT TO ERASE THIS TASK ENTIRELY?") }</b>
 </div>
 
-<p><i>${_("The task will be entirely erased.")}</i></p>
+<p><i>${ _("The task will be entirely erased.") }</i></p>
 
-${ form }
+${ form | n }
 
 <%include file="to_main_menu.mako"/>

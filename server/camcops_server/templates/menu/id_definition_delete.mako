@@ -20,7 +20,7 @@ camcops_server/templates/menu/id_definition_delete.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,12 +30,13 @@ camcops_server/templates/menu/id_definition_delete.mako
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Delete master ID definition number")} ${ iddef.which_idnum } (${ iddef.description | h })</h1>
+<h1>${ _("Delete master ID definition number") }
+    ${ iddef.which_idnum } (${ iddef.description })</h1>
 
 %if error:
-    <div class="error">${ error | h }</div>
+    <div class="error">${ error }</div>
 %endif
 
-${ form }
+${ form | n }
 
 <%include file="to_main_menu.mako"/>

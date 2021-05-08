@@ -20,7 +20,7 @@ camcops_server/templates/menu/exported_task_file_group.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -35,7 +35,7 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Exported files")}</h1>
+<h1>${ _("Exported files") }</h1>
 
 <table>
     <tr>
@@ -44,7 +44,10 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     </tr>
     <tr>
         <th>Exported task ID</th>
-        <td><a href="${ req.route_url(Routes.VIEW_EXPORTED_TASK, _query={ViewParam.ID: fg.exported_task_id}) }">ExportedTask ${ fg.exported_task_id }</a></td>
+        <td><a href="${ req.route_url(
+                            Routes.VIEW_EXPORTED_TASK,
+                            _query={ViewParam.ID: fg.exported_task_id}
+                        ) | n }">ExportedTask ${ fg.exported_task_id }</a></td>
     </tr>
     <tr>
         <th>Filenames</th>
@@ -52,7 +55,7 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     </tr>
     <tr>
         <th>Script called?</th>
-        <td>${ fg.script_called | h }</td>
+        <td>${ fg.script_called }</td>
     </tr>
     <tr>
         <th>Script exit code</th>
@@ -60,11 +63,11 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     </tr>
     <tr>
         <th>Script stdout</th>
-        <td>${ fg.script_stdout | h }</td>
+        <td>${ fg.script_stdout }</td>
     </tr>
     <tr>
         <th>Script stderr</th>
-        <td>${ fg.script_stderr | h}</td>
+        <td>${ fg.script_stderr }</td>
     </tr>
 </table>
 

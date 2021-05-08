@@ -20,7 +20,7 @@ camcops_server/cc_modules/cc_pyramid.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -317,7 +317,13 @@ MAKO_LOOKUP = TemplateLookup(
     # uses those variables.
 
     # -------------------------------------------------------------------------
-    # TEMPLATE CACHING
+    # Template default filtering
+    # -------------------------------------------------------------------------
+
+    default_filters=["h"],
+
+    # -------------------------------------------------------------------------
+    # Template caching
     # -------------------------------------------------------------------------
     # http://dogpilecache.readthedocs.io/en/latest/api.html#module-dogpile.cache.plugins.mako_cache  # noqa
     # http://docs.makotemplates.org/en/latest/caching.html#cache-arguments
@@ -746,6 +752,7 @@ class Routes(object):
     TESTPAGE_PRIVATE_1 = "testpage_private_1"
     TESTPAGE_PRIVATE_2 = "testpage_private_2"
     TESTPAGE_PRIVATE_3 = "testpage_private_3"
+    TESTPAGE_PRIVATE_4 = "testpage_private_4"
     TESTPAGE_PUBLIC_1 = "testpage_public_1"
     TRACKER = "tracker"
     UNLOCK_USER = "unlock_user"
@@ -881,6 +888,7 @@ class RouteCollection(object):
     TESTPAGE_PRIVATE_1 = RoutePath(Routes.TESTPAGE_PRIVATE_1)
     TESTPAGE_PRIVATE_2 = RoutePath(Routes.TESTPAGE_PRIVATE_2)
     TESTPAGE_PRIVATE_3 = RoutePath(Routes.TESTPAGE_PRIVATE_3)
+    TESTPAGE_PRIVATE_4 = RoutePath(Routes.TESTPAGE_PRIVATE_4)
     TESTPAGE_PUBLIC_1 = RoutePath(Routes.TESTPAGE_PUBLIC_1)
     TRACKER = RoutePath(Routes.TRACKER)
     UNLOCK_USER = RoutePath(Routes.UNLOCK_USER)
@@ -1267,6 +1275,8 @@ class CamcopsPage(Page):
                  curpage_attr: Dict[str, str] = None,
                  dotdot_attr: Dict[str, str] = None):
         """
+        See equivalent in superclass.
+
         Fixes bugs (e.g. mutable default arguments) and nasties (e.g.
         enforcing ".." for the ellipsis) in the original.
         """
@@ -1291,11 +1301,11 @@ class CamcopsPage(Page):
         leftmost_page = (
             max(self.first_page, (self.page - radius))
             if self.first_page else None
-        )
+        )  # type: Optional[int]
         rightmost_page = (
             min(self.last_page, (self.page+radius))
             if self.last_page else None
-        )
+        )  # type: Optional[int]
         nav_items = {
             "first_page": None,
             "last_page": None,

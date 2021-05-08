@@ -20,7 +20,7 @@ camcops_server/templates/menu/logged_out.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -33,8 +33,10 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 %>
 
 <div>
-    ${_("You have logged out.")}
+    ${ _("You have logged out.") }
 </div>
 <div>
-    ${_("Click")} <a href="${request.route_url(Routes.LOGIN)}">${_("here")}</a> ${_("to log in again")}.
+    ${ _("Click") }
+    <a href="${ request.route_url(Routes.LOGIN) | n }">${ _("here") }</a>
+    ${ _("to log in again") }.
 </div>

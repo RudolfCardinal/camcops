@@ -20,7 +20,7 @@ camcops_server/templates/menu/users_view.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -35,71 +35,95 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Users")}</h1>
+<h1>${ _("Users") }</h1>
 
-<div>${page.pager()}</div>
+<div>${ page.pager() | n }</div>
 
-${form}
+${form | n}
 
 <table>
     <tr>
-        <th>${_("Username")}</th>
-        <th>${_("ID")}</th>
-        <th>${_("Flags")}</th>
-        <th>${_("Full name")}</th>
-        <th>${_("Email")}</th>
-        <th>${_("View details")}</th>
-        <th>${_("Edit")}</th>
-        <th>${_("Groups")}</th>
-        <th>${_("Upload group")}</th>
-        <th>${_("Change password")}</th>
-        <th>${_("Delete")}</th>
+        <th>${ _("Username") }</th>
+        <th>${ _("ID") }</th>
+        <th>${ _("Flags") }</th>
+        <th>${ _("Full name") }</th>
+        <th>${ _("Email") }</th>
+        <th>${ _("View details") }</th>
+        <th>${ _("Edit") }</th>
+        <th>${ _("Groups") }</th>
+        <th>${ _("Upload group") }</th>
+        <th>${ _("Change password") }</th>
+        <th>${ _("Delete") }</th>
     </tr>
     %for user in page:
         <tr>
-            <td>${ user.username | h }</td>
+            <td>${ user.username }</td>
             <td>${ user.id }</td>
             <td>
                 %if user.superuser:
-                    <span class="important">${_("Superuser.")}</span>
+                    <span class="important">${ _("Superuser.") }</span>
                 %endif
                 %if user.is_a_groupadmin:
-                    <span class="important">${_("Group administrator")} (${ user.names_of_groups_user_is_admin_for_csv }).</span>
+                    <span class="important">${ _("Group administrator") }
+                        (${ user.names_of_groups_user_is_admin_for_csv }).</span>
                 %endif
                 %if user.is_locked_out(request):
-                    <span class="warning">${_("Locked out;")} <a href="${ req.route_url(Routes.UNLOCK_USER, _query={ViewParam.USER_ID: user.id}) }">${_("unlock")}</a>.</span>
+                    <span class="warning">${ _("Locked out;") }
+                        <a href="${ req.route_url(
+                                        Routes.UNLOCK_USER,
+                                        _query={ViewParam.USER_ID: user.id}
+                                    ) | n }">${ _("unlock") }</a>.</span>
                 %endif
                 %if user.auto_generated:
-                    <span>${_("Auto-generated")}</span>
+                    <span>${ _("Auto-generated") }</span>
                 %endif
             </td>
-            <td>${ (user.fullname or "") | h }</td>
-            <td>${ (user.email or "") | h }</td>
-            <td><a href="${ req.route_url(Routes.VIEW_USER, _query={ViewParam.USER_ID: user.id}) }">${_("View")}</a></td>
-            <td><a href="${ req.route_url(Routes.EDIT_USER, _query={ViewParam.USER_ID: user.id}) }">${_("Edit")}</a></td>
+            <td>${ user.fullname or "" }</td>
+            <td>${ user.email or "" }</td>
+            <td><a href="${ req.route_url(
+                                Routes.VIEW_USER,
+                                _query={ViewParam.USER_ID: user.id}
+                            ) | n }">${ _("View") }</a></td>
+            <td><a href="${ req.route_url(
+                                Routes.EDIT_USER,
+                                _query={ViewParam.USER_ID: user.id}
+                            ) | n }">${ _("Edit") }</a></td>
             <td>
                 %for i, ugm in enumerate(sorted(list(user.user_group_memberships), key=lambda ugm: ugm.group.name)):
                     %if i > 0:
                         <br>
                     %endif
-                    ${ ugm.group.name | h }
+                    ${ ugm.group.name }
                     %if req.user.may_administer_group(ugm.group_id):
-                        [<a href="${ req.route_url(Routes.EDIT_USER_GROUP_MEMBERSHIP, _query={ViewParam.USER_GROUP_MEMBERSHIP_ID: ugm.id}) }">${_("Permissions")}</a>]
+                        [<a href="${ req.route_url(
+                                        Routes.EDIT_USER_GROUP_MEMBERSHIP,
+                                        _query={ViewParam.USER_GROUP_MEMBERSHIP_ID: ugm.id}
+                                    ) | n }">${ _("Permissions") }</a>]
                     %endif
                 %endfor
             </td>
             <td>
-                ${ (escape(user.upload_group.name) if user.upload_group else "<i>(None)</i>") }
-                [<a href="${request.route_url(Routes.SET_OTHER_USER_UPLOAD_GROUP, _query={ViewParam.USER_ID: user.id})}">${_("change")}</a>]
+                ${ (escape(user.upload_group.name) if user.upload_group
+                    else "<i>(None)</i>") | n }
+                [<a href="${request.route_url(
+                                Routes.SET_OTHER_USER_UPLOAD_GROUP,
+                                _query={ViewParam.USER_ID: user.id}
+                            ) | n }">${ _("change") }</a>]
             </td>
-            <td><a href="${ req.route_url(Routes.CHANGE_OTHER_PASSWORD, _query={ViewParam.USER_ID: user.id}) }">${_("Change password")}</a></td>
-            <td><a href="${ req.route_url(Routes.DELETE_USER, _query={ViewParam.USER_ID: user.id}) }">${_("Delete")}</a></td>
+            <td><a href="${ req.route_url(
+                                Routes.CHANGE_OTHER_PASSWORD,
+                                _query={ViewParam.USER_ID: user.id}
+                            ) | n }">${ _("Change password") }</a></td>
+            <td><a href="${ req.route_url(
+                                Routes.DELETE_USER,
+                                _query={ViewParam.USER_ID: user.id}
+                            ) | n }">${ _("Delete") }</a></td>
         </tr>
     %endfor
 </table>
 
-<div>${page.pager()}</div>
+<div>${ page.pager() | n }</div>
 
-<td><a href="${ req.route_url(Routes.ADD_USER) }">${_("Add a user")}</a></td>
+<td><a href="${ req.route_url(Routes.ADD_USER) | n }">${ _("Add a user") }</a></td>
 
 <%include file="to_main_menu.mako"/>

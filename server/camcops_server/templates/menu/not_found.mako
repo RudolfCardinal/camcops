@@ -20,7 +20,7 @@ camcops_server/templates/menu/not_found.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -29,5 +29,5 @@ camcops_server/templates/menu/not_found.mako
 <%inherit file="generic_failure.mako"/>
 
 <div class="error">
-    ${_("Page not found!")}
+    ${ _("Page not found!") }
 </div>

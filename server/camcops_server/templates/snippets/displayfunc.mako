@@ -20,21 +20,25 @@ camcops_server/templates/snippets/displayfunc.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
 </%doc>
 
 <%def name="one_per_line(iterable, escape=True)">
+    ## Don't escape the output of this function (i.e. prevent escaping using
+    ## "| n"), because it returns HTML <br> tags. However, you should ask it to
+    ## escape the inputs, using escape=True, unless you have already done that
+    ## or want to pass raw HTML in.
     %for idx, x in enumerate(iterable):
         %if idx > 0:
             <br>
         %endif
         %if escape:
-            ${ x | h}
-        %else:
             ${ x }
+        %else:
+            ${ x | n }
         %endif
     %endfor
 </%def>

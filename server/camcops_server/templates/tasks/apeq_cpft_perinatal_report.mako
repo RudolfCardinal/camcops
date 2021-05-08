@@ -20,7 +20,7 @@ camcops_server/templates/tasks/apeq_cpft_perinatal_report.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -29,7 +29,7 @@ camcops_server/templates/tasks/apeq_cpft_perinatal_report.mako
 <%inherit file="report.mako"/>
 
 <%block name="css">
-${parent.css()}
+${ parent.css() | n }
 
 h2, h3 {
     margin-top: 20px;
@@ -52,29 +52,29 @@ h2, h3 {
 
     <p>
         %if start_datetime:
-            ${_("Created")} <b>&ge; ${ start_datetime | h }</b>.
+            ${ _("Created" ) } <b>&ge; ${ start_datetime }</b>.
         %endif
         %if end_datetime:
-            ${_("Created")} <b>&lt; ${ end_datetime | h }</b>.
+            ${ _("Created") } <b>&lt; ${ end_datetime }</b>.
         %endif
     </p>
 
-    <h2>${_("Main questions")}</h2>
+    <h2>${ _("Main questions") }</h2>
 
     <%include file="table.mako" args="column_headings=main_column_headings, rows=main_rows"/>
 
-    <h2>${_("Friends and family question")}</h2>
+    <h2>${ _("Friends and family question") }</h2>
 
     <%include file="table.mako" args="column_headings=ff_column_headings, rows=ff_rows"/>
 
-    <h3>${_("Reasons given for the above responses")}</h3>
+    <h3>${ _("Reasons given for the above responses") }</h3>
 
     <%include file="table.mako" args="column_headings=[], rows=ff_why_rows, table_class='ff-why-table'"/>
 
-    <h2>${_("Comments")}</h2>
+    <h2>${ _("Comments") }</h2>
     %for comment in comments:
        <blockquote>
-           <p>${comment | h}</p>
+           <p>${ comment }</p>
        </blockquote>
     %endfor
 

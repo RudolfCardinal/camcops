@@ -20,7 +20,7 @@ camcops_server/templates/menu/view_patient_task_schedule.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -37,17 +37,20 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Scheduled tasks for {patient} on schedule: {schedule}").format(patient=patient_descriptor, schedule=schedule_name)}</h1>
+<h1>
+    ${ _("Scheduled tasks for {patient} on schedule: {schedule}").format(
+            patient=patient_descriptor, schedule=schedule_name) }
+</h1>
 
 <table>
     <tr>
-        <th>${_("Task")}</th>
-        <th>${_("Due from")}</th>
-        <th>${_("Due by")}</th>
-        <th>${_("Created")}</th>
-        <th>${_("Complete")}</th>
-        <th>${_("View")}</th>
-        <th>${_("Print/save")}</th>
+        <th>${ _("Task") }</th>
+        <th>${ _("Due from") }</th>
+        <th>${ _("Due by") }</th>
+        <th>${ _("Created") }</th>
+        <th>${ _("Complete") }</th>
+        <th>${ _("View") }</th>
+        <th>${ _("Print/save") }</th>
     </tr>
 %for task_info in task_list:
     <%
@@ -83,17 +86,17 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
                ${ task_info.task.is_complete() }
             %endif
         </td>
-        <td ${ td_attributes }>
+        <td ${ td_attributes | n }>
             %if task_info.is_anonymous:
                —
             %elif task_info.task:
                 <a href="${ req.route_url(
-                    Routes.TASK,
-                    _query={
-                        ViewParam.TABLE_NAME: task_info.task.tablename,
-                        ViewParam.SERVER_PK: task_info.task.pk,
-                        ViewParam.VIEWTYPE: ViewArg.HTML,
-                    }) }">HTML</a>
+                                Routes.TASK,
+                                _query={
+                                    ViewParam.TABLE_NAME: task_info.task.tablename,
+                                    ViewParam.SERVER_PK: task_info.task.pk,
+                                    ViewParam.VIEWTYPE: ViewArg.HTML,
+                                }) | n }">HTML</a>
             %endif
         </td>
         <td ${ td_attributes }>
@@ -101,12 +104,12 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
                —
             %elif task_info.task:
                 <a href="${ req.route_url(
-                    Routes.TASK,
-                    _query={
-                        ViewParam.TABLE_NAME: task_info.task.tablename,
-                        ViewParam.SERVER_PK: task_info.task.pk,
-                        ViewParam.VIEWTYPE: ViewArg.PDF,
-                    }) }">PDF</a>
+                                Routes.TASK,
+                                _query={
+                                    ViewParam.TABLE_NAME: task_info.task.tablename,
+                                    ViewParam.SERVER_PK: task_info.task.pk,
+                                    ViewParam.VIEWTYPE: ViewArg.PDF,
+                                }) | n }">PDF</a>
             %endif
         </td>
     </tr>
@@ -114,6 +117,7 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 </table>
 
 <div>
-    <a href="${ req.route_url(Routes.VIEW_PATIENT_TASK_SCHEDULES)}">${_("Manage scheduled tasks for patients")}</a>
+    <a href="${ req.route_url(Routes.VIEW_PATIENT_TASK_SCHEDULES) | n }">
+        ${ _("Manage scheduled tasks for patients") }</a>
     <%include file="to_main_menu.mako"/>
 </div>

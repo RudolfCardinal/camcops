@@ -20,7 +20,7 @@ camcops_server/templates/base/base_pdf_no_paged_media.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -35,4 +35,4 @@ camcops_server/templates/base/base_pdf_no_paged_media.mako
     <%include file="css_pdf_no_paged_media.mako"/>
 </%block>
 
-${next.body()}
+${ next.body() | n }

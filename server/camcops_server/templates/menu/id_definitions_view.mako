@@ -20,7 +20,7 @@ camcops_server/templates/menu/id_definitions_view.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -34,33 +34,40 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Identification (ID) numbers")}</h1>
+<h1>${ _("Identification (ID) numbers") }</h1>
 
 <table>
     <tr>
-        <th>${_("ID number")}</th>
-        <th>${_("Description")}</th>
-        <th>${_("Short description")}</th>
-        <th>${_("Validation method")}</th>
-        <th>${_("HL7 ID Type")}</th>
-        <th>${_("HL7 Assigning Authority")}</th>
-        <th>${_("Edit")}</th>
-        <th>${_("Delete")}</th>
+        <th>${ _("ID number") }</th>
+        <th>${ _("Description") }</th>
+        <th>${ _("Short description") }</th>
+        <th>${ _("Validation method") }</th>
+        <th>${ _("HL7 ID Type") }</th>
+        <th>${ _("HL7 Assigning Authority") }</th>
+        <th>${ _("Edit") }</th>
+        <th>${ _("Delete") }</th>
     </tr>
     %for iddef in idnum_definitions:
         <tr>
-            <td>${iddef.which_idnum}</td>
-            <td>${iddef.description | h}</td>
-            <td>${iddef.short_description | h}</td>
-            <td>${iddef.validation_method or "" | h}</td>
-            <td>${iddef.hl7_id_type or "" | h}</td>
-            <td>${iddef.hl7_assigning_authority or "" | h}</td>
-            <td><a href="${request.route_url(Routes.EDIT_ID_DEFINITION, _query={ViewParam.WHICH_IDNUM: iddef.which_idnum})}">${_("Edit")}</a></td>
-            <td><a href="${request.route_url(Routes.DELETE_ID_DEFINITION, _query={ViewParam.WHICH_IDNUM: iddef.which_idnum})}">${_("Delete")}</a></td>
+            <td>${ iddef.which_idnum }</td>
+            <td>${ iddef.description }</td>
+            <td>${ iddef.short_description }</td>
+            <td>${ iddef.validation_method or "" }</td>
+            <td>${ iddef.hl7_id_type or "" }</td>
+            <td>${ iddef.hl7_assigning_authority or "" }</td>
+            <td><a href="${request.route_url(
+                                Routes.EDIT_ID_DEFINITION,
+                                _query={ViewParam.WHICH_IDNUM: iddef.which_idnum
+                            }) | n }">${ _("Edit") }</a></td>
+            <td><a href="${request.route_url(
+                                Routes.DELETE_ID_DEFINITION,
+                                _query={ViewParam.WHICH_IDNUM: iddef.which_idnum
+                            }) | n }">${ _("Delete") }</a></td>
         </tr>
     %endfor
 </table>
 
-<a href="${request.route_url(Routes.ADD_ID_DEFINITION)}">${_("Add new ID number definition")}</a>
+<a href="${ request.route_url(Routes.ADD_ID_DEFINITION) | n }">
+    ${ _("Add new ID number definition") }</a>
 
 <%include file="to_main_menu.mako"/>

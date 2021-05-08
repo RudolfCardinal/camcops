@@ -20,7 +20,7 @@ camcops_server/templates/menu/special_note_add.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,16 +30,16 @@ camcops_server/templates/menu/special_note_add.mako
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Add special note to task instance irrevocably?")}</h1>
+<h1>${ _("Add special note to task instance irrevocably?") }</h1>
 
 <%include file="task_descriptive_header.mako" args="task=task, anonymise=False"/>
 
 <div class="warning">
-    <b>${_("Be very sure you want to apply a note.")}</b>
+    <b>${ _("Be very sure you want to apply a note.") }</b>
 </div>
 
-<p><i>${_("Your note will be appended to any existing note.")}</i></p>
+<p><i>${ _("Your note will be appended to any existing note.") }</i></p>
 
-${ form }
+${ form | n }
 
 <%include file="to_main_menu.mako"/>

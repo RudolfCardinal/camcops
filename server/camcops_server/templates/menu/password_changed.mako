@@ -20,7 +20,7 @@ camcops_server/templates/menu/password_changed.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -28,11 +28,12 @@ camcops_server/templates/menu/password_changed.mako
 
 <%inherit file="base_web.mako"/>
 
-<div>${_("Password changed for user")} ${username | h}.</div>
+<div>${ _("Password changed for user") } ${ username }.</div>
 
 %if own_password:
     <div class="important">
-        ${_("If you store your password in your CamCOPS tablet application, remember to change it there as well.")}
+        ${ _("If you store your password in your CamCOPS tablet application, "
+             "remember to change it there as well.") }
     </div>
 %endif
 

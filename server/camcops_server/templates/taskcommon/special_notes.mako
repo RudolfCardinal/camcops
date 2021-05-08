@@ -20,7 +20,7 @@ camcops_server/templates/taskcommon/special_notes.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -41,13 +41,13 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
         %if idx > 0:
             <br>
         %endif
-        [${ (sn.note_at or "?") }, ${ (sn.get_username() or "?") }]<br>
-        <b>${ sn.note | br_html }</b>
+        [${ sn.note_at or "?" }, ${ sn.get_username() or "?" }]<br>
+        <b>${ sn.note | n,br_html }</b>
         %if viewtype == ViewArg.HTML and sn.user_may_delete_specialnote(req.user):
-            <br>[<a href="${
-                req.route_url(Routes.DELETE_SPECIAL_NOTE,
-                              _query={ViewParam.NOTE_ID: sn.note_id}
-                ) }">${_("Delete special note")}</a>]
+            <br>[<a href="${ req.route_url(
+                                Routes.DELETE_SPECIAL_NOTE,
+                                _query={ViewParam.NOTE_ID: sn.note_id}
+                             ) | n }">${ _("Delete special note") }</a>]
         %endif
     %endfor
 </div>

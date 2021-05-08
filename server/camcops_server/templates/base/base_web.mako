@@ -20,7 +20,7 @@ camcops_server/templates/base/base_web.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -34,8 +34,12 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 
 <%block name="logo">
     <div class="web_logo_header">
-        <a href="${request.route_url(Routes.HOME)}"><img class="logo_left" src="${request.url_camcops_logo}" alt="" /></a>
-        <a href="${request.url_local_institution}"><img class="logo_right" src="${request.url_local_logo}" alt="" /></a>
+        <a href="${ request.route_url(Routes.HOME) | n }">
+            <img class="logo_left" src="${ request.url_camcops_logo | n }" alt="" />
+        </a>
+        <a href="${ request.url_local_institution | n }">
+            <img class="logo_right" src="${ request.url_local_logo | n }" alt="" />
+        </a>
     </div>
 </%block>
 
@@ -44,11 +48,11 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 </%block>
 
 <%block name="extra_head_start">
-    ${parent.extra_head_start()}
-    <script src="${request.static_url('deform:static/scripts/jquery-2.0.3.min.js')}"></script>
-    <script src="${request.static_url('deform:static/scripts/bootstrap.min.js')}"></script>
+    ${ parent.extra_head_start() | n }
+    <script src="${ request.static_url('deform:static/scripts/jquery-2.0.3.min.js') | n }"></script>
+    <script src="${ request.static_url('deform:static/scripts/bootstrap.min.js') | n }"></script>
     <link rel="stylesheet"
-          href="${request.static_url('deform:static/css/bootstrap.min.css')}"
+          href="${ request.static_url('deform:static/css/bootstrap.min.css') | n }"
           media="screen"/>
 </%block>
 
@@ -58,7 +62,8 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
         %for message in request.session.pop_flash(queue):
             <li class="alert alert-${queue} alert-dismissable show" role="alert">
                 <strong>${ message }</strong>
-                <button type="button" class="close" data-dismiss="alert" aria-label="${_("Close")}">
+                <button type="button" class="close" data-dismiss="alert"
+                        aria-label="${ _("Close") }">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </li>
@@ -67,4 +72,4 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     </ul>
 </%block>
 
-${next.body()}
+${ next.body() | n }

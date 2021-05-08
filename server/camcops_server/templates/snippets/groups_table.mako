@@ -20,7 +20,7 @@ camcops_server/templates/snippets/groups_table.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -33,22 +33,22 @@ from markupsafe import escape
 %>
 <%namespace file="displayfunc.mako" import="one_per_line"/>
 
-<div>${groups_page.pager(show_if_single_page=False)}</div>
+<div>${ groups_page.pager(show_if_single_page=False) | n }</div>
 
 <table>
     <tr>
-        <th>${_("Group name")}</th>
-        <th>${_("Group ID")}</th>
-        <th>${_("Description")}</th>
-        <th>${_("Groups this group is allowed to see, in addition to itself")}</th>
-        <th>${_("Upload ID policy")}</th>
-        <th>${_("Principal (single necessary) ID number required by Upload policy")}</th>
-        <th>${_("Finalize ID policy")}</th>
-        <th>${_("Principal (single necessary) ID number required by Finalize policy")}</th>
-        <th>${_("Members")}</th>
+        <th>${ _("Group name") }</th>
+        <th>${ _("Group ID") }</th>
+        <th>${ _("Description") }</th>
+        <th>${ _("Groups this group is allowed to see, in addition to itself") }</th>
+        <th>${ _("Upload ID policy") }</th>
+        <th>${ _("Principal (single necessary) ID number required by Upload policy") }</th>
+        <th>${ _("Finalize ID policy") }</th>
+        <th>${ _("Principal (single necessary) ID number required by Finalize policy") }</th>
+        <th>${ _("Members") }</th>
         %if with_edit:
-            <th>${_("Edit")}</th>
-            <th>${_("Delete")}</th>
+            <th>${ _("Edit") }</th>
+            <th>${ _("Delete") }</th>
         %endif
     </tr>
     %for group in groups_page:
@@ -62,11 +62,11 @@ from markupsafe import escape
             users = list(group.regular_users)
         %>
         <tr>
-            <td>${ group.name | h }</td>
+            <td>${ group.name }</td>
             <td>${ group.id }</td>
-            <td>${ (group.description or "") | h }</td>
+            <td>${ group.description or "" }</td>
             <td>
-                ${ one_per_line(g.name for g in group.can_see_other_groups) }
+                ${ one_per_line(g.name for g in group.can_see_other_groups) | n }
             </td>
 
             <td
@@ -74,7 +74,7 @@ from markupsafe import escape
                     class="warning"
                 %endif
                 >
-                ${ (escape(group.upload_policy) if group.upload_policy else "<i>None</i>") }
+                ${ (escape(group.upload_policy) if group.upload_policy else "<i>None</i>") | n }
             </td>
 
             <td>${ critical_upload_id }</td>
@@ -84,26 +84,34 @@ from markupsafe import escape
                     class="warning"
                 %endif
                 >
-                ${ (escape(group.finalize_policy) if group.finalize_policy else "<i>None</i>") }
+                ${ (escape(group.finalize_policy) if group.finalize_policy else "<i>None</i>") | n }
             </td>
 
             <td>${ critical_finalize_id }</td>
 
             <td>
                 ${ (", ".join(sorted(u.username if u is not None else "<DATA_ERROR_NULL_USER>"
-                                     for u in users))) | h }
+                                     for u in users))) }
             </td>
 
             %if with_edit:
-                <td><a href="${ req.route_url(Routes.EDIT_GROUP, _query={ViewParam.GROUP_ID: group.id}) }">${_("Edit")}</a></td>
-                <td><a href="${ req.route_url(Routes.DELETE_GROUP, _query={ViewParam.GROUP_ID: group.id}) }">${_("Delete")}</a></td>
+                <td><a href="${ req.route_url(
+                                    Routes.EDIT_GROUP,
+                                    _query={ViewParam.GROUP_ID: group.id}
+                                ) | n }">${ _("Edit") }</a></td>
+                <td><a href="${ req.route_url(
+                                    Routes.DELETE_GROUP,
+                                    _query={ViewParam.GROUP_ID: group.id}
+                                ) | n }">${ _("Delete") }</a></td>
             %endif
         </tr>
     %endfor
 </table>
 
-<div>${groups_page.pager(show_if_single_page=False)}</div>
+<div>${ groups_page.pager(show_if_single_page=False) | n }</div>
 
 <div class="footnotes">
-    ${_("Colour in a policy column means that an ID policy is not valid (syntactically, because it refers to ID numbers that do not exist, or because it's less restrictive than the tablet's minimum ID policy).")}
+    ${ _("Colour in a policy column means that an ID policy is not valid "
+         "(syntactically, because it refers to ID numbers that do not exist, "
+         "or because it's less restrictive than the tablet's minimum ID policy).") }
 </div>

@@ -20,7 +20,7 @@ camcops_server/templates/snippets/query_result_orm.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -33,11 +33,6 @@ Creates an HTML table from a query result (from SQLAlchemy ORM).
 <%!
 
 from mako.filters import html_escape
-
-def filter_description(desc):
-    if not desc:  # None or ""
-        return ""
-    return html_escape(desc)
 
 def filter_value(value, null_html):
     if value is None:
@@ -53,13 +48,13 @@ def get_value(orm_object, attrname, null_html):
 <table>
     <tr>
         %for desc in descriptions:
-            <th>${filter_description(desc)}</th>
+            <th>${ desc or "" }</th>
         %endfor
     </tr>
     %for orm_object in orm_objects:
         <tr>
             %for attrname in attrnames:
-                <td>${get_value(orm_object, attrname, null_html)}</td>
+                <td>${ get_value(orm_object, attrname, null_html) | n }</td>
             %endfor
         </tr>
     %endfor

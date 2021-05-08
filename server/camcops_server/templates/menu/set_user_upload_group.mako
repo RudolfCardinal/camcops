@@ -20,7 +20,7 @@ camcops_server/templates/menu/set_user_upload_group.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,17 +30,19 @@ camcops_server/templates/menu/set_user_upload_group.mako
 
 <%include file="db_user_info.mako"/>
 
-<h1>Set upload group for user ${ user.username | h }</h1>
+<h1>Set upload group for user ${ user.username }</h1>
 
 <div class="important">
-    ${_("A group must be selected for the server to permit uploads.")}
+    ${ _("A group must be selected for the server to permit uploads.") }
 </div>
 
 <div class="warning">
-    ${_("Don’t change groups if tasks have been uploaded by this user but not finalized; this may lead to incorrect group assignment. (Finalize first, then change groups.)")}
+    ${ _("Don’t change groups if tasks have been uploaded by this user but "
+         "not finalized; this may lead to incorrect group assignment. "
+         "(Finalize first, then change groups.)") }
 </div>
 
-${ form }
+${ form | n }
 
 <%include file="to_view_all_users.mako"/>
 <%include file="to_main_menu.mako"/>

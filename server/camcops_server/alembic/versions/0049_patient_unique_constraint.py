@@ -20,7 +20,7 @@ camcops_server/alembic/versions/0049_patient_unique_constraint.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -37,8 +37,6 @@ Creation date: 2020-04-28 11:48:52.826510
 # =============================================================================
 # Imports
 # =============================================================================
-
-from alembic import op
 
 
 # =============================================================================

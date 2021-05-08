@@ -19,7 +19,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -33,7 +33,7 @@
 
 - We use PyCap (https://pycap.readthedocs.io/ or
   https://github.com/redcap-tools/PyCap). See also
-  http://redcap-tools.github.io/projects/. PyCap is no longer being actively
+  https://redcap-tools.github.io/projects/. PyCap is no longer being actively
   developed though the author is still responding to issues and pull requests.
 
 We use an XML fieldmap to describe how the rows in CamCOPS task tables are

@@ -20,7 +20,7 @@ camcops_server/templates/taskcommon/tracker.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,19 +30,19 @@ camcops_server/templates/taskcommon/tracker.mako
 <%inherit file="tracker_ctv.mako"/>
 
 <%block name="office_preamble">
-    ${_("Trackers use only information from tasks that are flagged CURRENT and COMPLETE.")}
+    ${ _("Trackers use only information from tasks that are flagged CURRENT and COMPLETE.") }
 </%block>
 
 %if not tracker.collection.all_tasks:
 
     <div class="warning">
-        ${_("No tasks found for tracker.")}
+        ${ _("No tasks found for tracker.") }
     </div>
 
 %elif not tracker.patient:
 
     <div class="warning">
-        ${_("No patient found for tracker.")}
+        ${ _("No patient found for tracker.") }
     </div>
 
 %else:
@@ -51,9 +51,9 @@ camcops_server/templates/taskcommon/tracker.mako
         <% instances = tracker.collection.tasks_for_task_class(cls) %>
         %if instances:
             <div class="taskheader">
-                <b>${ instances[0].longname(req) | h } (${ instances[0].shortname | h })</b>
+                <b>${ instances[0].longname(req) } (${ instances[0].shortname })</b>
             </div>
-            ${ tracker.get_all_plots_for_one_task_html(instances) }
+            ${ tracker.get_all_plots_for_one_task_html(instances) | n }
         %endif
     %endfor
 

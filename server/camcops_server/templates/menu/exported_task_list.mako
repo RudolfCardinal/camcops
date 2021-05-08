@@ -20,7 +20,7 @@ camcops_server/templates/menu/exported_task_list.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -35,16 +35,16 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Exported task log")}</h1>
+<h1>${ _("Exported task log") }</h1>
 
 %if conditions:
-    <h2>${_("Conditions")}</h2>
-    ${conditions | h}
+    <h2>${ _("Conditions") }</h2>
+    ${ conditions }
 %endif
 
-<h2>${_("Results")}</h2>
+<h2>${ _("Results") }</h2>
 
-<div>${page.pager()}</div>
+<div>${ page.pager() | n }</div>
 
 <table>
     <tr>
@@ -61,9 +61,22 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 
     %for et in page:
         <tr>
-            <td><a href="${ req.route_url(Routes.VIEW_EXPORTED_TASK, _query={ViewParam.ID: et.id}) }">ExportedTask ${ et.id }</a></td>
-            <td><a href="${ req.route_url(Routes.VIEW_EXPORT_RECIPIENT, _query={ViewParam.ID: et.recipient_id}) }">ExportRecipient ${ et.recipient_id }</a></td>
-            <td><a href="${ req.route_url(Routes.TASK, _query={ViewParam.TABLE_NAME: et.basetable, ViewParam.SERVER_PK: et.task_server_pk, ViewParam.VIEWTYPE: ViewArg.HTML}) }">${ et.basetable } ${ et.task_server_pk }</a></td>
+            <td><a href="${ req.route_url(
+                                Routes.VIEW_EXPORTED_TASK,
+                                _query={ViewParam.ID: et.id}
+                            ) | n }">ExportedTask ${ et.id }</a></td>
+            <td><a href="${ req.route_url(
+                                Routes.VIEW_EXPORT_RECIPIENT,
+                                _query={ViewParam.ID: et.recipient_id}
+                            ) | n }">ExportRecipient ${ et.recipient_id }</a></td>
+            <td><a href="${ req.route_url(
+                                Routes.TASK,
+                                _query={
+                                    ViewParam.TABLE_NAME: et.basetable,
+                                    ViewParam.SERVER_PK: et.task_server_pk,
+                                    ViewParam.VIEWTYPE: ViewArg.HTML
+                                }
+                            ) | n }">${ et.basetable } ${ et.task_server_pk }</a></td>
             <td>${ et.start_at_utc }</td>
             <td>${ et.finish_at_utc }</td>
             <td>${ et.success }</td>
@@ -74,10 +87,11 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     %endfor
 </table>
 
-<div>${page.pager()}</div>
+<div>${ page.pager() | n }</div>
 
 <div>
-    <a href="${ req.route_url(Routes.OFFER_EXPORTED_TASK_LIST)}">${_("Choose different options")}</a>
+    <a href="${ req.route_url(Routes.OFFER_EXPORTED_TASK_LIST) | n }">
+        ${ _("Choose different options") }</a>
 </div>
 
 <%include file="to_main_menu.mako"/>

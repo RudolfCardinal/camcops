@@ -20,7 +20,7 @@ camcops_server/templates/taskcommon/clinician.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -31,28 +31,28 @@ camcops_server/templates/taskcommon/clinician.mako
 <div class="clinician">
     <table class="taskdetail">
         <tr>
-            <td style="width:50%">${_("Clinician’s specialty:")}</td>
-            <td style="width:50%"><b>${ task.clinician_specialty | h }</b></td>
+            <td style="width:50%">${ _("Clinician’s specialty:") }</td>
+            <td style="width:50%"><b>${ task.clinician_specialty }</b></td>
         </tr>
         <tr>
-            <td>${_("Clinician’s name:")}</td>
-            <td><b>${ task.clinician_name | h }</b></td>
+            <td>${ _("Clinician’s name:") }</td>
+            <td><b>${ task.clinician_name }</b></td>
         </tr>
         <tr>
-            <td>${_("Clinician’s professional registration:")}</td>
-            <td><b>${ task.clinician_professional_registration | h }</b></td>
+            <td>${ _("Clinician’s professional registration:") }</td>
+            <td><b>${ task.clinician_professional_registration }</b></td>
         </tr>
         <tr>
-            <td>${_("Clinician’s post:")}</td>
-            <td><b>${ task.clinician_post | h }</b></td>
+            <td>${ _("Clinician’s post:") }</td>
+            <td><b>${ task.clinician_post }</b></td>
         </tr>
         <tr>
-            <td>${_("Clinician’s service:")}</td>
-            <td><b>${ task.clinician_service | h }</b></td>
+            <td>${ _("Clinician’s service:") }</td>
+            <td><b>${ task.clinician_service }</b></td>
         </tr>
         <tr>
-            <td>${_("Clinician’s contact details:")}</td>
-            <td><b>${ task.clinician_contact_details | h }</b></td>
+            <td>${ _("Clinician’s contact details:") }</td>
+            <td><b>${ task.clinician_contact_details }</b></td>
         </tr>
     </table>
 </div>

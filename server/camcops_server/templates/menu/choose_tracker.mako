@@ -20,7 +20,7 @@ camcops_server/templates/menu/choose_tracker.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,8 +30,8 @@ camcops_server/templates/menu/choose_tracker.mako
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Trackers: numerical information across time")}</h1>
+<h1>${ _("Trackers: numerical information across time") }</h1>
 
-${ form }
+${ form | n }
 
 <%include file="to_main_menu.mako"/>

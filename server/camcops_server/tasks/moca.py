@@ -20,7 +20,7 @@ camcops_server/tasks/moca.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -450,10 +450,13 @@ class Moca(TaskHasPatientMixin, TaskHasClinicianMixin, Task,
                 [1] Normal is ≥26 (Nasreddine et al. 2005, PubMed ID 15817019).
             </div>
             <div class="{CssClass.COPYRIGHT}">
-                MoCA: Copyright © Ziad Nasreddine.
-                May be reproduced without permission for CLINICAL and
-                EDUCATIONAL use. You must obtain permission from the copyright
-                holder for any other use.
+                MoCA: Copyright © Ziad Nasreddine. In 2012, could be reproduced
+                without permission for CLINICAL and EDUCATIONAL use (with
+                permission from the copyright holder required for any other
+                use), with no special restrictions on electronic versions.
+                However, as of 2021, electronic versions are prohibited; see <a
+                href="https://camcops.readthedocs.io/en/latest/tasks/moca.html">
+                https://camcops.readthedocs.io/en/latest/tasks/moca.html</a>.
             </div>
         """.format(
             CssClass=CssClass,

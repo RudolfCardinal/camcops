@@ -20,7 +20,7 @@ camcops_server/templates/menu/finalized_patient_edit.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,16 +30,16 @@ camcops_server/templates/menu/finalized_patient_edit.mako
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Edit details for finalized patient")}</h1>
+<h1>${ _("Edit details for finalized patient") }</h1>
 
-<div>${_("Server PK:")} ${object.pk}</div>
+<div>${ _("Server PK:") } ${object.pk}</div>
 
-${ form }
+${ form | n }
 
-<div class="warning">${_("The following tasks will be affected:")}</div>
+<div class="warning">${ _("The following tasks will be affected:") }</div>
 
 <%include file="view_tasks_table.mako" args="tasks=tasks"/>
 
-<div class="important">${ len(tasks) } ${_("tasks will be affected.")}</div>
+<div class="important">${ len(tasks) } ${ _("tasks will be affected.") }</div>
 
 <%include file="to_main_menu.mako"/>

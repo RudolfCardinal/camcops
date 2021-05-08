@@ -20,7 +20,7 @@ tools/MAKE_LINUX_PACKAGES.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,7 +30,7 @@ For CentOS, you need to get Python 3 installed. For Centos 6, 64-bit:
 
 .. code-block:: bash
 
-    # http://stackoverflow.com/questions/8087184/installing-python3-on-rhel
+    # https://stackoverflow.com/questions/8087184/installing-python3-on-rhel
 
     sudo yum install https://centos6.iuscommunity.org/ius-release.rpm
 
@@ -198,9 +198,9 @@ service_exists()
     echo "Service $servicename exists"
     return 0  # true
 
-    # [1] http://unix.stackexchange.com/questions/37313/how-do-i-grep-for-multiple-patterns
+    # [1] https://unix.stackexchange.com/questions/37313/how-do-i-grep-for-multiple-patterns
     # [2] https://unix.stackexchange.com/questions/226484/does-an-init-script-always-return-a-proper-exit-code-when-running-status
-    # [3] http://refspecs.linuxbase.org/LSB_3.0.0/LSB-PDA/LSB-PDA/iniscrptact.html
+    # [3] https://refspecs.linuxbase.org/LSB_3.0.0/LSB-PDA/LSB-PDA/iniscrptact.html
 }
 
 service_supervisord_command()
@@ -374,7 +374,7 @@ def check_prerequisites() -> None:
     """
     Check prerequisites are in place.
     """
-    # http://stackoverflow.com/questions/2806897
+    # https://stackoverflow.com/questions/2806897
     if os.geteuid() == 0:
         log.critical(
             "This script should not be run using sudo or as the root user")
@@ -555,7 +555,7 @@ def get_changelog() -> str:
   * PLEASE SEE docs/source/changelog.rst FOR ALL CHANGES, or the online version
     at https://camcops.readthedocs.io/.
   * This file (changelog.Debian) has a very precise format:
-    http://www.debian.org/doc/debian-policy/ch-source.html#s-dpkgchangelog
+    https://www.debian.org/doc/debian-policy/ch-source.html#s-dpkgchangelog
   * Note that newer entries are at the top.
 
  -- Rudolf Cardinal <rudolf@pobox.com>  {now}
@@ -769,7 +769,7 @@ def get_override() -> str:
     return """
 # Not an official new Debian package, so ignore this one.
 # If we did want to close a new-package ITP bug:
-# http://www.debian.org/doc/manuals/developers-reference/pkgs.html#upload-bugfix
+# https://www.debian.org/doc/manuals/developers-reference/pkgs.html#upload-bugfix
 {PACKAGE} binary: new-package-should-close-itp-bug
     """.format(  # noqa
         PACKAGE=PACKAGE_DEB_NAME,
@@ -802,7 +802,7 @@ CAMCOPS
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 

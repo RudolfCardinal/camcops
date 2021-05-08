@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+# noinspection HttpUrlsUsage
 """
 camcops_server/cc_modules/cc_config.py
 
@@ -20,7 +21,7 @@ camcops_server/cc_modules/cc_config.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -275,7 +276,7 @@ def warn_if_not_present(param_name: str, value: Any) -> None:
 # Cosmetic demonstration constants:
 DEFAULT_DB_READONLY_USER = 'QQQ_USERNAME_REPLACE_ME'
 DEFAULT_DB_READONLY_PASSWORD = 'PPP_PASSWORD_REPLACE_ME'
-DUMMY_INSTITUTION_URL = 'http://www.mydomain/'
+DUMMY_INSTITUTION_URL = 'https://www.mydomain/'
 
 
 def get_demo_config(for_docker: bool = False) -> str:
@@ -681,6 +682,7 @@ def get_demo_apache_config(
     cd = ConfigDefaults()
     specimen_internal_port = specimen_internal_port or cd.PORT
     urlbase = "/" + rootpath
+    # noinspection HttpUrlsUsage
     return f"""
 # Demonstration Apache config file section for CamCOPS.
 # Created by CamCOPS version {CAMCOPS_SERVER_VERSION_STRING}.

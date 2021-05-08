@@ -20,7 +20,7 @@ camcops_server/templates/menu/forbidden.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -43,13 +43,16 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
             will cause cookies not to be saved, because they're marked to the
             client as being HTTPS-only cookies by default.)
        -->
-        ${_("You are not logged in (or your session has timed out).")}
+        ${ _("You are not logged in (or your session has timed out).") }
         <div>
-            Click <a href="${request.route_url(Routes.LOGIN, _query=querydict)}">here</a> to log in.
+            Click
+            <a href="${request.route_url(Routes.LOGIN, _query=querydict) | n }">
+                here</a> to log in.
         </div>
     %else:
-        <!-- Logged in, but permission denied: probably a non-administrator trying an administrative function. -->
-        ${_("You do not have permission to view this page. It may be restricted to administrators.")}
+        <!-- Logged in, but permission denied. -->
+        ${ _("You do not have permission to view this page. "
+             "It may be restricted to administrators.") }
         <%include file="to_main_menu.mako"/>
     %endif
 </div>

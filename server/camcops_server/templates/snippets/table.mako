@@ -20,7 +20,7 @@ camcops_server/templates/snippets/table.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -28,22 +28,22 @@ camcops_server/templates/snippets/table.mako
 <%page args="column_headings, rows, table_class=None, escape_cells=True"/>
 <table
 %if table_class:
-class="${table_class}"
+class="${ table_class | n }"
 %endif
 >
     <tr>
         %for c in column_headings:
-            <th>${c | h}</th>
+            <th>${ c }</th>
         %endfor
     </tr>
     %for row in rows:
         <tr>
             %for (col_index,val) in enumerate(row):
-                <td class="table-cell col-${col_index}">
+                <td class="table-cell col-${col_index | n }">
                     %if escape_cells:
-                        ${val | h}
+                        ${ val }
                     %else:
-                        ${val}
+                        ${ val | n }
                     %endif
                 </td>
             %endfor

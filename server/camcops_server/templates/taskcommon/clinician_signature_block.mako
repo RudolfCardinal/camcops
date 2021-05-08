@@ -20,7 +20,7 @@ camcops_server/templates/taskcommon/clinician_signature_block.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -33,19 +33,19 @@ camcops_server/templates/taskcommon/clinician_signature_block.mako
     <table class="noborder">
         <tr class="signature_label">
             <td class="signature_label" style="width:33%">
-                ${_("Signature of author/validator")}
+                ${ _("Signature of author/validator") }
             </td>
             <td class="signature_label" style="width:33%">
-                ${_("Print name")}
+                ${ _("Print name") }
             </td>
             <td class="signature_label" style="width:33%">
-                ${_("Date and time")}
+                ${ _("Date and time") }
             </td>
         </tr>
         <tr class="signature">
             ## ... can't get "height" to work in table; only seems to like line-height; for
             ## which, you need some text, hence the &nbsp;
-            ## http://stackoverflow.com/questions/6398172/setting-table-row-height-in-css
+            ## https://stackoverflow.com/questions/6398172/setting-table-row-height-in-css
             <td class="signature">&nbsp;</td>
             <td class="signature">&nbsp;</td>
             <td class="signature">&nbsp;</td>

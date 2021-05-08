@@ -20,7 +20,7 @@ camcops_server/templates/taskcommon/tracker_ctv_header.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -31,5 +31,5 @@ camcops_server/templates/taskcommon/tracker_ctv_header.mako
 %if tracker.patient:
     <%include file="patient_page_header.mako" args="patient=tracker.patient"/>
 %else:
-    <div class="warning">${_("Missing patient!")}</div>
+    <div class="warning">${ _("Missing patient!") }</div>
 %endif

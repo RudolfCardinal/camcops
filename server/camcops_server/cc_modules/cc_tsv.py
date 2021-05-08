@@ -20,7 +20,7 @@ camcops_server/cc_modules/cc_tsv.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -420,7 +420,7 @@ class TsvCollection(object):
 
         - https://docs.python.org/3/library/zipfile.html
         - https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
-        - http://en.wikipedia.org/wiki/Zip_(file_format)#Compression_methods
+        - https://en.wikipedia.org/wiki/Zip_(file_format)#Compression_methods
 
         Note also that ``openpyxl`` uses ``ZIP_DEFLATED``, which seems to be
         the most portable if not the best compression.

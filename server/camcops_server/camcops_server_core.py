@@ -20,7 +20,7 @@ camcops_server/camcops_server_core.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -412,7 +412,7 @@ def serve_gunicorn(application: "Router",
     - Multiprocessing; this is a Good Thing particularly in Python; see e.g.
 
       - https://eli.thegreenplace.net/2012/01/16/python-parallelizing-cpu-bound-tasks-with-multiprocessing/
-      - http://www.dabeaz.com/python/UnderstandingGIL.pdf
+      - https://www.dabeaz.com/python/UnderstandingGIL.pdf
 
     - UNIX only.
 
@@ -830,7 +830,7 @@ def launch_celery_workers(
     - https://medium.com/@taylorhughes/three-quick-tips-from-two-years-with-celery-c05ff9d7f9eb
 
     - Re ``-Ofair``:
-      http://docs.celeryproject.org/en/latest/userguide/optimizing.html
+      https://docs.celeryproject.org/en/latest/userguide/optimizing.html
 
     """  # noqa: E501
     config = get_default_config_from_os_env()
@@ -861,7 +861,7 @@ def launch_celery_beat(
     Launch the Celery Beat scheduler.
 
     (This can be combined with ``celery worker``, but that's not recommended;
-    http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html#starting-the-scheduler).
+    https://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html#starting-the-scheduler).
     """  # noqa: E501
     ensure_directories_exist()
     config = get_default_config_from_os_env()

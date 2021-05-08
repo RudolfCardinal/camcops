@@ -20,7 +20,7 @@ camcops_server/tools/fetch_snomed_codes.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -29,7 +29,7 @@ identifiers from a SNOMED server (e.g. of their national provider).
 
 References:
 
-- http://ihtsdo.github.io/sct-snapshot-rest-api/api.html
+- https://ihtsdo.github.io/sct-snapshot-rest-api/api.html
 - https://termbrowser.nhs.uk/
 
 """
@@ -74,7 +74,7 @@ International. All rights reserved.
 Some people/organizations in some countries are authorized to use SNOMED CT
 identifiers for data creation systems. Others are not. See e.g.
 
-    http://snomed.org/licensing
+    https://snomed.org/licensing
     https://www.snomed.org/snomed-ct/get-snomed
     https://termbrowser.nhs.uk
 

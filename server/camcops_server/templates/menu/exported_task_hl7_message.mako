@@ -20,7 +20,7 @@ camcops_server/templates/menu/exported_task_hl7_message.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -34,7 +34,7 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Individual HL7 message")}</h1>
+<h1>${ _("Individual HL7 message") }</h1>
 
 <table>
     <tr>
@@ -43,7 +43,10 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     </tr>
     <tr>
         <th>Exported task ID</th>
-        <td><a href="${ req.route_url(Routes.VIEW_EXPORTED_TASK, _query={ViewParam.ID: msg.exported_task_id}) }">ExportedTask ${ msg.exported_task_id }</a></td>
+        <td><a href="${ req.route_url(
+                            Routes.VIEW_EXPORTED_TASK,
+                            _query={ViewParam.ID: msg.exported_task_id}
+                        ) | n }">ExportedTask ${ msg.exported_task_id }</a></td>
     </tr>
     <tr>
         <th>Sent at (UTC)</th>
@@ -59,15 +62,15 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     </tr>
     <tr>
         <th>Failure reason</th>
-        <td>${ msg.failure_reason | h }</td>
+        <td>${ msg.failure_reason }</td>
     </tr>
     <tr>
         <th>Message</th>
-        <td><pre>${ msg.message or "" | h }</pre></td>
+        <td><pre>${ msg.message or "" }</pre></td>
     </tr>
     <tr>
         <th>Reply</th>
-        <td><pre>${ msg.reply or "" | h }</pre></td>
+        <td><pre>${ msg.reply or "" }</pre></td>
     </tr>
 </table>
 

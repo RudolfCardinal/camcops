@@ -20,7 +20,7 @@ camcops_server/templates/taskcommon/tracker_ctv.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,6 +30,7 @@ camcops_server/templates/taskcommon/tracker_ctv.mako
 
 <%!
 
+from markupsafe import escape
 from cardinal_pythonlib.datetimefunc import format_datetime
 from camcops_server.cc_modules.cc_constants import CSS_PAGED_MEDIA, DateFormat
 from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
@@ -55,6 +56,7 @@ def inherit_file(context):
 %>
 
 <%inherit file="${ inherit_file(context) }"/>
+## ... don't use "| n" for that.
 
 ## ============================================================================
 ## For CSS paged media, extra headers
@@ -75,9 +77,17 @@ def inherit_file(context):
 ## ============================================================================
 
 <div class="trackerheader">
-    ${_("Patient identified by:")} <b>${ ("; ".join(x.description(request) for x in tracker.taskfilter.idnum_criteria) + ".") | h }</b>
-    ${_("Date range for search:")} <b>${ format_daterange(tracker.taskfilter.start_datetime, tracker.taskfilter.end_datetime) }</b>.
-    ${_("The tracker information will <b>only be valid</b> (i.e. will only be from only one patient!) if all contributing tablet devices use these identifiers consistently. The consistency check is below. The patient information shown below is taken from the first task used.")}
+    ${ _("Patient identified by:") }
+    <b>${ ("; ".join(x.description(request)
+           for x in tracker.taskfilter.idnum_criteria) + ".") }</b>
+    ${ _("Date range for search:") }
+    <b>${ format_daterange(tracker.taskfilter.start_datetime,
+                           tracker.taskfilter.end_datetime) }</b>.
+    ${ _("The tracker information will <b>only be valid</b> (i.e. will only "
+         "be from only one patient!) if all contributing tablet devices use "
+         "these identifiers consistently. The consistency check is below. "
+         "The patient information shown below is taken from the first task "
+         "used.") | n }
 </div>
 
 ## Consistency
@@ -89,10 +99,10 @@ def inherit_file(context):
     else:
         cons_class = "warning"
         joiner = "<br>"
-    consistency = joiner.join(cons)
+    consistency = joiner.join(escape(c) for c in cons)
 %>
-<div class="${ cons_class }">
-    ${ consistency }
+<div class="${ cons_class | n }">
+    ${ consistency | n }
 </div>
 
 ## Patient
@@ -100,7 +110,8 @@ def inherit_file(context):
     <%include file="patient.mako" args="patient=tracker.patient, viewtype=viewtype"/>
 %else:
     <div class="warning">
-        ${_("No patient found, or the patient has no relevant tasks in the time period requested.")}
+        ${ _("No patient found, or the patient has no relevant tasks in the """
+             "time period requested.") }
     </div>
 %endif
 
@@ -108,7 +119,7 @@ def inherit_file(context):
 ## Main bit
 ## ============================================================================
 
-${next.body()}
+${ next.body() | n }
 
 ## ============================================================================
 ## Office stuff
@@ -117,13 +128,16 @@ ${next.body()}
 <div class="office">
     <%block name="office_preamble"/>
 
-    ${_("Requested tasks:")}
-        ${ (", ".join(tracker.taskfilter.task_tablename_list) if tracker.taskfilter.task_classes else "None") }.
-    ${_("Sources (tablename, task server PK, patient server PK):")}
+    ${ _("Requested tasks:") }
+        ${ (", ".join(tracker.taskfilter.task_tablename_list)
+            if tracker.taskfilter.task_classes else "None") }.
+    ${ _("Sources (tablename, task server PK, patient server PK):") }
         ${ tracker.summary }.
-    ${_("Information retrieved from")} ${ request.application_url }
-        (${_("server version")} ${ CAMCOPS_SERVER_VERSION_STRING })
-        ${_("at:")} ${ format_datetime(request.now, DateFormat.SHORT_DATETIME_SECONDS) }.
+    ${ _("Information retrieved from") }
+        ${ request.application_url }
+        (${ _("server version") } ${ CAMCOPS_SERVER_VERSION_STRING })
+        ${ _("at:") }
+        ${ format_datetime(request.now, DateFormat.SHORT_DATETIME_SECONDS) }.
 </div>
 
 ## ============================================================================
@@ -136,14 +150,14 @@ ${next.body()}
     <div class="navigation">
         ## Link to PDF version
         <a href="${ req.route_url(
-            Routes.CTV if tracker.as_ctv else Routes.TRACKER,
-            _query={
-                ViewParam.WHICH_IDNUM: tracker.taskfilter.idnum_criteria[0].which_idnum,
-                ViewParam.IDNUM_VALUE: tracker.taskfilter.idnum_criteria[0].idnum_value,
-                ViewParam.START_DATETIME: tracker.taskfilter.start_datetime,
-                ViewParam.END_DATETIME: tracker.taskfilter.end_datetime,
-                ViewParam.TASKS: tracker.taskfilter.task_tablename_list,
-                ViewParam.VIEWTYPE: ViewArg.PDF,
-            }) }">${_("View PDF for printing/saving")}</a>
+                        Routes.CTV if tracker.as_ctv else Routes.TRACKER,
+                        _query={
+                            ViewParam.WHICH_IDNUM: tracker.taskfilter.idnum_criteria[0].which_idnum,
+                            ViewParam.IDNUM_VALUE: tracker.taskfilter.idnum_criteria[0].idnum_value,
+                            ViewParam.START_DATETIME: tracker.taskfilter.start_datetime,
+                            ViewParam.END_DATETIME: tracker.taskfilter.end_datetime,
+                            ViewParam.TASKS: tracker.taskfilter.task_tablename_list,
+                            ViewParam.VIEWTYPE: ViewArg.PDF,
+                        }) | n }">${ _("View PDF for printing/saving") }</a>
     </div>
 %endif

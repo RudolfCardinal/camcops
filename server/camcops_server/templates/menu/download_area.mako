@@ -20,7 +20,7 @@ camcops_server/templates/menu/download_area.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,36 +30,36 @@ camcops_server/templates/menu/download_area.mako
 
 <%include file="db_user_info.mako"/>
 
-<style nonce="${request.nonce}">
+<style nonce="${ request.nonce | n }">
     <%include file="style_deform_inside_tables.css"/>
 </style>
 
-<h2>${_("Download area")}</h2>
+<h2>${ _("Download area") }</h2>
 
 <table>
     <tr>
-        <th>${_("Name")}</th>
-        <th>${_("Size")}</th>
-        <th>${_("Created")}</th>
-        <th>${_("Time left")}</th>
-        <th>${_("Delete")}</th>
+        <th>${ _("Name") }</th>
+        <th>${ _("Size") }</th>
+        <th>${ _("Created") }</th>
+        <th>${ _("Time left") }</th>
+        <th>${ _("Delete") }</th>
     </tr>
     %for f in files:
         <tr>
-            <td><a href="${f.download_url}">${f.filename | h}</a></td>
-            <td>${f.size_str}</td>
-            <td>${f.when_last_modified_str}</td>
-            <td>${f.time_left_str}</td>
-            <td>${f.delete_form}</td>
+            <td><a href="${ f.download_url | n }">${ f.filename }</a></td>
+            <td>${ f.size_str }</td>
+            <td>${ f.when_last_modified_str }</td>
+            <td>${ f.time_left_str }</td>
+            <td>${ f.delete_form | n }</td>
         </tr>
     %endfor
 </table>
 
 <div>
-    ${_("Space permitted:")} ${permitted}.
-    ${_("Space used:")} ${used}.
-    ${_("Space available:")} ${available}.
-    ${_("File lifetime (minutes):")} ${lifetime_min}.
+    ${ _("Space permitted:") } ${ permitted }.
+    ${ _("Space used:") } ${ used }.
+    ${ _("Space available:") } ${ available }.
+    ${ _("File lifetime (minutes):") } ${ lifetime_min }.
 </div>
 
 <%include file="to_main_menu.mako"/>

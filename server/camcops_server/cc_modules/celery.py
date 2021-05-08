@@ -20,7 +20,7 @@ camcops_server/cc_modules/celery.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -75,7 +75,7 @@ If using a separate ``celery_tasks.py`` file:
     Or maybe you're using relative imports?
 
     Please see
-    http://docs.celeryq.org/en/latest/internals/protocol.html
+    https://docs.celeryq.org/en/latest/internals/protocol.html
     for more information.
 
     The full contents of the message body was:
@@ -96,14 +96,14 @@ General advice:
 
 Task decorator options:
 
-- http://docs.celeryproject.org/en/latest/reference/celery.app.task.html
+- https://docs.celeryproject.org/en/latest/reference/celery.app.task.html
 - ``bind``: makes the first argument a ``self`` parameter to manipulate the
   task itself;
-  http://docs.celeryproject.org/en/latest/userguide/tasks.html#example
+  https://docs.celeryproject.org/en/latest/userguide/tasks.html#example
 - ``acks_late`` (for the decorator) or ``task_acks_late``: see
 
-  - http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-task_acks_late
-  - http://docs.celeryproject.org/en/latest/faq.html#faq-acks-late-vs-retry
+  - https://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-task_acks_late
+  - https://docs.celeryproject.org/en/latest/faq.html#faq-acks-late-vs-retry
   - Here I am retrying on failure with exponential backoff, but not using
     ``acks_late`` in addition.
 
@@ -244,7 +244,7 @@ def debug_task(self) -> None:
     and also launch workers with ``camcops_server launch_workers``.
 
     For a bound task, the first (``self``) argument is the task instance; see
-    http://docs.celeryproject.org/en/latest/userguide/tasks.html#bound-tasks
+    https://docs.celeryproject.org/en/latest/userguide/tasks.html#bound-tasks
 
     """
     log.info(f"self: {self!r}")
@@ -502,7 +502,7 @@ def housekeeping() -> None:
     (Remember that the ``bind`` parameter to ``@celery_app.task()`` means that
     the first argument to the function, typically called ``self``, is the
     Celery task. We don't need it here. See
-    http://docs.celeryproject.org/en/latest/userguide/tasks.html#bound-tasks.)
+    https://docs.celeryproject.org/en/latest/userguide/tasks.html#bound-tasks.)
     """
     from camcops_server.cc_modules.cc_request import command_line_request_context  # delayed import  # noqa
     from camcops_server.cc_modules.cc_session import CamcopsSession  # delayed import  # noqa

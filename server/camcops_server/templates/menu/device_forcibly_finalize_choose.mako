@@ -20,7 +20,7 @@ camcops_server/templates/menu/device_forcibly_finalize_choose.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -30,14 +30,20 @@ camcops_server/templates/menu/device_forcibly_finalize_choose.mako
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Forcibly finalize a device")}</h1>
+<h1>${ _("Forcibly finalize a device") }</h1>
 
-<h2>${_("Step 1: choose a device")}</h2>
+<h2>${ _("Step 1: choose a device") }</h2>
 
 <div class="important">
-    ${_("This process marks all records from a particular device (e.g. tablet, or desktop client) as final, so the device can no longer alter them. If you do this and the client re-uploads records, they will be created as fresh tasks, so only force-finalize devices that are no longer in use and to which you no longer have access.")}
+    ${ _(
+        "This process marks all records from a particular device "
+        "(e.g. tablet, or desktop client) as final, so the device can no "
+        "longer alter them. If you do this and the client re-uploads "
+        "records, they will be created as fresh tasks, so only "
+        "force-finalize devices that are no longer in use and to which you "
+        "no longer have access.") }
 </div>
 
-${ form }
+${ form | n }
 
 <%include file="to_main_menu.mako"/>

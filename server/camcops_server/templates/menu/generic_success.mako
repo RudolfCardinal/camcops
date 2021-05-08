@@ -20,7 +20,7 @@ camcops_server/templates/menu/generic_success.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -32,11 +32,11 @@ camcops_server/templates/menu/generic_success.mako
 <h1>Success!</h1>
 
 %if msg:
-    <div>${msg | h}</div>
+    <div>${ msg }</div>
 %endif
 
 %if extra_html:
-    ${extra_html}
+    ${ extra_html | n }
 %endif
 
 <%include file="to_main_menu.mako"/>

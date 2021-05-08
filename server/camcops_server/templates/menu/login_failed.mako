@@ -20,7 +20,7 @@ camcops_server/templates/menu/login_failed.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -35,8 +35,10 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 <%include file="db_user_info.mako"/>
 
 <div class="error">
-    ${_("Invalid username/password (or user not authorized).")}
+    ${ _("Invalid username/password (or user not authorized).") }
 </div>
 <div>
-    ${_("Click")} <a href="${request.route_url(Routes.LOGIN)}">${_("here")}</a> ${_("to try again.")}
+    ${ _("Click") }
+    <a href="${ request.route_url(Routes.LOGIN)| n }">${ _("here") }</a>
+    ${ _("to try again.") }
 </div>

@@ -15,7 +15,7 @@
     <string name="instructions_2">Begin the AUDIT by saying “Now I am going to ask you some questions about your use of alcoholic beverages during this past year.”</string>
     <string name="instructions_3">Explain what is meant by “alcoholic beverages” by using local examples of beer, wine, vodka, etc.</string>
     <string name="instructions_4">Code answers in terms of “standard drinks”.</string>
-    <string name="instructions_5">A US “standard drink” is 14 g of ethanol (http://www.cdc.gov/alcohol/faqs.htm#standDrink), which is 17.8 ml. A UK unit is 10 ml of ethanol, so a US standard drink is about 1.8 UK units, and a UK unit is about 0.56 US standard drinks.</string>
+    <string name="instructions_5">A US “standard drink” is 14 g of ethanol (https://www.cdc.gov/alcohol/faqs.htm#standDrink), which is 17.8 ml. A UK unit is 10 ml of ethanol, so a US standard drink is about 1.8 UK units, and a UK unit is about 0.56 US standard drinks.</string>
     <string name="q1_title">AUDIT: question 1</string>
     <string name="q2_title">AUDIT: question 2</string>
     <string name="q3_title">AUDIT: question 3</string>

@@ -20,7 +20,7 @@ camcops_server/cc_modules/cc_text.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -166,7 +166,7 @@ def server_string(req: "CamcopsRequest", w: SS) -> str:
             "\n"
             "You should have received a copy of the GNU General Public "
             "License along with CamCOPS. If not, see "
-            "http://www.gnu.org/licenses/.\n"
+            "https://www.gnu.org/licenses/.\n"
             "\n"
             "3. Content created by others and distributed with CamCOPS may be "
             "in the public domain, or distributed under other licenses or "

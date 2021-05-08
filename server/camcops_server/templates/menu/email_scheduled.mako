@@ -20,7 +20,7 @@ camcops_server/templates/menu/email_scheduled.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -28,6 +28,7 @@ camcops_server/templates/menu/email_scheduled.mako
 
 <%inherit file="base_web.mako"/>
 
-<div>${_("An e-mail with this data dump will be sent to you shortly. Please check your inbox in a few minutes.")}</div>
+<div>${ _("An e-mail with this data dump will be sent to you shortly. "
+          "Please check your inbox in a few minutes.") }</div>
 
 <%include file="to_main_menu.mako"/>

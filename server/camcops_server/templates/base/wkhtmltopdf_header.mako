@@ -20,7 +20,7 @@ camcops_server/templates/base/wkhtmltopdf_header.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -36,14 +36,14 @@ WORKS IN CONJUNCTION WITH wkhtmltopdf_footer.mako
 </%block>
 
 <%block name="extra_head_start">
-    ${parent.extra_head_start()}
+    ${ parent.extra_head_start() | n }
 
-    <script nonce="${request.nonce}">
+    <script nonce="${ request.nonce | n }">
         document.addEventListener("DOMContentLoaded", subst, false);
         // the function itself is defined in wkhtmltopdf_footer.mako
     </script>
 </%block>
 
 <div>
-    ${inner_text}
+    ${ inner_text | n }
 </div>

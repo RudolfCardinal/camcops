@@ -20,7 +20,7 @@ camcops_server/templates/css/css_base.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -38,6 +38,9 @@ CSS notes:
 - http://stackoverflow.com/questions/6023419
 
 </%doc>
+
+<%page expression_filter="n"/>
+## ... everything here is trusted.
 
 <%
     # Passing parameters through templates:

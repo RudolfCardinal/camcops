@@ -20,7 +20,7 @@ camcops_server/templates/tasks/apeq_cpft_perinatal_report.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -29,7 +29,7 @@ camcops_server/templates/tasks/apeq_cpft_perinatal_report.mako
 <%inherit file="report.mako"/>
 
 <%block name="css">
-${parent.css()}
+${ parent.css() | n }
 
 h2, h3 {
     margin-top: 20px;
@@ -52,24 +52,24 @@ h2, h3 {
 
     <p>
         %if start_datetime:
-            ${_("Created")} <b>&ge; ${ start_datetime }</b>.
+            ${ _("Created") } <b>&ge; ${ start_datetime }</b>.
         %endif
         %if end_datetime:
-            ${_("Created")} <b>&lt; ${ end_datetime }</b>.
+            ${ _("Created") } <b>&lt; ${ end_datetime }</b>.
         %endif
     </p>
 
     %for table in tables:
-    <h2>${ table.heading | h }</h2>
+    <h2>${ table.heading }</h2>
 
     <%include file="table.mako" args="column_headings=table.column_headings, rows=table.rows, escape_cells=False"/>
 
     %endfor
 
-    <h2>${_("Comments")}</h2>
+    <h2>${ _("Comments") }</h2>
     %for comment in comments:
        <blockquote>
-           <p>${comment | h}</p>
+           <p>${ comment }</p>
        </blockquote>
     %endfor
 

@@ -20,7 +20,7 @@ camcops_server/templates/taskcommon/task.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -63,6 +63,7 @@ def inherit_file(context):
 %>
 
 <%inherit file="${ inherit_file(context) }"/>
+## ... don't use "| n" for that.
 
 ## ============================================================================
 ## Title (overriding base.mako)
@@ -136,68 +137,84 @@ def inherit_file(context):
 ## Main task content
 ## ============================================================================
 
-${ task.get_task_html(req) }
+${ task.get_task_html(req) | n }
 
 ## ============================================================================
 ## "Office" stuff
 ## ============================================================================
 
 <div class="office">
-    ${_("Created on device at:")} ${ format_datetime(task.when_created, DateFormat.SHORT_DATETIME_SECONDS) }.
-    ${_("Last modified at:")} ${ format_datetime(task.when_last_modified, DateFormat.SHORT_DATETIME_SECONDS) }.
-    ${_("Table:")} ${ task.tablename }.
-    ${_("Task PK on client device:")} ${ task.id }.
-    ${_("Uploading device ID:")} ${ (task._device.get_friendly_name_and_id() if task._device else "?") | h }.
-    ${_("Tablet CamCOPS version at upload:")} ${ task._camcops_version }.
-    ${_("Uploaded at:")} ${ format_datetime(task._when_added_exact, DateFormat.SHORT_DATETIME_SECONDS) }.
-    ${_("Group:")} ${ task._group.name | h } (${ task._group_id }).
-    ${_("Adding user:")} ${ task.get_adding_user_username() | h }.
-    ${_("Server PK:")} ${ task.pk }
-        (${_("predecessor")} ${ task._predecessor_pk },
-        ${_("successor")} ${ task._successor_pk }).
-    ${_("Current?")}
+    ${ _("Created on device at:") }
+        ${ format_datetime(task.when_created, DateFormat.SHORT_DATETIME_SECONDS) }.
+    ${ _("Last modified at:") }
+        ${ format_datetime(task.when_last_modified, DateFormat.SHORT_DATETIME_SECONDS) }.
+    ${ _("Table:") }
+        ${ task.tablename }.
+    ${ _("Task PK on client device:") }
+        ${ task.id }.
+    ${ _("Uploading device ID:") }
+        ${ task._device.get_friendly_name_and_id() if task._device else "?" }.
+    ${ _("Tablet CamCOPS version at upload:") }
+        ${ task._camcops_version }.
+    ${ _("Uploaded at:") }
+        ${ format_datetime(task._when_added_exact, DateFormat.SHORT_DATETIME_SECONDS) }.
+    ${ _("Group:") }
+        ${ task._group.name } (${ task._group_id }).
+    ${ _("Adding user:") }
+        ${ task.get_adding_user_username() }.
+    ${ _("Server PK:") }
+        ${ task.pk }
+        (${ _("predecessor") } ${ task._predecessor_pk },
+        ${ _("successor") } ${ task._successor_pk }).
+    ${ _("Current?") }
         %if task._current:
             ## some repetition as harder to have no space before "." otherwise!
             ${ get_yes_no(req, True) }.
         %else:
             ${ get_yes_no(req, False) }
             %if task._successor_pk is None:
-                (${_("deleted")}
+                (${ _("deleted") }
             %else:
-                (${_("modified")}
+                (${ _("modified") }
             %endif
             ## TRANSLATOR: ... deleted/modified... by <username>... at <time>
-            ${_("by")} ${ task.get_removing_user_username() | h }
+            ${ _("by") }
+                ${ task.get_removing_user_username() }
             ## TRANSLATOR: ... deleted/modified... by <username>... at <time>
-            ${_("at")} ${ format_datetime(task._when_removed_exact, DateFormat.SHORT_DATETIME_SECONDS) }.
+            ${ _("at") }
+                ${ format_datetime(task._when_removed_exact, DateFormat.SHORT_DATETIME_SECONDS) }.
         %endif
-    ${_("Preserved/erased from tablet?")}
+    ${ _("Preserved/erased from tablet?") }
         %if task.is_preserved():
             ${ get_yes_no(req, True) }
             %if task.was_forcibly_preserved():
                 ## TRANSLATOR: ... [forcibly] preserved... by <username>... at <time>
-                (${_("forcibly preserved")}
+                (${ _("forcibly preserved") }
             %else:
                 ## TRANSLATOR: ... [forcibly] preserved... by <username>... at <time>
-                (${_("preserved")}
+                (${ _("preserved") }
             %endif
             ## TRANSLATOR: ... [forcibly] preserved... by <username>... at <time>
-            ${_("by")} ${ task.get_preserving_user_username() | h }
+            ${ _("by") }
+                ${ task.get_preserving_user_username() }
             ## TRANSLATOR: ... [forcibly] preserved... by <username>... at <time>
-            ${_("at")} ${ task.era }.
+            ${ _("at") }
+                ${ task.era }.
             ## ... already an UTC ISO8601 string (BUT Python transformation now).
         %else:
             ${ get_yes_no(req, False) }.
         %endif
-    ${_("Patient server PK used:")}
+    ${ _("Patient server PK used:") }
         ${ task.get_patient_server_pk() if not task.is_anonymous else "N/A" }.
     ## TRANSLATOR: Information received from <url> (server version <version>) at: <datetime>.
-    ${_("Information retrieved from")}
-        ${ req.url | h }
-        ## TRANSLATOR: Information received from <url> (server version <version>) at: <datetime>.
-        (${_("server version")} ${ CAMCOPS_SERVER_VERSION_STRING })
-        ## TRANSLATOR: Information received from <url> (server version <version>) at: <datetime>.
-        ${_("at:")} ${ format_datetime(req.now, DateFormat.SHORT_DATETIME_SECONDS) }.
+    ${ _("Information retrieved from") }
+        ${ req.url }
+    ## TRANSLATOR: Information received from <url> (server version <version>) at: <datetime>.
+    (${ _("server version") }
+        ${ CAMCOPS_SERVER_VERSION_STRING })
+    ## TRANSLATOR: Information received from <url> (server version <version>) at: <datetime>.
+    ${ _("at:") }
+        ${ format_datetime(req.now, DateFormat.SHORT_DATETIME_SECONDS) }.
 </div>
 
 ## ============================================================================
@@ -211,15 +228,13 @@ ${ task.get_task_html(req) }
         ## Link to XML version (which is always identifiable)
 
         %if not anonymise:
-            <p>
-                <a href="${ req.route_url(
-                            Routes.TASK,
-                            _query={
-                                ViewParam.TABLE_NAME: task.tablename,
-                                ViewParam.SERVER_PK: task.pk,
-                                ViewParam.VIEWTYPE: ViewArg.XML,
-                            }) }">${_("View raw data as XML")}</a>
-            </p>
+            <p><a href="${ req.route_url(
+                                Routes.TASK,
+                                _query={
+                                    ViewParam.TABLE_NAME: task.tablename,
+                                    ViewParam.SERVER_PK: task.pk,
+                                    ViewParam.VIEWTYPE: ViewArg.XML,
+                                }) | n }">${ _("View raw data as XML") }</a></p>
         %endif
 
         ## Link to anonymous version (or back to identifiable):
@@ -232,7 +247,7 @@ ${ task.get_task_html(req) }
                                     ViewParam.TABLE_NAME: task.tablename,
                                     ViewParam.SERVER_PK: task.pk,
                                     ViewParam.VIEWTYPE: ViewArg.HTML,
-                                }) }">${_("View identifiable version")}</a>
+                                }) | n }">${ _("View identifiable version") }</a>
             %else:
                 View anonymised version:
                 <a href="${ req.route_url(
@@ -242,7 +257,7 @@ ${ task.get_task_html(req) }
                                     ViewParam.SERVER_PK: task.pk,
                                     ViewParam.VIEWTYPE: ViewArg.HTML,
                                     ViewParam.ANONYMISE: True,
-                                }) }">HTML</a>
+                                }) | n }">HTML</a>
                 |
                 <a href="${ req.route_url(
                                 Routes.TASK,
@@ -251,7 +266,7 @@ ${ task.get_task_html(req) }
                                     ViewParam.SERVER_PK: task.pk,
                                     ViewParam.VIEWTYPE: ViewArg.PDF,
                                     ViewParam.ANONYMISE: True,
-                                }) }">PDF</a>
+                                }) | n }">PDF</a>
             %endif
         </p>
     </div>
@@ -262,19 +277,19 @@ ${ task.get_task_html(req) }
             ## check this collapses to zero height with no content!
             %if req.user.authorized_to_add_special_note(task._group_id):
                 <p><a href="${ req.route_url(
-                            Routes.ADD_SPECIAL_NOTE,
-                            _query={
-                                ViewParam.TABLE_NAME: task.tablename,
-                                ViewParam.SERVER_PK: task.pk,
-                            }) }">${_("Apply special note")}</a></p>
+                                    Routes.ADD_SPECIAL_NOTE,
+                                    _query={
+                                        ViewParam.TABLE_NAME: task.tablename,
+                                        ViewParam.SERVER_PK: task.pk,
+                                    }) | n }">${ _("Apply special note") }</a></p>
             %endif
             %if req.user.may_administer_group(task._group_id):
                 %if task.has_patient and task.patient and task.patient.is_finalized:
                     <p><a href="${ req.route_url(
-                                Routes.EDIT_FINALIZED_PATIENT,
-                                _query={
-                                    ViewParam.SERVER_PK: task.patient.pk
-                                }) }">${_("Edit patient details")}</a></p>
+                                        Routes.EDIT_FINALIZED_PATIENT,
+                                        _query={
+                                            ViewParam.SERVER_PK: task.patient.pk
+                                        }) | n }">${ _("Edit patient details") }</a></p>
                 %endif
             %endif
             %if req.user.authorized_to_erase_tasks(task._group_id):
@@ -282,18 +297,19 @@ ${ task.get_task_html(req) }
                 %if task.era != ERA_NOW:
                     %if not task.is_erased():
                         <p><a href="${ req.route_url(
-                                    Routes.ERASE_TASK_LEAVING_PLACEHOLDER,
-                                    _query={
-                                        ViewParam.TABLE_NAME: task.tablename,
-                                        ViewParam.SERVER_PK: task.pk,
-                                    }) }">${_("Erase task instance, leaving placeholder")}</a></p>
+                                            Routes.ERASE_TASK_LEAVING_PLACEHOLDER,
+                                            _query={
+                                                ViewParam.TABLE_NAME: task.tablename,
+                                                ViewParam.SERVER_PK: task.pk,
+                                            }) | n }">
+                            ${ _("Erase task instance, leaving placeholder") }</a></p>
                     %endif
                     <p><a href="${ req.route_url(
-                                Routes.ERASE_TASK_ENTIRELY,
-                                _query={
-                                    ViewParam.TABLE_NAME: task.tablename,
-                                    ViewParam.SERVER_PK: task.pk,
-                                }) }">${_("Erase task entirely")}</a></p>
+                                        Routes.ERASE_TASK_ENTIRELY,
+                                        _query={
+                                            ViewParam.TABLE_NAME: task.tablename,
+                                            ViewParam.SERVER_PK: task.pk,
+                                        }) | n }">${ _("Erase task entirely") }</a></p>
                 %endif
             %endif
         </div>
@@ -307,24 +323,24 @@ ${ task.get_task_html(req) }
             <p><i>
                 An older version of this record exists:
                 <a href="${ req.route_url(
-                        Routes.TASK,
-                        _query={
-                            ViewParam.TABLE_NAME: task.tablename,
-                            ViewParam.SERVER_PK: task._predecessor_pk,
-                            ViewParam.VIEWTYPE: ViewArg.HTML,
-                        }) }">${_("view previous version")}</a>.
+                                Routes.TASK,
+                                _query={
+                                    ViewParam.TABLE_NAME: task.tablename,
+                                    ViewParam.SERVER_PK: task._predecessor_pk,
+                                    ViewParam.VIEWTYPE: ViewArg.HTML,
+                                }) | n }">${ _("view previous version") }</a>.
             </i></p>
         %endif
         %if task._successor_pk is not None:
             <p><b>
                 An newer version of this record exists:
                 <a href="${ req.route_url(
-                        Routes.TASK,
-                        _query={
-                            ViewParam.TABLE_NAME: task.tablename,
-                            ViewParam.SERVER_PK: task._successor_pk,
-                            ViewParam.VIEWTYPE: ViewArg.HTML,
-                        }) }">${_("view next version")}</a>.
+                                Routes.TASK,
+                                _query={
+                                    ViewParam.TABLE_NAME: task.tablename,
+                                    ViewParam.SERVER_PK: task._successor_pk,
+                                    ViewParam.VIEWTYPE: ViewArg.HTML,
+                                }) | n }">${ _("view next version") }</a>.
             </b></p>
         %endif
 
@@ -332,21 +348,21 @@ ${ task.get_task_html(req) }
         <p>
             %if anonymise:
                 <a href="${ req.route_url(
-                    Routes.TASK,
-                    _query={
-                        ViewParam.TABLE_NAME: task.tablename,
-                        ViewParam.SERVER_PK: task.pk,
-                        ViewParam.VIEWTYPE: ViewArg.PDF,
-                        ViewParam.ANONYMISE: True,
-                    }) }">${_("View anonymised PDF")}</a>
+                                Routes.TASK,
+                                _query={
+                                    ViewParam.TABLE_NAME: task.tablename,
+                                    ViewParam.SERVER_PK: task.pk,
+                                    ViewParam.VIEWTYPE: ViewArg.PDF,
+                                    ViewParam.ANONYMISE: True,
+                                }) | n }">${ _("View anonymised PDF") }</a>
             %else:
                 <a href="${ req.route_url(
-                    Routes.TASK,
-                    _query={
-                        ViewParam.TABLE_NAME: task.tablename,
-                        ViewParam.SERVER_PK: task.pk,
-                        ViewParam.VIEWTYPE: ViewArg.PDF,
-                    }) }">${_("View PDF for printing/saving")}</a>
+                                Routes.TASK,
+                                _query={
+                                    ViewParam.TABLE_NAME: task.tablename,
+                                    ViewParam.SERVER_PK: task.pk,
+                                    ViewParam.VIEWTYPE: ViewArg.PDF,
+                                }) | n }">${ _("View PDF for printing/saving") }</a>
             %endif
         </p>
     </div>

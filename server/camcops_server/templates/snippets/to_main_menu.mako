@@ -20,7 +20,7 @@ camcops_server/templates/snippets/to_main_menu.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -31,5 +31,5 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 %>
 
 <div>
-    <a href="${request.route_url(Routes.HOME)}">${_("Return to main menu")}</a>
+    <a href="${ request.route_url(Routes.HOME) | n }">${ _("Return to main menu") }</a>
 </div>

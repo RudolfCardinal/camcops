@@ -20,7 +20,7 @@ camcops_server/templates/test/inherit_cache_test_parent.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -29,5 +29,5 @@ camcops_server/templates/test/inherit_cache_test_parent.mako
 ## <%page cached="True" cache_region="local" cache_key="${self.filename}"/>
 <%page cached="True" cache_region="local" cache_key="PARENT"/>
 Parent_stuff_start
-${self.body()}
+${ self.body() | n }
 Parent_stuff_end

@@ -20,7 +20,7 @@ camcops_server/templates/taskcommon/task_descriptive_header.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -41,17 +41,17 @@ from camcops_server.cc_modules.cc_text import SS
 
 %if task.has_patient:
     %if anonymise:
-        <div class="warning">${_("Patient details hidden at user’s request!")}</div>
+        <div class="warning">${ _("Patient details hidden at user’s request!") }</div>
     %else:
         %if task.patient:
             <%include file="patient.mako" args="patient=task.patient, anonymise=anonymise, viewtype=viewtype"/>
         %else:
-            <div class="warning">${_("Missing patient information!")}</div>
+            <div class="warning">${ _("Missing patient information!") }</div>
         %endif
     %endif
 %else:
     <div class="patient">
-        ${ req.sstring(SS.ANONYMOUS_TASK) | h }
+        ${ req.sstring(SS.ANONYMOUS_TASK) }
     </div>
 %endif
 
@@ -60,12 +60,16 @@ from camcops_server.cc_modules.cc_text import SS
 ## ============================================================================
 
 <div class="taskheader">
-    <b>${ task.longname(req) | h } (${ task.shortname | h })</b><br>
-    ${_("Created:")} ${ answer(format_datetime(task.when_created,
-                                               DateFormat.LONG_DATETIME_WITH_DAY,
-                                               default=None)) }
+    <b>${ task.longname(req) } (${ task.shortname })</b><br>
+    ${ _("Created:") } ${ answer(
+                            format_datetime(task.when_created,
+                                            DateFormat.LONG_DATETIME_WITH_DAY,
+                                            default=None)
+                          ) | n }
     %if not task.is_anonymous and task.patient:
-        (${_("patient aged")} ${ answer(task.patient.get_age_at(task.when_created),
-                                        default_for_blank_strings=True) })
+        (${ _("patient aged") } ${ answer(
+                                        task.patient.get_age_at(task.when_created),
+                                        default_for_blank_strings=True
+                                   ) | n })
     %endif
 </div>

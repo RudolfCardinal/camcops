@@ -20,7 +20,7 @@ camcops_server/cc_modules/cc_anon.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -430,7 +430,7 @@ def write_crate_data_dictionary(req: "CamcopsRequest",
       Clinical records anonymisation and text extraction (CRATE): an
       open-source software system.
       *BMC Medical Informatics and Decision Making* 17: 50.
-      http://www.pubmed.gov/28441940;
+      https://www.pubmed.gov/28441940;
       https://doi.org/10.1186/s12911-017-0437-1.
 
     - https://crateanon.readthedocs.io/

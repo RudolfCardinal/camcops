@@ -20,7 +20,7 @@ camcops_server/templates/menu/export_recipient.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -35,7 +35,7 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
 
 <%include file="db_user_info.mako"/>
 
-<h1>${_("Export recipient")}</h1>
+<h1>${ _("Export recipient") }</h1>
 
 <table>
     <!-- Identification, current -->
@@ -45,7 +45,7 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     </tr>
     <tr>
         <th>Name</th>
-        <td>${ recipient.recipient_name or "" | h }</td>
+        <td>${ recipient.recipient_name or "" }</td>
     </tr>
     <tr>
         <th>Current?</th>
@@ -55,7 +55,7 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     <!-- How to export -->
     <tr>
         <th>How: Transmission method</th>
-        <td>${ recipient.transmission_method or "" | h }</td>
+        <td>${ recipient.transmission_method or "" }</td>
     </tr>
     <tr>
         <th>How: Push?</th>
@@ -63,7 +63,7 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     </tr>
     <tr>
         <th>How: Task format</th>
-        <td>${ recipient.task_format or "" | h }</td>
+        <td>${ recipient.task_format or "" }</td>
     </tr>
     <tr>
         <th>How: Include fields comments in XML?</th>
@@ -107,7 +107,7 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     <!-- Database -->
     <tr>
         <th>Database: URL</th>
-        <td>${ recipient.db_url_obscuring_password or "" | h }</td>
+        <td>${ recipient.db_url_obscuring_password or "" }</td>
     </tr>
     <tr>
         <th>Database: echo?</th>
@@ -129,7 +129,7 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     <!-- E-mail -->
     <tr>
         <th>E-mail: host</th>
-        <td>${ recipient.email_host or "" | h }</td>
+        <td>${ recipient.email_host or "" }</td>
     </tr>
     <tr>
         <th>E-mail: port</th>
@@ -141,39 +141,39 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     </tr>
     <tr>
         <th>E-mail: from</th>
-        <td>${ recipient.email_from or "" | h }</td>
+        <td>${ recipient.email_from or "" }</td>
     </tr>
     <tr>
         <th>E-mail: sender</th>
-        <td>${ recipient.email_sender or "" | h }</td>
+        <td>${ recipient.email_sender or "" }</td>
     </tr>
     <tr>
         <th>E-mail: reply-to</th>
-        <td>${ recipient.email_reply_to or "" | h }</td>
+        <td>${ recipient.email_reply_to or "" }</td>
     </tr>
     <tr>
         <th>E-mail: to</th>
-        <td>${ recipient.email_to or "" | h }</td>
+        <td>${ recipient.email_to or "" }</td>
     </tr>
     <tr>
         <th>E-mail: CC</th>
-        <td>${ recipient.email_cc or "" | h }</td>
+        <td>${ recipient.email_cc or "" }</td>
     </tr>
     <tr>
         <th>E-mail: BCC</th>
-        <td>${ recipient.email_bcc or "" | h }</td>
+        <td>${ recipient.email_bcc or "" }</td>
     </tr>
     <tr>
         <th>E-mail: patient spec</th>
-        <td>${ recipient.email_patient_spec or "" | h }</td>
+        <td>${ recipient.email_patient_spec or "" }</td>
     </tr>
     <tr>
         <th>E-mail: patient spec if anonymous</th>
-        <td>${ recipient.email_patient_spec_if_anonymous or "" | h }</td>
+        <td>${ recipient.email_patient_spec_if_anonymous or "" }</td>
     </tr>
     <tr>
         <th>E-mail: subject</th>
-        <td>${ recipient.email_subject or "" | h }</td>
+        <td>${ recipient.email_subject or "" }</td>
     </tr>
     <tr>
         <th>E-mail: treat body as HTML?</th>
@@ -181,7 +181,7 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     </tr>
     <tr>
         <th>E-mail: body</th>
-        <td><pre>${ recipient.email_body or "" | h }</pre></td>
+        <td><pre>${ recipient.email_body or "" }</pre></td>
     </tr>
     <tr>
         <th>E-mail: keep message?</th>
@@ -191,15 +191,15 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     <!-- File -->
     <tr>
         <th>File: patient spec</th>
-        <td>${ recipient.file_patient_spec or "" |  h }</td>
+        <td>${ recipient.file_patient_spec or "" }</td>
     </tr>
     <tr>
         <th>File: patient spec if anonymous</th>
-        <td>${ recipient.file_patient_spec_if_anonymous or "" | h }</td>
+        <td>${ recipient.file_patient_spec_if_anonymous or "" }</td>
     </tr>
     <tr>
         <th>File: filename spec</th>
-        <td>${ recipient.file_filename_spec or "" | h }</td>
+        <td>${ recipient.file_filename_spec or "" }</td>
     </tr>
     <tr>
         <th>File: make directory?</th>
@@ -215,7 +215,7 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     </tr>
     <tr>
         <th>File: script to run after export</th>
-        <td>${ recipient.file_script_after_export or "" | h }</td>
+        <td>${ recipient.file_script_after_export or "" }</td>
     </tr>
 
     <!-- File/RiO -->
@@ -225,17 +225,17 @@ from camcops_server.cc_modules.cc_pyramid import Routes, ViewArg, ViewParam
     </tr>
     <tr>
         <th>File: RiO metadata: name of automatic upload user</th>
-        <td>${ recipient.rio_uploading_user or "" | h }</td>
+        <td>${ recipient.rio_uploading_user or "" }</td>
     </tr>
     <tr>
         <th>File: RiO metadata: document type for RiO</th>
-        <td>${ recipient.rio_document_type or "" | h }</td>
+        <td>${ recipient.rio_document_type or "" }</td>
     </tr>
 
     <!-- HL7 -->
     <tr>
         <th>HL7: host</th>
-        <td>${ recipient.hl7_host or "" | h }</td>
+        <td>${ recipient.hl7_host or "" }</td>
     </tr>
     <tr>
         <th>HL7: port</th>

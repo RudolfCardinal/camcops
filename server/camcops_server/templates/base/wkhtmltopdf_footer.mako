@@ -20,7 +20,7 @@ camcops_server/templates/base/wkhtmltopdf_footer.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -36,20 +36,20 @@ WORKS IN CONJUNCTION WITH wkhtmltopdf_header.mako
 </%block>
 
 <%block name="extra_head_start">
-    ${parent.extra_head_start()}
+    ${ parent.extra_head_start() | n }
 
-    <script nonce="${request.nonce}">
+    <script nonce="${ request.nonce | n }">
         // Do not move this Javascript out into a file that's requested separately;
         // wkhtmltopdf will not be able to see it.
 
         // noinspection JSUnusedLocalSymbols
         function subst() {
-            var vars = {},
-                x = document.location.search.substring(1).split('&'),
-                i,
-                z,
-                y,
-                j;
+            const vars = {};
+            let x = document.location.search.substring(1).split('&'),
+                    i,
+                    z,
+                    y,
+                    j;
             for (i in x) {
                 if (x.hasOwnProperty(i)) {
                     z = x[i].split('=', 2);
@@ -73,6 +73,6 @@ WORKS IN CONJUNCTION WITH wkhtmltopdf_header.mako
 </%block>
 
 <div>
-    ${_("Page")} <span class="page"></span> ${_("of")} <span class="topage"></span>.
-    ${inner_text}
+    ${ _("Page") } <span class="page"></span> ${ _("of") } <span class="topage"></span>.
+    ${ inner_text | n }
 </div>

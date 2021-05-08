@@ -20,7 +20,7 @@ camcops_server/templates/taskcommon/task_not_current.mako
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -37,18 +37,19 @@ from camcops_server.cc_modules.cc_constants import DateFormat
 
 <div class="warning">
     %if task.pk is None:
-        ${_("WARNING! This is NOT a valid record. It has a blank primary key and is therefore nonsensical (and only useful for software testing).")}
+        ${ _("WARNING! This is NOT a valid record. It has a blank primary key "
+             "and is therefore nonsensical (and only useful for software testing).") }
     %else:
-        ${_("WARNING! This is NOT a current record.")}<br>
+        ${ _("WARNING! This is NOT a current record.") }<br>
         %if task._successor_pk is not None:
-            ${_("It was MODIFIED at")}
+            ${ _("It was MODIFIED at") }
             ${ format_datetime(task._when_removed_exact, DateFormat.LONG_DATETIME_SECONDS) }.
         %elif task._manually_erased:
-            ${_("It was MANUALLY ERASED at")}
+            ${ _("It was MANUALLY ERASED at") }
             ${ format_datetime(task._manually_erased_at, DateFormat.LONG_DATETIME_SECONDS) }
-            by ${ task.get_manually_erasing_user_username() | h }.
+            by ${ task.get_manually_erasing_user_username() }.
         %else:
-            ${_("It was DELETED at")}
+            ${ _("It was DELETED at") }
             ${ format_datetime(task._when_removed_exact, DateFormat.LONG_DATETIME_SECONDS) }.
         %endif
     %endif

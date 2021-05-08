@@ -20,7 +20,7 @@ camcops_server/cc_modules/cc_convert.py
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with CamCOPS. If not, see <http://www.gnu.org/licenses/>.
+    along with CamCOPS. If not, see <https://www.gnu.org/licenses/>.
 
 ===============================================================================
 
@@ -98,7 +98,7 @@ def decode_single_value(v: str) -> Any:
                     (case-insensitive)
         BLOB        ``X'4D7953514C'``
                     (hex-encoded; matches MySQL method;
-                    http://dev.mysql.com/doc/refman/5.0/en/hexadecimal-literals.html)
+                    https://dev.mysql.com/doc/refman/5.0/en/hexadecimal-literals.html)
         BLOB        ``64'TXlTUUw='``
                     (base-64-encoded; this notation is my invention)
         ==========  ===========================================================
